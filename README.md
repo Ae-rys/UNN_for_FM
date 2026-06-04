@@ -1,8 +1,5 @@
 # UNN for Flow Matching — MNIST Benchmark
 
-Refactored from the original Colab notebook. All MNIST experiments run
-sequentially from a single entry point.
-
 ## Structure
 
 ```
