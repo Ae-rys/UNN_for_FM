@@ -56,14 +56,3 @@ python run_mnist.py --results-dir /path/to/my/results
 `LNO` = Learned Normalized Operator (V = W, step size fixed by spectral norm).  
 `rand` = iteration count randomised U[5,15] during training.  
 `fixed` = fixed iteration count K=5.
-
-## Bugs fixed vs. original notebook
-
-1. `model.get_model` → `model.__class__.__name__` (attribute did not exist).
-2. `SharedConvCP_UNN.__init__`: `internal_channels` → `internal_channel`
-   (undefined variable in the `torch.randn(...)` call for `shared_V`).
-3. `SharedConvCP_UNN.forward`: `t_scaled` → `t`
-   (variable was never defined; used in both the UNet and DoubleConvTime branches).
-4. `CP_Iteration` (LNO branch): `spectral_norm(W_weight)` → `spectral_norm(self.W_weight)`
-   (`W_weight` is not a local variable in `__init__`).
-5. `ConvCP_Iteration` (LNO branch): same fix as above.
