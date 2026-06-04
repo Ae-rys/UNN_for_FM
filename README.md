@@ -45,12 +45,12 @@ python run_mnist.py --results-dir /path/to/my/results
 |---------------------------|--------------|--------------|---------|--------|
 | MLP_baseline              | MLP          | —            | —       | —      |
 | SmallUNet_baseline        | UNet         | —            | —       | —      |
-| DiFB_UNN_LFO/LNO          | DiFB         | MLP          | LFO/LNO | No    |
-| CP_UNN_LFO/LNO            | CP           | MLP          | LFO/LNO | No    |
-| ConvDFB_UNN_LFO/LNO       | ConvDFB      | DoubleConvT  | LFO/LNO | No    |
-| ConvCP_UNN_LFO/LNO        | ConvCP       | DoubleConvT  | LFO/LNO | No    |
-| SharedConvDFB_UNet_*/DCT_*| ConvDFB      | UNet / DCT   | LFO/LNO | Yes   |
-| SharedConvCP_UNet_*/DCT_* | ConvCP       | UNet / DCT   | LFO/LNO | Yes   |
+| DiFB_UNN                  | DiFB         | MLP          | LFO/LNO | No    |
+| CP_UNN_                   | CP           | MLP          | LFO/LNO | No    |
+| ConvDFB_UNN               | ConvDFB      | DoubleConvT  | LFO/LNO | No    |
+| ConvCP_UNN                | ConvCP       | DoubleConvT  | LFO/LNO | No    |
+| SharedConvDFB             | ConvDFB      | UNet / DCT   | LFO/LNO | Yes   |
+| SharedConvCP              | ConvCP       | UNet / DCT   | LFO/LNO | Yes   |
 
 `LFO` = Learned Forward Operator (W and V are independent learned parameters).  
 `LNO` = Learned Normalized Operator (V = W, step size fixed by spectral norm).  
