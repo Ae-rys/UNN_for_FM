@@ -25,6 +25,7 @@ from models import (
     DiFB_UNN, DFB_UNN,
     ConvDFB_UNN, SharedConvDFB_UNN,
     CP_UNN, ConvCP_UNN, SharedConvCP_UNN,
+    ScCP_UNN, SharedConvScCP_UNN,
     SmallUNet, small_MLP,
 )
 from train import train_mnist
@@ -153,6 +154,48 @@ def build_experiments(device):
         dict(
             name  = "SharedConvCP_DCT_LNO_rand",
             build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=False, version="LNO").to(device),
+            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
+        ),
+        # ---- ScCP (Accelerated Chambolle-Pock, strongly convex) ----
+        dict(
+            name  = "ScCP_UNN_LFO",
+            build = lambda: ScCP_UNN(dim=784, K=3, w=1024, version="LFO").to(device),
+            kwargs= {},
+        ),
+        dict(
+            name  = "ScCP_UNN_LNO",
+            build = lambda: ScCP_UNN(dim=784, K=3, w=1024, version="LNO").to(device),
+            kwargs= {},
+        ),
+        # ---- Shared ConvScCP ----
+        dict(
+            name  = "SharedConvScCP_UNet_LFO_rand",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LFO").to(device),
+            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_UNet_LNO_rand",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LNO").to(device),
+            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_UNet_LFO_fixed",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LFO").to(device),
+            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_UNet_LNO_fixed",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LNO").to(device),
+            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_DCT_LFO_rand",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=False, version="LFO").to(device),
+            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_DCT_LNO_rand",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=False, version="LNO").to(device),
             kwargs= dict(randomized_layer_nb=True, multi_iter=True),
         ),
     ]

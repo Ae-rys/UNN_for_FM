@@ -555,6 +555,7 @@ class ConvCP_UNN(nn.Module):
 # SharedConvCP-UNN (shared weights across iterations)
 # ---------------------------------------------------------------------------
 
+
 class SharedConvCP_UNN(nn.Module):
     def __init__(self, dim=784, K=10, alpha_init=1.0, internal_channel=64,
                  img_size=28, use_Unet=False, version="LFO"):
@@ -615,4 +616,161 @@ class SharedConvCP_UNN(nn.Module):
                 u = self.prox(u + sigma * dual_step, t)
             x_bar = 2 * x_next - x
             x     = x_next
+        return (x - z).view(batch_size, -1)
+
+
+# ---------------------------------------------------------------------------
+# ScCP-UNN (Accelerated Chambolle-Pock, strongly convex variant)
+# ---------------------------------------------------------------------------
+# Schedule:  alpha_k = (1 + 2*rho*tau_k)^{-1/2}
+#            tau_{k+1}   = alpha_k * tau_k          (decreasing)
+#            sigma_{k+1} = sigma_k / alpha_k         (increasing)
+#            sigma_k * tau_k = sigma_0 * tau_0 = const   (stability product preserved)
+# Extrapolation: y = x^{k+1} + alpha_k*(x^{k+1} - x^k)   (alpha_k <= 1)
+# ---------------------------------------------------------------------------
+
+class ScCP_Iteration(nn.Module):
+    """Single accelerated CP step.
+
+    tau, sigma, alpha are passed in by ScCP_UNN (adaptive schedule),
+    so this class does not own them as parameters.
+    """
+    def __init__(self, dim, prox_dual, version="LFO"):
+        super().__init__()
+        self.version  = version
+        self.W_weight = nn.Parameter(torch.eye(dim) + torch.randn(dim, dim) * 0.01)
+        if version == "LFO":
+            self.V_weight = nn.Parameter(torch.eye(dim) + torch.randn(dim, dim) * 0.01)
+        else:
+            self.register_buffer('_sigma_u', F.normalize(torch.randn(dim), dim=0))
+        self.prox_dual = prox_dual
+
+    def spectral_norm(self):
+        _s, self._sigma_u = sigma_max_power_iter(self.W_weight, self._sigma_u)
+        return _s
+
+    def forward(self, x, u, z, t, tau, sigma, alpha):
+        V = self.V_weight if self.version == "LFO" else self.W_weight.T
+        primal_input = x - tau * F.linear(u, V, None)
+        x_next = (primal_input + tau * z) / (1 + tau)
+        y = x_next + alpha * (x_next - x)
+        dual_step = sigma * F.linear(y, self.W_weight, None)
+        u_next = self.prox_dual(torch.cat((u + dual_step, t), dim=-1))
+        return x_next, u_next
+
+
+class ScCP_UNN(nn.Module):
+    """Accelerated CP UNN (K unfolded layers, MLP prox, per-layer W).
+
+    Learnable: rho (strong convexity), tau_0, sigma_0 (LFO) or derived (LNO).
+    """
+    def __init__(self, dim, K=10, w=32, version="LFO"):
+        super().__init__()
+        self.dim     = dim
+        self.K       = K
+        self.version = version
+        self.log_tau0 = nn.Parameter(torch.tensor(-0.5))
+        self.log_rho  = nn.Parameter(torch.tensor(-1.0))
+        if version == "LFO":
+            self.log_sigma0 = nn.Parameter(torch.tensor(-0.5))
+        self.prox_list = nn.ModuleList([small_MLP(dim=dim, w=w, time_varying=True) for _ in range(K)])
+        self.layers = nn.ModuleList([
+            ScCP_Iteration(dim, self.prox_list[i], version=version) for i in range(K)
+        ])
+
+    def forward(self, xt_t):
+        xt = xt_t[:, :self.dim]
+        t  = xt_t[:, self.dim:]
+        z  = xt
+        x  = xt.clone()
+        u  = torch.zeros_like(xt)
+        tau = F.softplus(self.log_tau0)
+        rho = F.softplus(self.log_rho)
+        if self.version == "LFO":
+            sigma = F.softplus(self.log_sigma0)
+        else:
+            # LNO: enforce sigma_0 * tau_0 * max_k ||W_k||^2 < 1
+            sn = torch.stack([layer.spectral_norm() for layer in self.layers]).max()
+            sigma = 0.99 / (tau * sn ** 2)
+        for layer in self.layers:
+            alpha = (1.0 + 2.0 * rho * tau).pow(-0.5)
+            x, u  = layer(x, u, z, t, tau, sigma, alpha)
+            tau   = alpha * tau
+            sigma = sigma / alpha
+        return x - xt
+
+
+class SharedConvScCP_UNN(nn.Module):
+    """Accelerated CP UNN with shared convolutional weights across iterations.
+
+    For LNO: sigma_0 = 0.99 / (tau_0 * ||W||^2), ensuring stability.
+    Since sigma_k * tau_k = const, the constraint holds for all k.
+    """
+    def __init__(self, dim=784, K=10, alpha_init=1.0, internal_channel=64,
+                 img_size=28, use_Unet=False, version="LFO"):
+        super().__init__()
+        self.dim              = dim
+        self.K                = K
+        self.internal_channel = internal_channel
+        self.img_size         = img_size
+        self.version          = version
+        self.shared_W = nn.Parameter(torch.randn(internal_channel, 1, 3, 3) * 0.05)
+        if version == "LFO":
+            self.shared_V   = nn.Parameter(torch.randn(internal_channel, 1, 3, 3) * 0.05)
+            self.log_sigma0 = nn.Parameter(torch.tensor(-0.5))
+        else:
+            self.register_buffer('_sigma_u', F.normalize(torch.randn(internal_channel), dim=0))
+        self.log_tau0   = nn.Parameter(torch.tensor(-0.5))
+        self.log_rho    = nn.Parameter(torch.tensor(-1.0))
+        self.alpha_prox = nn.Parameter(torch.tensor(alpha_init))
+        if use_Unet:
+            self.prox = SmallUNet(
+                in_channels=internal_channel, out_channels=internal_channel,
+                base_ch=internal_channel // 2, alpha=self.alpha_prox,
+            )
+        else:
+            self.prox = DoubleConvTime(
+                in_ch=internal_channel, out_ch=internal_channel,
+                embed_dim=internal_channel // 2, alpha=self.alpha_prox,
+            )
+        self.use_Unet = use_Unet
+
+    def forward(self, xt_t, n_iter=None):
+        iters      = n_iter if n_iter is not None else self.K
+        batch_size = xt_t.shape[0]
+        z = xt_t[:, :self.dim].view(batch_size, 1, self.img_size, self.img_size)
+        t = xt_t[:, self.dim:]
+        x = z.clone()
+        u = torch.zeros(batch_size, self.internal_channel, self.img_size, self.img_size, device=z.device)
+        tau = F.softplus(self.log_tau0)
+        rho = F.softplus(self.log_rho)
+        if self.version == "LFO":
+            sigma = F.softplus(self.log_sigma0)
+            V     = self.shared_V
+        else:
+            _s, self._sigma_u = sigma_max_power_iter(self.shared_W, self._sigma_u)
+            sigma = 0.99 / (tau * _s ** 2)
+            V     = self.shared_W
+        for _ in range(iters):
+            alpha = (1.0 + 2.0 * rho * tau).pow(-0.5)
+            # Primal update
+            grad_u       = F.conv_transpose2d(u, V, padding=1)
+            primal_input = x - tau * grad_u
+            x_next       = (primal_input + tau * z) / (1 + tau)
+            # Extrapolation with momentum alpha_k <= 1
+            y = x_next + alpha * (x_next - x)
+            # Dual update on extrapolated point y
+            dual_step = sigma * F.conv2d(y, self.shared_W, padding=1)
+            if self.use_Unet:
+                u_flat    = (u + dual_step).view(batch_size, -1, 784)
+                ut_t_flat = torch.cat(
+                    [u_flat, t[:, 0].view(batch_size, 1, 1).expand(batch_size, self.internal_channel, 1)],
+                    dim=-1,
+                )
+                u = self.prox(ut_t_flat).view(batch_size, self.internal_channel, self.img_size, self.img_size)
+            else:
+                u = self.prox(u + dual_step, t)
+            x     = x_next
+            tau   = alpha * tau
+            sigma = sigma / alpha
         return (x - z).view(batch_size, -1)

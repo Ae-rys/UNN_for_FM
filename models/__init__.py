@@ -8,4 +8,6 @@ from .architectures import (
     CP_UNN,
     ConvCP_UNN,
     SharedConvCP_UNN,
+    ScCP_UNN,
+    SharedConvScCP_UNN,
 )
