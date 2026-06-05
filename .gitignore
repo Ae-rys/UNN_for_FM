@@ -1,0 +1,13 @@
+
+# Ignore PyTorch model files
+*.pt
+
+# Ignore CLAUDE markdown file
+CLAUDE.md
+
+# Ignore data directory
+data/
+
+# Ignore python cache files
+__pycache__/
+*.pyc
