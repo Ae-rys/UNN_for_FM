@@ -18,7 +18,7 @@ unn_mnist/
 |   |    │   ├── epoch_N_niter_K.png (multi-iter models)
 |   |    │   ├── loss.png            (loss curve)
 |   |    │   └── loss.txt            (epoch \t loss, tab-separated)
-└── summary.txt            ← final loss + status for every run
+|   |    └── summary.txt            ← final loss + status for every run
 ```
 
 ## Usage
