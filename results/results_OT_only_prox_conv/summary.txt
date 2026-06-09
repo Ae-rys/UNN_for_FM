@@ -1,0 +1,4 @@
+model_name	n_params	final_loss	train_time_s	status
+SharedConvDFB_CFMUNet_LFO_fixed	1112866	0.260419	949.1	OK
+SharedConvCP_CFMUNet_LFO_fixed	1112867	0.258993	964.7	OK
+SharedConvScCP_CFMUNet_LFO_fixed	1112868	0.257660	963.7	OK

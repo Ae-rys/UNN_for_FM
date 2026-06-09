@@ -11,3 +11,5 @@ data/
 # Ignore python cache files
 __pycache__/
 *.pyc
+
+only_torchCFM_results/

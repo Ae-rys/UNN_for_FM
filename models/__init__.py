@@ -1,13 +1,17 @@
 from .architectures import (
     small_MLP,
     SmallUNet,
+    UNetProxConv,
     DFB_UNN,
     DiFB_UNN,
+    SharedDFB_UNN,
     ConvDFB_UNN,
     SharedConvDFB_UNN,
     CP_UNN,
+    SharedCP_UNN,
     ConvCP_UNN,
     SharedConvCP_UNN,
     ScCP_UNN,
     SharedConvScCP_UNN,
+    UNet,
 )

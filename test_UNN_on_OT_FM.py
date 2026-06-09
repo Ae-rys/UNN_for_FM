@@ -283,7 +283,7 @@ def train_model(
     n_iter: int = 10_000,
     batch_size: int = 512,
     lr: float = 1e-3,
-    log_every: int = 500,
+    log_every: int = 1000,
 ):
     """
     Entraîne `model` sur la loss CFM (MSE sur le champ de vecteurs).
@@ -336,12 +336,13 @@ def train_model(
 # 5. Expérience principale
 # ---------------------------------------------------------------------------
 
-def run_experiment(d=2, n_iter=10_000, K_list=(3, 5, 10), device_str="cpu"):
+def run_experiment(d=10, n_iter=10_000, K_list=(3, 5, 10), device_str="cpu"):
     device = torch.device(device_str)
     
     # --- Définition du problème gaussien ---
     torch.manual_seed(42)
-    mu1    = torch.tensor([2.0, 1.0], device=device)[:d]
+    mu1    = torch.randn((d,), device=device)
+    mu1[:2] = torch.tensor([3.0, 2.0], device=device)
     # Sigma1 quelconque définie positive
     L      = torch.randn(d, d, device=device) * 0.5
     Sigma1 = L @ L.T + torch.eye(d, device=device)
@@ -352,7 +353,7 @@ def run_experiment(d=2, n_iter=10_000, K_list=(3, 5, 10), device_str="cpu"):
     mu1   = mu1.to(device)
     
     print(f"Problème : P0 = N(0,I_{d}), P1 = N(mu1, Sigma1)")
-    print(f"A = {A.numpy()}")
+    print(f"A = {A.cpu().numpy()}")
     
     # --- Vérification numérique : le prox exact doit donner x1 ---
     print("\n--- Vérification du prox exact ---")
@@ -364,37 +365,37 @@ def run_experiment(d=2, n_iter=10_000, K_list=(3, 5, 10), device_str="cpu"):
     # --- Modèles à comparer ---
     results = {}
     
-    # MLP baseline
-    print("\n--- Entraînement MLP ---")
-    mlp = nn.Sequential(
-        nn.Linear(d + 1, 64), nn.SiLU(),
-        nn.Linear(64, 64),    nn.SiLU(),
-        nn.Linear(64, d),
-    ).to(device)
-    results["MLP"] = train_model(mlp, mu1, A, A_inv, device, n_iter=n_iter)
+    # # MLP baseline
+    # print("\n--- Entraînement MLP ---")
+    # mlp = nn.Sequential(
+    #     nn.Linear(d + 1, 64), nn.SiLU(),
+    #     nn.Linear(64, 64),    nn.SiLU(),
+    #     nn.Linear(64, d),
+    # ).to(device)
+    # results["MLP"] = train_model(mlp, mu1, A, A_inv, device, n_iter=n_iter)
     
-    # DFB-UNN pour différents K
-    for K in K_list:
-        for version in ["LFO", "LNO"]:
-            name = f"DFB_UNN_K{K}_{version}"
-            print(f"\n--- Entraînement {name} ---")
-            model = DFB_UNN(dim=d, K=K, version=version, w=32, learned_prox=True).to(device)
-            results[name] = train_model(model, mu1, A, A_inv, device, n_iter=n_iter)
+    # # DFB-UNN pour différents K
+    # for K in K_list:
+    #     for version in ["LFO", "LNO"]:
+    #         name = f"DFB_UNN_K{K}_{version}"
+    #         print(f"\n--- Entraînement {name} ---")
+    #         model = DFB_UNN(dim=d, K=K, version=version, w=32, learned_prox=True).to(device)
+    #         results[name] = train_model(model, mu1, A, A_inv, device, n_iter=n_iter)
     
-    # CP-UNN pour K intermédiaire
-    for K in K_list:
-        for version in ["LFO", "LNO"]:
-            name = f"CP_UNN_K{K}_{version}"
-            print(f"\n--- Entraînement {name} ---")
-            model = CP_UNN(dim=d, K=K, version=version, w=32).to(device)
-            results[name] = train_model(model, mu1, A, A_inv, device, n_iter=n_iter)
+    # # CP-UNN pour K intermédiaire
+    # for K in K_list:
+    #     for version in ["LFO", "LNO"]:
+    #         name = f"CP_UNN_K{K}_{version}"
+    #         print(f"\n--- Entraînement {name} ---")
+    #         model = CP_UNN(dim=d, K=K, version=version, w=32).to(device)
+    #         results[name] = train_model(model, mu1, A, A_inv, device, n_iter=n_iter)
     
     # ScCP-UNN pour K intermédiaire
     for K in K_list:
         for version in ["LFO", "LNO"]:
             name = f"ScCP_UNN_K{K}_{version}"
             print(f"\n--- Entraînement {name} ---")
-            model = ScCP_UNN(dim=d, K=K, version=version, w=64).to(device)
+            model = ScCP_UNN(dim=d, K=K, version=version, w=32).to(device)
             results[name] = train_model(model, mu1, A, A_inv, device, n_iter=n_iter)
 
     return results
@@ -435,7 +436,7 @@ def _plot_K_ablation(K_list, final_errors, param_counts):
     plt.savefig("K_ablation.png", dpi=150)
     plt.show()
 
-def plot_results(results: dict, log_every: int = 500, n_iter: int = 10_000):
+def plot_results(results: dict, log_every: int = 1000, n_iter: int = 10_000):
     steps = np.arange(0, n_iter, log_every)
     if len(steps) < len(next(iter(results.values()))[1]):
         steps = np.append(steps, n_iter - 1)
@@ -592,12 +593,12 @@ if __name__ == "__main__":
     
     # Expérience principale
     results = run_experiment(
-        d=2,
+        d=10,
         n_iter=10_000,
-        K_list=(3, 5, 10),
+        K_list=(3, 5),
         device_str=device_str,
     )
-    plot_results(results, log_every=500, n_iter=10_000)
+    plot_results(results, log_every=1000, n_iter=10_000)
     
     # Ablation sur K
     device = torch.device(device_str)
@@ -609,7 +610,8 @@ if __name__ == "__main__":
     
     K_ablation(mu1, A, A_inv, device, K_list=(1, 2, 3, 5, 10, 15), n_iter=5000)
     
-    # Visualisation du champ de vecteurs (d=2 seulement)
-    best_model = DFB_UNN(dim=2, K=10, version="LNO", w=64).to(device)
-    train_model(best_model, mu1, A, A_inv, device, n_iter=10_000, log_every=10_000)
-    plot_vector_fields(mu1, A, A_inv, best_model, device, title="DFB-UNN LNO K=10")
+    if d==2:
+        # Visualisation du champ de vecteurs (d=2 seulement)
+        best_model = DFB_UNN(dim=2, K=10, version="LNO", w=32).to(device)
+        train_model(best_model, mu1, A, A_inv, device, n_iter=10_000, log_every=10_000)
+        plot_vector_fields(mu1, A, A_inv, best_model, device, title="DFB-UNN LNO K=10")

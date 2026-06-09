@@ -13,7 +13,7 @@ matplotlib.use("Agg")  # headless — save figures instead of displaying them
 import matplotlib.pyplot as plt
 import torch
 from torchdyn.core import NeuralODE
-from torchcfm.conditional_flow_matching import ConditionalFlowMatcher
+from torchcfm.conditional_flow_matching import ConditionalFlowMatcher, ExactOptimalTransportConditionalFlowMatcher
 from torchcfm.utils import torch_wrapper
 from tqdm import tqdm
 
@@ -60,8 +60,10 @@ def train_mnist(
     """
     run_dir = os.path.join(results_dir, model_name)
     os.makedirs(run_dir, exist_ok=True)
+    
+    # model = torch.compile(model).to(device)
 
-    FM        = ConditionalFlowMatcher(sigma=0.1)
+    FM        = ExactOptimalTransportConditionalFlowMatcher(sigma=0.1)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     total_params = sum(p.numel() for p in model.parameters())
@@ -71,6 +73,7 @@ def train_mnist(
     print(f"{'='*60}")
 
     loss_history = []
+    train_start = time.perf_counter()
 
     for epoch in range(nb_epochs):
         model.train()
@@ -79,16 +82,22 @@ def train_mnist(
 
         for x1_batch, _ in tqdm(train_loader, desc=f"Epoch {epoch+1}/{nb_epochs}", leave=False):
             batch_size = x1_batch.size(0)
-            x1 = x1_batch.to(device).view(batch_size, -1)
+            if model_name == "UNet_torchCFM_baseline":
+                x1 = x1_batch.to(device)
+            else:
+                x1 = x1_batch.to(device).view(batch_size, -1)
             x0 = torch.randn_like(x1)
 
             t, xt, ut = FM.sample_location_and_conditional_flow(x0, x1)
-            xt_t = torch.cat([xt, t.view(batch_size, 1)], dim=-1)
 
             if randomized_layer_nb:
+                xt_t = torch.cat([xt, t.view(batch_size, 1)], dim=-1)
                 n_iter = random.randint(5, 15)
                 vt = model(xt_t, n_iter=n_iter)
+            elif model_name == "UNet_torchCFM_baseline":
+                vt = model(t, xt)
             else:
+                xt_t = torch.cat([xt, t.view(batch_size, 1)], dim=-1)
                 vt = model(xt_t)
 
             loss = torch.mean((vt - ut) ** 2)
@@ -103,14 +112,18 @@ def train_mnist(
         loss_history.append(avg_loss)
         print(f"  Epoch {epoch+1}/{nb_epochs} — loss: {avg_loss:.4f}  ({elapsed:.1f}s)")
 
-        # ---- Periodic evaluation and image saving ----
+        # ---- Periodic image  and model saving ----
         if epoch % 2 == 0:
-            ckpt_path = os.path.join(run_dir, f"epoch_{epoch+1}.pt")
-            torch.save(model.state_dict(), ckpt_path)
-
+            
+            checkpoint_path = os.path.join(run_dir, f"model_epoch_{epoch+1}.pt")
+            torch.save(model.state_dict(), checkpoint_path)
+            
             model.eval()
             with torch.no_grad():
-                x0_test = torch.randn(10, 784, device=device)
+                if model_name == "UNet_torchCFM_baseline":
+                    x0_test = torch.randn(10, 1, 28, 28, device=device)
+                else:
+                    x0_test = torch.randn(10, 784, device=device)
                 t_span  = torch.linspace(0, 1, 2, device=device)
 
                 if multi_iter:
@@ -128,7 +141,13 @@ def train_mnist(
                         img_path = os.path.join(run_dir, f"epoch_{epoch+1}_niter_{n_it}.png")
                         plot_images(traj[-1], title=f"{model_name} — epoch {epoch+1}, {n_it} iters", save_path=img_path)
                 else:
-                    node = NeuralODE(torch_wrapper(model), solver="dopri5", atol=1e-4, rtol=1e-4)
+                    if model_name == "UNet_torchCFM_baseline":
+                        class _Wrapper(torch.nn.Module):
+                            def __init__(self, m): super().__init__(); self.m = m
+                            def forward(self, t, x, **kw): return self.m(t.expand(x.shape[0]), x)
+                        node = NeuralODE(_Wrapper(model), solver="dopri5", atol=1e-4, rtol=1e-4)
+                    else:
+                        node = NeuralODE(torch_wrapper(model), solver="dopri5", atol=1e-4, rtol=1e-4)
                     traj = node.trajectory(x0_test, t_span=t_span)
 
                     for tag, frames in [("t0", traj[0]), ("t1", traj[-1])]:
@@ -153,5 +172,6 @@ def train_mnist(
         for ep, l in enumerate(loss_history, 1):
             f.write(f"{ep}\t{l:.6f}\n")
 
+    total_time = time.perf_counter() - train_start
     print(f"  Results saved to: {run_dir}")
-    return loss_history
+    return loss_history, total_params, total_time

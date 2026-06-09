@@ -7,6 +7,7 @@ All neural network building blocks and UNN model definitions.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchcfm.models.unet import UNetModel
 
 
 def sigma_max(W: torch.Tensor) -> torch.Tensor:
@@ -79,6 +80,24 @@ class small_MLP(nn.Module):
 MLP = small_MLP
 
 
+class UNetProxConv(nn.Module):
+    """Wraps torchcfm UNetModel as a convolutional prox for SharedConv* models.
+
+    Called as prox(u, t) where u: (B, C, H, W) and t: (B, 1).
+    Passes u directly to UNetModel with time conditioning.
+    """
+    def __init__(self, in_channels, img_size=28, num_channels=32, num_res_blocks=1):
+        super().__init__()
+        self.unet = UNetModel(
+            dim=(in_channels, img_size, img_size),
+            num_channels=num_channels,
+            num_res_blocks=num_res_blocks,
+        )
+
+    def forward(self, u, t):
+        return self.unet(t.squeeze(-1), u)
+
+
 # ---------------------------------------------------------------------------
 # UNet building blocks
 # ---------------------------------------------------------------------------
@@ -132,6 +151,48 @@ class SmallUNet(nn.Module):
         x_dec = self.dec1(torch.cat([x_up, x1], dim=1))
         out   = self.outc(x_dec)
         return out.view(batch_size, -1)
+
+class UNet(nn.Module):
+    #Bigger UNet, to get better results
+    def __init__(self, in_channels=1, out_channels=1, base_ch=64, alpha=1.0):
+        super().__init__()
+        self.time_scaling = nn.Sequential(
+            nn.Linear(in_channels, base_ch),
+            nn.SiLU(),
+            nn.Linear(base_ch, base_ch),
+        )
+        self.inc   = DoubleConv(in_channels, base_ch, base_ch)
+        self.down1 = nn.Sequential(nn.MaxPool2d(2), DoubleConv(base_ch, base_ch * 2, base_ch * 2))
+        self.down2 = nn.Sequential(nn.MaxPool2d(2), DoubleConv(base_ch * 2, base_ch * 4, base_ch * 4))
+        self.bot   = DoubleConv(base_ch * 4, base_ch * 4, base_ch * 4)
+        self.up1   = nn.ConvTranspose2d(base_ch * 4, base_ch * 2, kernel_size=2, stride=2)
+        self.dec1  = DoubleConv(base_ch * 4, base_ch * 2, base_ch * 2)
+        self.up2   = nn.ConvTranspose2d(base_ch * 2, base_ch, kernel_size=2, stride=2)
+        self.dec2  = DoubleConv(base_ch * 2, base_ch, base_ch)
+        self.outc  = nn.Conv2d(base_ch, out_channels, kernel_size=1)
+        self.in_channels = in_channels
+        self.alpha = alpha
+    
+    def forward(self, xt_t):
+        x = xt_t[..., :-1]
+        t = xt_t[..., -1:]
+        batch_size = x.shape[0]
+        x_img = x.view(batch_size, self.in_channels, 28, 28)
+        if t.dim() > 2:
+            t = t.squeeze(-1)
+        alpha = F.softplus(self.alpha) if torch.is_tensor(self.alpha) else self.alpha
+        t_emb = alpha * self.time_scaling(t).view(batch_size, -1, 1, 1)
+        x1    = self.inc(x_img) + t_emb
+        x2    = self.down1(x1)
+        x3    = self.down2(x2)
+        x_bot = self.bot(x3)
+        x_up  = self.up1(x_bot)
+        x_dec1 = self.dec1(torch.cat([x_up, x2], dim=1))
+        x_up2  = self.up2(x_dec1)
+        x_dec2 = self.dec2(torch.cat([x_up2, x1], dim=1))
+        out   = self.outc(x_dec2)
+        return out.view(batch_size, -1)
+        
 
 
 class DoubleConvTime(nn.Module):
@@ -321,6 +382,44 @@ class DiFB_UNN(nn.Module):
 
 
 # ---------------------------------------------------------------------------
+# SharedDFB-UNN (shared W across iterations, flat/linear)
+# ---------------------------------------------------------------------------
+
+class SharedDFB_UNN(nn.Module):
+    def __init__(self, dim, K=10, w=32, version="LFO"):
+        super().__init__()
+        self.dim     = dim
+        self.K       = K
+        self.version = version
+        self.shared_W = nn.Parameter(torch.eye(dim) + torch.randn(dim, dim) * 0.01)
+        if version == "LFO":
+            self.shared_V = nn.Parameter(torch.eye(dim) + torch.randn(dim, dim) * 0.01)
+            self.tau = nn.Parameter(torch.tensor(0.5))
+        else:
+            self.register_buffer('_sigma_u', F.normalize(torch.randn(dim), dim=0))
+        self.prox = small_MLP(dim=dim, w=w, time_varying=True)
+
+    def forward(self, xt_t, n_iter=None):
+        iters  = n_iter if n_iter is not None else self.K
+        xt     = xt_t[:, :self.dim]
+        t      = xt_t[:, self.dim:]
+        z      = xt
+        u      = torch.zeros_like(xt)
+        x_next = z.clone()
+        V = self.shared_V if self.version == "LFO" else self.shared_W.T
+        if self.version == "LFO":
+            tau = F.softplus(self.tau)
+        else:
+            _s, self._sigma_u = sigma_max_power_iter(self.shared_W, self._sigma_u)
+            tau = 1.99 / _s ** 2
+        for _ in range(iters):
+            x_next = z - F.linear(u, V, None)
+            step   = tau * F.linear(x_next, self.shared_W, None)
+            u      = self.prox(torch.cat((u + step, t), dim=-1))
+        return x_next - xt
+
+
+# ---------------------------------------------------------------------------
 # ConvDFB-UNN (each layer has its own W)
 # ---------------------------------------------------------------------------
 
@@ -394,17 +493,21 @@ class SharedConvDFB_UNN(nn.Module):
         else:
             self.register_buffer('_sigma_u', F.normalize(torch.randn(internal_channel), dim=0))
         self.alpha = nn.Parameter(torch.tensor(alpha_init))
-        if use_Unet:
+        if use_Unet is True or use_Unet == "small":
             self.prox = SmallUNet(
                 in_channels=internal_channel, out_channels=internal_channel,
                 base_ch=internal_channel // 2, alpha=self.alpha,
             )
+            self.use_Unet = "small"
+        elif use_Unet == "cfm":
+            self.prox = UNetProxConv(in_channels=internal_channel)
+            self.use_Unet = "cfm"
         else:
             self.prox = DoubleConvTime(
                 in_ch=internal_channel, out_ch=internal_channel,
                 embed_dim=internal_channel // 2, alpha=self.alpha,
             )
-        self.use_Unet = use_Unet
+            self.use_Unet = False
 
     def forward(self, xt_t, n_iter=None):
         iters      = n_iter if n_iter is not None else self.K
@@ -422,7 +525,7 @@ class SharedConvDFB_UNN(nn.Module):
         for _ in range(iters):
             x_next = z - F.conv_transpose2d(u, V, padding=1)
             step   = tau * F.conv2d(x_next, self.shared_W, padding=1)
-            if self.use_Unet:
+            if self.use_Unet == "small":
                 u_flat   = (u + step).view(batch_size, -1, 784)
                 ut_t_flat = torch.cat(
                     [u_flat, t[:, 0].view(batch_size, 1, 1).expand(batch_size, self.internal_channel, 1)],
@@ -486,6 +589,50 @@ class CP_UNN(nn.Module):
         u     = torch.zeros_like(xt)
         for layer in self.layers:
             x, x_bar, u = layer(x, x_bar, u, z, t)
+        return x - xt
+
+
+# ---------------------------------------------------------------------------
+# SharedCP-UNN (shared W across iterations, flat/linear)
+# ---------------------------------------------------------------------------
+
+class SharedCP_UNN(nn.Module):
+    def __init__(self, dim, K=10, w=32, version="LFO"):
+        super().__init__()
+        self.dim     = dim
+        self.K       = K
+        self.version = version
+        self.shared_W = nn.Parameter(torch.eye(dim) + torch.randn(dim, dim) * 0.01)
+        self.sigma    = nn.Parameter(torch.tensor(0.5))
+        if version == "LFO":
+            self.shared_V = nn.Parameter(torch.eye(dim) + torch.randn(dim, dim) * 0.01)
+            self.tau      = nn.Parameter(torch.tensor(0.5))
+        else:
+            self.register_buffer('_sigma_u', F.normalize(torch.randn(dim), dim=0))
+        self.prox = small_MLP(dim=dim, w=w, time_varying=True)
+
+    def forward(self, xt_t, n_iter=None):
+        iters = n_iter if n_iter is not None else self.K
+        xt    = xt_t[:, :self.dim]
+        t     = xt_t[:, self.dim:]
+        z     = xt
+        x     = xt.clone()
+        x_bar = xt.clone()
+        u     = torch.zeros_like(xt)
+        sigma = F.softplus(self.sigma)
+        V = self.shared_V if self.version == "LFO" else self.shared_W.T
+        if self.version == "LFO":
+            tau = F.softplus(self.tau)
+        else:
+            _s, self._sigma_u = sigma_max_power_iter(self.shared_W, self._sigma_u)
+            tau = 0.99 / (sigma * _s ** 2)
+        for _ in range(iters):
+            primal_input = x - tau * F.linear(u, V, None)
+            x_next       = (primal_input + tau * z) / (1 + tau)
+            dual_step    = sigma * F.linear(x_bar, self.shared_W, None)
+            u            = self.prox(torch.cat((u + dual_step, t), dim=-1))
+            x_bar        = 2 * x_next - x
+            x            = x_next
         return x - xt
 
 
@@ -573,17 +720,21 @@ class SharedConvCP_UNN(nn.Module):
         else:
             self.register_buffer('_sigma_u', F.normalize(torch.randn(internal_channel), dim=0))
         self.alpha = nn.Parameter(torch.tensor(alpha_init))
-        if use_Unet:
+        if use_Unet is True or use_Unet == "small":
             self.prox = SmallUNet(
                 in_channels=internal_channel, out_channels=internal_channel,
                 base_ch=internal_channel // 2, alpha=self.alpha,
             )
+            self.use_Unet = "small"
+        elif use_Unet == "cfm":
+            self.prox = UNetProxConv(in_channels=internal_channel, img_size=img_size)
+            self.use_Unet = "cfm"
         else:
             self.prox = DoubleConvTime(
                 in_ch=internal_channel, out_ch=internal_channel,
                 embed_dim=internal_channel // 2, alpha=self.alpha,
             )
-        self.use_Unet = use_Unet
+            self.use_Unet = False
 
     def forward(self, xt_t, n_iter=None):
         iters      = n_iter if n_iter is not None else self.K
@@ -605,7 +756,7 @@ class SharedConvCP_UNN(nn.Module):
             primal_input = x - tau * grad_u
             x_next       = (primal_input + tau * z) / (1 + tau)
             dual_step    = F.conv2d(x_bar, self.shared_W, padding=1)
-            if self.use_Unet:
+            if self.use_Unet == "small":
                 u_flat    = (u + sigma * dual_step).view(batch_size, -1, 784)
                 ut_t_flat = torch.cat(
                     [u_flat, t[:, 0].view(batch_size, 1, 1).expand(batch_size, self.internal_channel, 1)],
@@ -723,17 +874,21 @@ class SharedConvScCP_UNN(nn.Module):
         self.log_tau0   = nn.Parameter(torch.tensor(-0.5))
         self.log_rho    = nn.Parameter(torch.tensor(-1.0))
         self.alpha_prox = nn.Parameter(torch.tensor(alpha_init))
-        if use_Unet:
+        if use_Unet is True or use_Unet == "small":
             self.prox = SmallUNet(
                 in_channels=internal_channel, out_channels=internal_channel,
                 base_ch=internal_channel // 2, alpha=self.alpha_prox,
             )
+            self.use_Unet = "small"
+        elif use_Unet == "cfm":
+            self.prox = UNetProxConv(in_channels=internal_channel, img_size=img_size)
+            self.use_Unet = "cfm"
         else:
             self.prox = DoubleConvTime(
                 in_ch=internal_channel, out_ch=internal_channel,
                 embed_dim=internal_channel // 2, alpha=self.alpha_prox,
             )
-        self.use_Unet = use_Unet
+            self.use_Unet = False
 
     def forward(self, xt_t, n_iter=None):
         iters      = n_iter if n_iter is not None else self.K
@@ -761,7 +916,7 @@ class SharedConvScCP_UNN(nn.Module):
             y = x_next + alpha * (x_next - x)
             # Dual update on extrapolated point y
             dual_step = sigma * F.conv2d(y, self.shared_W, padding=1)
-            if self.use_Unet:
+            if self.use_Unet == "small":
                 u_flat    = (u + dual_step).view(batch_size, -1, 784)
                 ut_t_flat = torch.cat(
                     [u_flat, t[:, 0].view(batch_size, 1, 1).expand(batch_size, self.internal_channel, 1)],
