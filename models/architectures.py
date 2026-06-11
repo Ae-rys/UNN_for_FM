@@ -378,7 +378,7 @@ class DFB_UNN(nn.Module):
             DFB_Iteration(dim, self.proxs[i], dual_dim=self.dual_dim, version=version) for i in range(K)
         ])
 
-    def forward(self, xt_t):
+    def forward(self, xt_t, return_u=False):
         xt = xt_t[:, :self.dim]
         t  = xt_t[:, self.dim:]
         z  = xt
@@ -386,7 +386,10 @@ class DFB_UNN(nn.Module):
         u  = torch.zeros(xt.shape[0], self.dual_dim, device=xt.device)
         for layer in self.layers:
             x, u = layer(u, z, t)
-        return x - xt
+        vt = x - xt
+        if return_u:
+            return vt, u
+        return vt
 
 # ---------------------------------------------------------------------------
 # DiFB-UNN (DFB with inertia/momentum)

@@ -292,7 +292,7 @@ def build_experiments(device):
         # ---- Shared DFB (flat, shared W, dual_dim=32) ----
         dict(
             name  = "SharedDFB_UNN_LFO_rand",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, w=64, dual_dim="2", version="LFO").to(device),
+            build = lambda: SharedDFB_UNN(dim=DIM, K=10, w=64, dual_dim=2, version="LFO").to(device),
             kwargs= dict(randomized_layer_nb=True, multi_iter=True),
         ),
         dict(
@@ -429,7 +429,11 @@ def main():
     parser.add_argument("--skip",        type=str, default="")
     parser.add_argument("--only",        type=str, default="")
     parser.add_argument("--batch-size",  type=int, default=BATCH_SIZE)
+    parser.add_argument("--seed",        type=int, default=42)
     args = parser.parse_args()
+
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
