@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	train_time_s	status
+MLP_baseline	4546	1.830210	14.7	OK

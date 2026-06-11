@@ -56,7 +56,6 @@ python run_mnist.py --results-dir /path/to/my/results
 | Name          | Family | Prox | Version |
 |---------------|--------|------|---------|
 | DiFB_UNN      | DiFB   | MLP  | LFO/LNO |
-| CP_UNN        | CP     | MLP  | LFO/LNO |
 | ScCP_UNN      | ScCP   | MLP  | LFO/LNO |
 
 ### Convolutional UNNs (per-layer W)
@@ -64,14 +63,12 @@ python run_mnist.py --results-dir /path/to/my/results
 | Name          | Family  | Prox        | Version |
 |---------------|---------|-------------|---------|
 | ConvDFB_UNN   | ConvDFB | DoubleConvT | LFO/LNO |
-| ConvCP_UNN    | ConvCP  | DoubleConvT | LFO/LNO |
 
 ### Shared flat UNNs (shared W, linear operator)
 
 | Name          | Family | Prox | Version | Training |
 |---------------|--------|------|---------|----------|
 | SharedDFB_UNN | DFB    | MLP  | LFO/LNO | rand / fixed |
-| SharedCP_UNN  | CP     | MLP  | LFO/LNO | rand / fixed |
 
 ### Shared convolutional UNNs (shared W, conv operator)
 
@@ -80,9 +77,6 @@ python run_mnist.py --results-dir /path/to/my/results
 | SharedConvDFB_DCT       | ConvDFB | DoubleConvT       | LFO/LNO | fixed        |
 | SharedConvDFB_UNet      | ConvDFB | SmallUNet         | LFO/LNO | rand / fixed |
 | SharedConvDFB_CFMUNet   | ConvDFB | torchcfm UNet     | LFO/LNO | rand / fixed |
-| SharedConvCP_DCT        | ConvCP  | DoubleConvT       | LFO/LNO | rand         |
-| SharedConvCP_UNet       | ConvCP  | SmallUNet         | LFO/LNO | rand / fixed |
-| SharedConvCP_CFMUNet    | ConvCP  | torchcfm UNet     | LFO/LNO | rand / fixed |
 | SharedConvScCP_DCT      | ScCP    | DoubleConvT       | LFO/LNO | rand         |
 | SharedConvScCP_UNet     | ScCP    | SmallUNet         | LFO/LNO | rand / fixed |
 | SharedConvScCP_CFMUNet  | ScCP    | torchcfm UNet     | LFO/LNO | rand / fixed |

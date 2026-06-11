@@ -13,6 +13,7 @@ Results (checkpoints, generated images, loss curves) are saved under
 """
 
 import argparse
+import gc
 import os
 import sys
 
@@ -25,9 +26,7 @@ from torchcfm.models.unet import UNetModel
 from models import (
     DiFB_UNN, DFB_UNN,
     SharedDFB_UNN,
-    ConvDFB_UNN, SharedConvDFB_UNN,
-    CP_UNN, SharedCP_UNN,
-    ConvCP_UNN, SharedConvCP_UNN,
+    ConvDFB_UNN, ConvDiFB_UNN, ConvScCP_UNN, SharedConvDFB_UNN,
     ScCP_UNN, SharedConvScCP_UNN,
     SmallUNet, small_MLP, UNet,
 )
@@ -42,7 +41,6 @@ from train import train_mnist
 # ---------------------------------------------------------------------------
 
 def build_experiments(device):
-    alpha = torch.tensor(1.0)
     return [
         # ---- Baselines ----
         dict(
@@ -65,69 +63,6 @@ def build_experiments(device):
             build = lambda: SmallUNet(base_ch=32).to(device),
             kwargs= {},
         ),
-        # ---- Standard UNNs ----
-        dict(
-            name  = "DiFB_UNN_LFO",
-            build = lambda: DiFB_UNN(dim=784, K=10, w=256, version="LFO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "DiFB_UNN_LNO",
-            build = lambda: DiFB_UNN(dim=784, K=10, w=256, version="LNO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "CP_UNN_LFO",
-            build = lambda: CP_UNN(dim=784, K=3, w=256, version="LFO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "CP_UNN_LNO",
-            build = lambda: CP_UNN(dim=784, K=3, w=256, version="LNO").to(device),
-            kwargs= {},
-        ),
-        # ---- Shared flat DFB ----
-        dict(
-            name  = "SharedDFB_UNN_LFO_rand",
-            build = lambda: SharedDFB_UNN(dim=784, K=5, w=256, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_LNO_rand",
-            build = lambda: SharedDFB_UNN(dim=784, K=5, w=256, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_LFO_fixed",
-            build = lambda: SharedDFB_UNN(dim=784, K=5, w=256, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_LNO_fixed",
-            build = lambda: SharedDFB_UNN(dim=784, K=5, w=256, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- Shared flat CP ----
-        dict(
-            name  = "SharedCP_UNN_LFO_rand",
-            build = lambda: SharedCP_UNN(dim=784, K=5, w=256, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedCP_UNN_LNO_rand",
-            build = lambda: SharedCP_UNN(dim=784, K=5, w=256, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedCP_UNN_LFO_fixed",
-            build = lambda: SharedCP_UNN(dim=784, K=5, w=256, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedCP_UNN_LNO_fixed",
-            build = lambda: SharedCP_UNN(dim=784, K=5, w=256, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
         # ---- Convolutional UNNs ----
         dict(
             name  = "ConvDFB_UNN_LFO",
@@ -139,14 +74,35 @@ def build_experiments(device):
             build = lambda: ConvDFB_UNN(dim=784, K=20, internal_channel=64, version="LNO").to(device),
             kwargs= {},
         ),
+        # ---- Convolutional UNNs + L1 prox (non-shared, per-layer W) ----
         dict(
-            name  = "ConvCP_UNN_LFO",
-            build = lambda: ConvCP_UNN(dim=784, K=3, internal_channels=64, version="LFO").to(device),
+            name  = "ConvDFB_UNN_L1_LFO",
+            build = lambda: ConvDFB_UNN(dim=784, K=32, internal_channel=1024, use_Unet="l1", version="LFO", use_checkpoint=True).to(device),
             kwargs= {},
         ),
         dict(
-            name  = "ConvCP_UNN_LNO",
-            build = lambda: ConvCP_UNN(dim=784, K=3, internal_channels=64, version="LNO").to(device),
+            name  = "ConvDFB_UNN_L1_LNO",
+            build = lambda: ConvDFB_UNN(dim=784, K=20, internal_channel=256, use_Unet="l1", version="LNO", use_checkpoint=True).to(device),
+            kwargs= {},
+        ),
+        dict(
+            name  = "ConvDiFB_UNN_L1_LFO",
+            build = lambda: ConvDiFB_UNN(dim=784, K=20, internal_channel=256, use_Unet="l1", version="LFO").to(device),
+            kwargs= {},
+        ),
+        dict(
+            name  = "ConvDiFB_UNN_L1_LNO",
+            build = lambda: ConvDiFB_UNN(dim=784, K=20, internal_channel=256, use_Unet="l1", version="LNO").to(device),
+            kwargs= {},
+        ),
+        dict(
+            name  = "ConvScCP_UNN_L1_LFO",
+            build = lambda: ConvScCP_UNN(dim=784, K=20, internal_channel=512, use_Unet="l1", version="LFO").to(device),
+            kwargs= {},
+        ),
+        dict(
+            name  = "ConvScCP_UNN_L1_LNO",
+            build = lambda: ConvScCP_UNN(dim=784, K=20, internal_channel=256, use_Unet="l1", version="LNO").to(device),
             kwargs= {},
         ),
         # ---- Shared ConvDFB ----
@@ -180,49 +136,7 @@ def build_experiments(device):
             build = lambda: SharedConvDFB_UNN(dim=784, K=5, internal_channel=64, use_Unet=False, version="LNO").to(device),
             kwargs= dict(randomized_layer_nb=False, multi_iter=True),
         ),
-        # ---- Shared ConvCP ----
-        dict(
-            name  = "SharedConvCP_UNet_LNO_rand",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedConvCP_UNet_LFO_rand",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedConvCP_UNet_LFO_fixed",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedConvCP_UNet_LNO_fixed",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=True,  version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedConvCP_DCT_LFO_rand",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=False, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedConvCP_DCT_LNO_rand",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet=False, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        # ---- ScCP (Accelerated Chambolle-Pock, strongly convex) ----
-        dict(
-            name  = "ScCP_UNN_LFO",
-            build = lambda: ScCP_UNN(dim=784, K=3, w=64, version="LFO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "ScCP_UNN_LNO",
-            build = lambda: ScCP_UNN(dim=784, K=3, w=64, version="LNO").to(device),
-            kwargs= {},
-        ),
-        # ---- Shared ConvDFB + torchcfm UNet prox ----
+        # ---- ScCP (Accelerated Chambolle-Pock, strongly convex), Shared ConvDFB + torchcfm UNet prox ----
         dict(
             name  = "SharedConvDFB_CFMUNet_LFO_rand",
             build = lambda: SharedConvDFB_UNN(dim=784, K=5, internal_channel=64, use_Unet="cfm", version="LFO").to(device),
@@ -243,25 +157,46 @@ def build_experiments(device):
             build = lambda: SharedConvDFB_UNN(dim=784, K=5, internal_channel=64, use_Unet="cfm", version="LNO").to(device),
             kwargs= dict(randomized_layer_nb=False, multi_iter=True),
         ),
-        # ---- Shared ConvCP + torchcfm UNet prox ----
+        # ---- Shared ConvDFB + L1 prox ----
         dict(
-            name  = "SharedConvCP_CFMUNet_LFO_rand",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet="cfm", version="LFO").to(device),
+            name  = "SharedConvDFB_L1_LFO_rand",
+            build = lambda: SharedConvDFB_UNN(dim=784, K=5, internal_channel=64, use_Unet="l1", version="LFO").to(device),
             kwargs= dict(randomized_layer_nb=True, multi_iter=True),
         ),
         dict(
-            name  = "SharedConvCP_CFMUNet_LNO_rand",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet="cfm", version="LNO").to(device),
+            name  = "SharedConvDFB_L1_LNO_rand",
+            build = lambda: SharedConvDFB_UNN(dim=784, K=5, internal_channel=64, use_Unet="l1", version="LNO").to(device),
             kwargs= dict(randomized_layer_nb=True, multi_iter=True),
         ),
         dict(
-            name  = "SharedConvCP_CFMUNet_LFO_fixed",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet="cfm", version="LFO").to(device),
+            name  = "SharedConvDFB_L1_LFO_fixed",
+            build = lambda: SharedConvDFB_UNN(dim=784, K=30, internal_channel=128, use_Unet="l1", version="LFO").to(device),
+            kwargs= dict(randomized_layer_nb=False, multi_iter=False),
+        ),
+        dict(
+            name  = "SharedConvDFB_L1_LNO_fixed",
+            build = lambda: SharedConvDFB_UNN(dim=784, K=30, internal_channel=128, use_Unet="l1", version="LNO").to(device),
+            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
+        ),
+        # ---- Shared ConvScCP + L1 prox ----
+        dict(
+            name  = "SharedConvScCP_L1_LFO_rand",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=30, internal_channel=128, use_Unet="l1", version="LFO").to(device),
+            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_L1_LNO_rand",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=30, internal_channel=128, use_Unet="l1", version="LNO").to(device),
+            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
+        ),
+        dict(
+            name  = "SharedConvScCP_L1_LFO_fixed",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=30, internal_channel=128, use_Unet="l1", version="LFO").to(device),
             kwargs= dict(randomized_layer_nb=False, multi_iter=True),
         ),
         dict(
-            name  = "SharedConvCP_CFMUNet_LNO_fixed",
-            build = lambda: SharedConvCP_UNN(dim=784, K=5, internal_channel=64, use_Unet="cfm", version="LNO").to(device),
+            name  = "SharedConvScCP_L1_LNO_fixed",
+            build = lambda: SharedConvScCP_UNN(dim=784, K=30, internal_channel=128, use_Unet="l1", version="LNO").to(device),
             kwargs= dict(randomized_layer_nb=False, multi_iter=True),
         ),
         # ---- Shared ConvScCP + torchcfm UNet prox ----
@@ -382,6 +317,10 @@ def main():
         except Exception as exc:
             print(f"  ERROR: {exc}")
             summary.append((name, float("nan"), 0, 0.0, str(exc)))
+        finally:
+            model = None
+            gc.collect()
+            torch.cuda.empty_cache()
 
     # ---- Final summary ----
     print("\n" + "=" * 60)

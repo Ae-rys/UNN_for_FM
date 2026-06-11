@@ -61,7 +61,7 @@ def train_mnist(
     run_dir = os.path.join(results_dir, model_name)
     os.makedirs(run_dir, exist_ok=True)
     
-    # model = torch.compile(model).to(device)
+    #model = torch.compile(model).to(device)
 
     FM        = ExactOptimalTransportConditionalFlowMatcher(sigma=0.1)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -71,6 +71,9 @@ def train_mnist(
     print(f"Model : {model_name}")
     print(f"Params: {total_params:,}")
     print(f"{'='*60}")
+
+    with open(os.path.join(run_dir, "params.txt"), "w") as f:
+        f.write(f"{total_params}\n")
 
     loss_history = []
     train_start = time.perf_counter()
@@ -115,8 +118,8 @@ def train_mnist(
         # ---- Periodic image  and model saving ----
         if epoch % 2 == 0:
             
-            checkpoint_path = os.path.join(run_dir, f"model_epoch_{epoch+1}.pt")
-            torch.save(model.state_dict(), checkpoint_path)
+            # checkpoint_path = os.path.join(run_dir, f"model_epoch_{epoch+1}.pt")
+            # torch.save(model.state_dict(), checkpoint_path)
             
             model.eval()
             with torch.no_grad():
@@ -135,7 +138,6 @@ def train_mnist(
                         node = NeuralODE(
                             ode_func, solver="dopri5",
                             atol=1e-3, rtol=1e-3,
-                            optimizable_params=model.parameters(),
                         )
                         traj = node.trajectory(x0_test, t_span=t_span)
                         img_path = os.path.join(run_dir, f"epoch_{epoch+1}_niter_{n_it}.png")

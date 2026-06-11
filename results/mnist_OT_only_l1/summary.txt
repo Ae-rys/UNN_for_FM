@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	train_time_s	status
+ConvDiFB_UNN_L1_LFO	0	nan	0.0	[Errno 28] No space left on device
