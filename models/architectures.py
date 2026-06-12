@@ -377,6 +377,12 @@ class DFB_UNN(nn.Module):
         self.layers = nn.ModuleList([
             DFB_Iteration(dim, self.proxs[i], dual_dim=self.dual_dim, version=version) for i in range(K)
         ])
+        
+        self.time_scaling_end = nn.Sequential(
+            nn.Linear(2, w),
+            nn.SiLU(),
+            nn.Linear(w, 2),
+        )
 
     def forward(self, xt_t, return_u=False):
         xt = xt_t[:, :self.dim]
@@ -387,6 +393,7 @@ class DFB_UNN(nn.Module):
         for layer in self.layers:
             x, u = layer(u, z, t)
         vt = x - xt
+        vt = self.time_scaling_end(vt)
         if return_u:
             return vt, u
         return vt
