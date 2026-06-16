@@ -62,7 +62,7 @@ def train_mnist(
     os.makedirs(run_dir, exist_ok=True)
     
     #model = torch.compile(model).to(device)
-
+    
     FM        = ExactOptimalTransportConditionalFlowMatcher(sigma=0.1)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 

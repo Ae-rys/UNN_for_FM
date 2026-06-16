@@ -39,6 +39,17 @@ def sigma_max_power_iter(W: torch.Tensor, u: torch.Tensor, n_iter: int = 3):
             u = F.normalize(mat @ v, dim=0)
     return (u @ mat @ v).detach(), u
 
+def compute_delta(u_traj):
+    """Dual-trajectory length delta_t = sum_k ||u^[k+1] - u^[k]||, per example.
+
+    u_traj: list of K+1 tensors of shape (B, dual_dim), as returned by
+    a UNN's forward(..., return_dual_traj=True).
+    Returns a tensor of shape (B,).
+    """
+    delta = torch.zeros(u_traj[0].shape[0], device=u_traj[0].device)
+    for k in range(len(u_traj) - 1):
+        delta = delta + torch.norm(u_traj[k + 1] - u_traj[k], dim=-1)
+    return delta
 
 # ---------------------------------------------------------------------------
 # Primitives
@@ -351,6 +362,13 @@ class DFB_Iteration(nn.Module):
             self.register_buffer('_sigma_u', F.normalize(torch.randn(dual_dim), dim=0))
         self.prox = prox
 
+        self.time_scaling = nn.Sequential(
+            nn.Linear(1, 8),
+            nn.SiLU(),
+            nn.Linear(8, 1),
+            nn.Softplus(),
+        )
+
     def forward(self, u, z, t):
         V      = self.V_weight if self.version == "LFO" else self.W_weight.T
         x_next = z - F.linear(u, V, None)
@@ -360,7 +378,7 @@ class DFB_Iteration(nn.Module):
             _s, self._sigma_u = sigma_max_power_iter(self.W_weight, self._sigma_u)
             tau = 1.99 / _s ** 2
         step   = tau * F.linear(x_next, self.W_weight, None)
-        u_next = self.prox(torch.cat((u + step, t), dim=-1))
+        u_next = self.prox(torch.cat((u + step, self.time_scaling(t)), dim=-1))
         return x_next, u_next
 
 
@@ -378,11 +396,11 @@ class DFB_UNN(nn.Module):
             DFB_Iteration(dim, self.proxs[i], dual_dim=self.dual_dim, version=version) for i in range(K)
         ])
         
-        self.time_scaling_end = nn.Sequential(
-            nn.Linear(2, w),
-            nn.SiLU(),
-            nn.Linear(w, 2),
-        )
+        # self.time_scaling_end = nn.Sequential(
+        #     nn.Linear(2, w),
+        #     nn.SiLU(),
+        #     nn.Linear(w, 2),
+        # )
 
     def forward(self, xt_t, return_u=False):
         xt = xt_t[:, :self.dim]
@@ -393,10 +411,263 @@ class DFB_UNN(nn.Module):
         for layer in self.layers:
             x, u = layer(u, z, t)
         vt = x - xt
-        vt = self.time_scaling_end(vt)
+        vt = vt
         if return_u:
             return vt, u
         return vt
+    
+    
+    
+# ---------------------------------------------------------------------------
+# FLAT-DFB-UNN
+# ---------------------------------------------------------------------------
+    
+# class FLAT_DFB_UNN(nn.Module):
+#     def __init__(self, dim, N=10, w=64, dual_dim=None, learned_prox=False, version="LFO"):
+#         super().__init__()
+#         self.dim      = dim
+#         self.N        = N
+#         self.dual_dim = dual_dim or dim
+
+#         # learned_prox=True est NON NÉGOCIABLE pour la génération.
+#         # L1ProxFlat contracte structurellement tout vers 0 (voir analyse ci-dessus).
+#         if learned_prox:
+#             self.proxs = nn.ModuleList([
+#                     small_MLP(dim=self.dual_dim, time_varying=True, w=w) for _ in range(N)
+#                 ])
+#         else:
+#             self.proxs = nn.ModuleList([
+#                 L1ProxFlat(dim=self.dual_dim) for _ in range(N)
+#             ])
+#         self.layers = nn.ModuleList([
+#             DFB_Iteration(dim, self.proxs[i], dual_dim=self.dual_dim, version=version)
+#             for i in range(N)
+#         ])
+
+#     def forward(self, x0, return_traj=False, return_x1_hats=False):
+#         B = x0.shape[0]
+#         x = x0
+
+#         # u PERSISTANT sur toute la trajectoire.
+#         # Si on reset u à chaque pas :
+#         #   x_next = z - V @ 0 = z  →  le prox ne sert à rien,
+#         #   son output u_next est immédiatement jeté.
+#         u = torch.zeros(B, self.dual_dim, device=x.device)
+
+#         x_traj   = [x]
+#         x_states = []
+
+#         for n, layer in enumerate(self.layers):
+#             t_n      = (n + 1) / (self.N + 1)   # évite 0 et 1
+#             t_tensor = torch.full((B, 1), t_n, device=x.device)
+
+#             # z = x  (pas z = x/t)
+#             # ──────────────────────────────────────────────────────────────
+#             # La couche DFB calcule  x_next = x - V @ u  (pas de MAP estimate).
+#             # C'est directement l'étape d'Euler de l'ODE FM, pas une prox approchée.
+#             # Passer z = x/t avec u reset donne x_next = x/t (le prox est ignoré),
+#             # puis la combinaison convexe fait DIVERGER x (facteur (1 + λ*(1/t-1)) > 1).
+#             # ──────────────────────────────────────────────────────────────
+#             x_next, u = layer(u, x, t_tensor)
+#             # x_next = x + x_next
+#             x_states.append(x_next)
+
+#             # PAS de combinaison convexe supplémentaire.
+#             # Le DFB encode déjà le step via (x_next = x - V@u).
+#             # Rajouter (1-λ)*x + λ*x_next revient à multiplier le step par λ,
+#             # ce qui fait (1-λ*tau)*x → contraction vers 0.
+#             x = x_next
+#             x_traj.append(x)
+
+#         if return_traj and return_x1_hats:
+#             return x, x_traj, x_states
+#         if return_traj:
+#             return x, x_traj
+#         if return_x1_hats:
+#             return x, x_states
+#         return x
+
+class FLAT_DFB_UNN(nn.Module):
+    """
+    DFB Unrolled Network trained with FLAT (FLow-Aligned Training).
+
+    The time schedule is fixed (not learned):
+        t_k = 1 - (1 - k/N)^(1+alpha),  sum(delta_k) = 1, t_0=0, t_N=1.
+    Larger alpha concentrates more timesteps near t=1.
+
+    Two forward modes:
+      "direct"        — standard cascade, one pass through all N layers in order.
+                        Used for training and baseline inference.
+      "velocity_step" — lookahead inference: at each step n, run all remaining
+                        layers from the current state to estimate x1, then take
+                        the Euler step v_n = (x1_hat - x) / (1 - t_n).
+
+    Use train_flat_2moons() which implements:
+        L = L_recon + w_velocity * (1/N) * sum_k L1(x^(k+1), x*_{t_{k+1}})
+    """
+    def __init__(self, dim, N=10, w=64, dual_dim=None, learned_prox=False,
+                 version="LFO", alpha=4.0):
+        super().__init__()
+        self.dim      = dim
+        self.N        = N
+        self.dual_dim = dual_dim or dim
+        self.alpha    = alpha
+
+        if learned_prox:
+            self.proxs = nn.ModuleList([
+                small_MLP(dim=self.dual_dim, time_varying=True, w=w) for _ in range(N)
+            ])
+        else:
+            self.proxs = nn.ModuleList([
+                L1ProxFlat(dim=self.dual_dim) for _ in range(N)
+            ])
+        self.layers = nn.ModuleList([
+            DFB_Iteration(dim, self.proxs[i], dual_dim=self.dual_dim, version=version)
+            for i in range(N)
+        ])
+        print("time schedule:")
+        with torch.no_grad():
+            t_sched = self.get_schedule()
+            for n in range(self.N + 1):
+                print(f"  t_{n} = {t_sched[n].item():.4f}")
+
+    def get_schedule(self, device=None):
+        """FLAT schedule (Eq. 15): t_k = 1 - (1 - k/N)^(1+alpha). Dense near t=1 for alpha > 0."""
+        k = torch.arange(self.N + 1, dtype=torch.float32)
+        t = 1.0 - (1.0 - k / self.N).pow(1.0 + self.alpha)
+        if device is not None:
+            t = t.to(device)
+        return t  # (N+1,), t[0]=0, t[N]=1
+
+    def forward(self, x0, mode="direct", return_traj=False, return_x1_hats=False):
+        B = x0.shape[0]
+        t_sched = self.get_schedule(device=x0.device)
+
+        if mode == "direct":
+            x = x0
+            u = torch.zeros(B, self.dual_dim, device=x.device)
+            x_traj   = [x]
+            x_states = []
+
+            for n, layer in enumerate(self.layers):
+                # Condition on current time t_k (paper Eq. 12: Phi_k = f_theta(x_{t_k}, t_k))
+                t_tensor = torch.full((B, 1), t_sched[n].item(), device=x.device)
+                x_next, u = layer(u, x, t_tensor)
+                x_states.append(x_next)
+                x = x_next
+                x_traj.append(x)
+
+            if return_traj and return_x1_hats: return x, x_traj, x_states
+            if return_traj: return x, x_traj
+            if return_x1_hats: return x, x_states
+            return x
+
+        elif mode == "velocity_step":
+            # Lookahead: at each step n, run remaining layers to estimate x1,
+            # then take an Euler step along v_n = (x1_hat - x) / (1 - t_n).
+            x = x0
+            u = torch.zeros(B, self.dual_dim, device=x.device)
+            x_traj = [x]
+
+            for n in range(self.N):
+                t_n     = t_sched[n].item()
+                delta_n = (t_sched[n + 1] - t_sched[n]).item()
+
+                # Run all remaining layers from (x, u) to estimate x1
+                x_temp, u_temp = x, u
+                for m in range(n, self.N):
+                    t_m = torch.full((B, 1), t_sched[m].item(), device=x.device)
+                    x_temp, u_temp = self.layers[m](u_temp, x_temp, t_m)
+                x1_hat = x_temp
+
+                # Euler step as convex combination: x_{t_{n+1}} = (1-λ)*x + λ*x1_hat
+                # where λ = delta_n / (1 - t_n)
+                denom    = max(1.0 - t_n, 1e-6)
+                lambda_n = delta_n / denom
+                x_new    = (1.0 - lambda_n) * x + lambda_n * x1_hat
+
+                # Advance dual u with layer n at time t_n (keeps u consistent across steps)
+                t_n_tensor = torch.full((B, 1), t_n, device=x.device)
+                _, u = self.layers[n](u, x, t_n_tensor)
+
+                x = x_new
+                x_traj.append(x)
+
+            if return_traj: return x, x_traj
+            return x
+    
+    
+
+
+class SharedFLAT_DFB_UNN(nn.Module):
+    """
+    Version à poids partagés de FLAT DFB (limite Deep Equilibrium).
+    Idéal pour varier le nombre d'itérations N dynamiquement.
+    """
+    def __init__(self, dim, N=10, w=32, dual_dim=None, version="LFO", prox_type="mlp"):
+        super().__init__()
+        self.dim = dim
+        self.N = N
+        self.version = version
+        self.dual_dim = dual_dim or dim
+        
+        W_init = torch.randn(self.dual_dim, dim) * 0.01
+        if self.dual_dim == dim:
+            W_init = W_init + torch.eye(dim)
+        self.shared_W = nn.Parameter(W_init)
+        
+        if version == "LFO":
+            V_init = torch.randn(dim, self.dual_dim) * 0.01
+            if self.dual_dim == dim:
+                V_init = V_init + torch.eye(dim)
+            self.shared_V = nn.Parameter(V_init)
+            self.tau = nn.Parameter(torch.tensor(0.5))
+        else:
+            self.register_buffer('_sigma_u', F.normalize(torch.randn(self.dual_dim), dim=0))
+            
+        if prox_type == "l1":
+            self.prox = L1ProxFlat(dim=self.dual_dim)
+        else:
+            self.prox = small_MLP(dim=self.dual_dim, w=w, time_varying=True)
+
+    def forward(self, x0, return_traj=False, return_x1_hats=False):
+        B = x0.shape[0]
+        x = x0
+        u = torch.zeros(B, self.dual_dim, device=x.device)
+        
+        x_traj = [x]
+        x1_hats = []
+        
+        V = self.shared_V if self.version == "LFO" else self.shared_W.T
+        if self.version == "LFO":
+            tau = F.softplus(self.tau)
+        else:
+            _s, self._sigma_u = sigma_max_power_iter(self.shared_W, self._sigma_u)
+            tau = 1.99 / _s ** 2
+            
+        for n in range(self.N):
+            t_n = n / self.N
+            lam_n = 1.0 / (self.N - n)
+            t_tensor = torch.full((B, 1), t_n, device=x.device)
+            
+            # DFB Iteration Manuelle
+            x1_hat = x - F.linear(u, V, None)
+            step = tau * F.linear(x1_hat, self.shared_W, None)
+            u = self.prox(torch.cat((u + step, t_tensor), dim=-1))
+            
+            x1_hats.append(x1_hat)
+            
+            # Euler step
+            x = (1 - lam_n) * x + lam_n * x1_hat
+            x_traj.append(x)
+            
+        if return_traj and return_x1_hats:
+            return x, x_traj, x1_hats
+        if return_traj:
+            return x, x_traj
+        if return_x1_hats:
+            return x, x1_hats
+        return x
 
 # ---------------------------------------------------------------------------
 # DiFB-UNN (DFB with inertia/momentum)
@@ -507,11 +778,12 @@ class SharedDFB_UNN(nn.Module):
 # ---------------------------------------------------------------------------
 
 class SharedDiFB_UNN(nn.Module):
-    def __init__(self, dim, K=10, w=32, dual_dim=None, version="LFO", prox_type="mlp"):
+    def __init__(self, dim, K=10, w=32, dual_dim=None, version="LFO", prox_type="mlp", a=3.0):
         super().__init__()
         self.dim      = dim
         self.K        = K
         self.version  = version
+        self.a        = a
         self.dual_dim = dual_dim or dim
         W_init = torch.randn(self.dual_dim, dim) * 0.01
         self.rho = nn.Parameter(torch.full((K,), 0.5))
@@ -546,7 +818,7 @@ class SharedDiFB_UNN(nn.Module):
         else:
             _s, self._sigma_u = sigma_max_power_iter(self.shared_W, self._sigma_u)
             tau = 1.99 / _s ** 2
-        for _ in range(iters):
+        for k in range(iters):
             x_next  = z - F.linear(u, V, None)
             step    = tau * F.linear(x_next, self.shared_W, None)
             u_tilde = self.prox(torch.cat((u + step, t), dim=-1))

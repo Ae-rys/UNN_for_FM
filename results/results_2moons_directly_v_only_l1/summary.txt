@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	train_time_s	status
+SharedDiFB_UNN_L1_LFO_rand	0	nan	0.0	name 'k' is not defined

@@ -16,4 +16,7 @@ from .architectures import (
     ConvScCP_UNN,
     SharedConvScCP_UNN,
     UNet,
+    compute_delta,
+    SharedFLAT_DFB_UNN,
+    FLAT_DFB_UNN,
 )

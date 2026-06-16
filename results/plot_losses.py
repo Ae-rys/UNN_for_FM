@@ -503,7 +503,7 @@ def plot_losses_overview(results_dir: str, output_path: str = None,
 
 
 if __name__ == "__main__":
-    results_dir = os.path.join(os.path.dirname(__file__), "2_moons_only_l1")
+    results_dir = os.path.join(os.path.dirname(__file__), "results_2moons_directly_v_only_l1")
     plot_all_losses(results_dir, output_path=os.path.join(results_dir, "losses_comparison.png"))
     plot_losses_by_group(results_dir, output_path=os.path.join(results_dir, "losses_by_group.png"))
     plot_losses_by_algo(results_dir, output_path=os.path.join(results_dir, "losses_by_algo.png"))
