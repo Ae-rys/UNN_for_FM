@@ -14,10 +14,13 @@ import os
 import random
 import time
 
+import re
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import ot
 import torch
 from sklearn.datasets import make_moons
 from torch.utils.data import DataLoader, TensorDataset
@@ -124,7 +127,7 @@ def save_unn_paths(model, train_loader, device, title, path, n_samples=8, t_valu
             xt   = (1 - t) * x0 + t * x1  # mean of the CFM linear path (sigma small)
             xt_t = torch.cat([xt, t], dim=-1)
 
-            _, x_traj, _ = model(xt_t, return_traj=True)
+            _, x_traj = model(xt_t, return_traj=True)
             paths = torch.stack(x_traj, dim=1).cpu().numpy()  # (B, K+1, dim)
 
             ax.scatter(ref_data[:, 0], ref_data[:, 1], s=4, alpha=0.15, c="gray", label="target (2-moons)")
@@ -133,9 +136,9 @@ def save_unn_paths(model, train_loader, device, title, path, n_samples=8, t_valu
                 ax.plot(pts[:, 0], pts[:, 1], "-", color="black", alpha=0.3, linewidth=1, zorder=2)
                 sc = ax.scatter(pts[:, 0], pts[:, 1], c=np.arange(pts.shape[0]), cmap="plasma", s=12, zorder=3)
             ax.scatter(xt.cpu().numpy()[:, 0], xt.cpu().numpy()[:, 1],
-                       marker="s", facecolors="none", edgecolors="steelblue", s=50, label="$x_t$ (start)", zorder=4)
+                       marker="s", facecolors="none", edgecolors="steelblue", s=50, label="$x_t$", zorder=4)
             ax.scatter(x1.cpu().numpy()[:, 0], x1.cpu().numpy()[:, 1],
-                       marker="x", c="green", s=50, label="$x_1$ (target)", zorder=4)
+                       marker="x", c="green", s=50, label="$x_1$", zorder=4)
 
             ax.set_title(f"t = {t_val:.2f}", fontsize=9)
             ax.set_xlim(-3.5, 3.5)
@@ -222,6 +225,106 @@ def save_flat_transport_field(model, ref_data, device, title, path,
     plt.close(fig)
 
 
+def save_per_layer_updates(model, ref_data, device, title, path,
+                            n_samples=300, selected_layers=None, mode="direct"):
+    """Per-layer displacement δ^(k) = x^(k+1) - x^(k) for FLAT_DFB_UNN.
+    Each panel: quiver of what layer k contributes, at the positions x^(k).
+    Reveals which layers do most of the work and where the cascade "hesitates".
+    """
+    model.eval()
+    N = model.N
+    if selected_layers is None:
+        # ~5 evenly spaced layers, always including first and last
+        step = max(1, (N - 1) // 4)
+        selected_layers = sorted(set(range(0, N, step)) | {N - 1})
+
+    x0 = torch.randn(n_samples, 2, device=device)
+    with torch.no_grad():
+        _, x_traj = model(x0, return_traj=True, mode=mode)
+
+    paths = torch.stack(x_traj, dim=1).cpu().numpy()  # (n_samples, N+1, 2)
+    t_sched = model.get_schedule().numpy()
+
+    n_panels = len(selected_layers)
+    fig, axes = plt.subplots(1, n_panels, figsize=(5 * n_panels, 5), constrained_layout=True)
+    if n_panels == 1:
+        axes = [axes]
+
+    q = None
+    for ax, k in zip(axes, selected_layers):
+        pos   = paths[:, k,     :]          # x^(k)
+        delta = paths[:, k + 1, :] - pos    # δ^(k) = x^(k+1) - x^(k)
+        speed = np.linalg.norm(delta, axis=-1)
+
+        ax.scatter(ref_data[:, 0], ref_data[:, 1], s=3, alpha=0.12, c="gray")
+        q = ax.quiver(pos[:, 0], pos[:, 1], delta[:, 0], delta[:, 1],
+                       speed, cmap="plasma", angles="xy", scale_units="xy", scale=1,
+                       width=0.003, headwidth=4)
+        ax.set_title(f"k={k}  t: {t_sched[k]:.2f}→{t_sched[k+1]:.2f}", fontsize=9)
+        ax.set_xlim(-3.5, 3.5); ax.set_ylim(-3.5, 3.5)
+        ax.set_aspect("equal")
+
+    if q is not None:
+        cbar = fig.colorbar(q, ax=axes, shrink=0.8, pad=0.02)
+        cbar.set_label(r"$\|\delta^{(k)}\| = \|x^{(k+1)} - x^{(k)}\|$")
+    fig.suptitle(title, fontsize=10)
+    plt.savefig(path, dpi=100)
+    plt.close(fig)
+
+
+def save_density_diff(generated, ref_data, title, path, bins=60, xlim=(-3.5, 3.5)):
+    """2D histogram difference: H(generated) - H(target).
+    Red = over-generated regions, blue = under-generated / missed modes.
+    Overlaid contours show the target density for reference.
+    Directly diagnoses mode collapse and coverage failures.
+    """
+    edges = np.linspace(*xlim, bins + 1)
+    H_gen, _, _ = np.histogram2d(generated[:, 0], generated[:, 1],
+                                  bins=[edges, edges], density=True)
+    H_ref, _, _ = np.histogram2d(ref_data[:, 0], ref_data[:, 1],
+                                  bins=[edges, edges], density=True)
+    H_diff = H_gen - H_ref
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    XX, YY  = np.meshgrid(centers, centers)
+
+    # Optional smoothing via scipy — degrades gracefully if not available
+    try:
+        from scipy.ndimage import gaussian_filter
+        H_gen_s  = gaussian_filter(H_gen,  sigma=1.5)
+        H_ref_s  = gaussian_filter(H_ref,  sigma=1.5)
+        H_diff_s = gaussian_filter(H_diff, sigma=1.5)
+    except ImportError:
+        H_gen_s, H_ref_s, H_diff_s = H_gen, H_ref, H_diff
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5), constrained_layout=True)
+
+    # Panel 1: generated density
+    im0 = axes[0].pcolormesh(XX, YY, H_gen_s.T, cmap="Blues", shading="auto")
+    fig.colorbar(im0, ax=axes[0])
+    axes[0].set_title("generated density", fontsize=9)
+
+    # Panel 2: target density
+    im1 = axes[1].pcolormesh(XX, YY, H_ref_s.T, cmap="Greys", shading="auto")
+    fig.colorbar(im1, ax=axes[1])
+    axes[1].set_title("target density", fontsize=9)
+
+    # Panel 3: difference (diverging)
+    vmax = np.abs(H_diff_s).max() or 1.0
+    im2  = axes[2].pcolormesh(XX, YY, H_diff_s.T, cmap="RdBu_r",
+                               vmin=-vmax, vmax=vmax, shading="auto")
+    axes[2].contour(XX, YY, H_ref_s.T, levels=5, colors="black", alpha=0.4, linewidths=0.7)
+    fig.colorbar(im2, ax=axes[2])
+    axes[2].set_title("generated − target  (red=over, blue=missed)", fontsize=9)
+
+    for ax in axes:
+        ax.set_xlim(*xlim); ax.set_ylim(*xlim)
+        ax.set_aspect("equal")
+
+    fig.suptitle(title, fontsize=10)
+    plt.savefig(path, dpi=100)
+    plt.close(fig)
+
+
 def save_vector_field(model, train_loader, device, title, path,
                        t_values=(0.1, 0.3, 0.5, 0.7, 0.9), grid_size=20, xlim=(-3.5, 3.5), mode="direct"):
     """Plot the predicted velocity field v_t(x) = model(cat([x, t])) on a regular
@@ -250,7 +353,7 @@ def save_vector_field(model, train_loader, device, title, path,
         for ax, t_val in zip(axes, t_values):
             t    = torch.full((grid.shape[0], 1), float(t_val), device=device)
             xt_t = torch.cat([grid, t], dim=-1)
-            vt   = model(xt_t, mode=mode)
+            vt   = model(xt_t)
 
             grid_np = grid.cpu().numpy()
             vt_np   = vt.cpu().numpy()
@@ -270,6 +373,22 @@ def save_vector_field(model, train_loader, device, title, path,
     fig.suptitle(title, fontsize=10)
     plt.savefig(path, dpi=100)
     plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Quantitative error metric
+# ---------------------------------------------------------------------------
+
+def compute_w2(generated, target, max_n=500):
+    """Exact 2-Wasserstein distance between `generated` and `target` point
+    clouds (subsampled to `max_n` points each for tractable exact OT)."""
+    n = min(len(generated), len(target), max_n)
+    a = np.asarray(generated[:n], dtype=np.float64)
+    b = np.asarray(target[:n], dtype=np.float64)
+    M = ot.dist(a, b, metric="sqeuclidean")
+    w = np.full(n, 1.0 / n)
+    w2_sq = ot.emd2(w, w, M)
+    return float(np.sqrt(max(w2_sq, 0.0)))
 
 
 # ---------------------------------------------------------------------------
@@ -301,9 +420,10 @@ def train_2moons(
     with open(os.path.join(run_dir, "params.txt"), "w") as f:
         f.write(f"{total_params}\n")
 
-    loss_history = []
-    train_start  = time.perf_counter()
-    eval_every   = max(1, nb_epochs // 5)
+    loss_history  = []
+    error_history = []  # (epoch, W2 distance to target)
+    train_start   = time.perf_counter()
+    eval_every    = max(1, nb_epochs // 5)
 
     for epoch in range(nb_epochs):
         model.train()
@@ -390,6 +510,10 @@ def train_2moons(
                     title=f"{model_name} — epoch {epoch+1}",
                     path=os.path.join(run_dir, f"vector_field_epoch_{epoch+1}.png"),
                 )
+
+                w2 = compute_w2(gen, ref_data)
+                error_history.append((epoch + 1, w2))
+                print(f"  Epoch {epoch+1}/{nb_epochs} — W2 error: {w2:.4f}")
             model.train()
 
     # Loss curve
@@ -406,9 +530,26 @@ def train_2moons(
         for ep, l in enumerate(loss_history, 1):
             f.write(f"{ep}\t{l:.6f}\n")
 
+    # Error (W2 to target) curve
+    err_epochs = [ep for ep, _ in error_history]
+    err_values = [w2 for _, w2 in error_history]
+    plt.figure()
+    plt.plot(err_epochs, err_values, marker="o", markersize=4)
+    plt.xlabel("Epoch")
+    plt.ylabel("W2 distance to target")
+    plt.title(f"Training error — {model_name}")
+    plt.tight_layout()
+    plt.savefig(os.path.join(run_dir, "error.png"))
+    plt.close()
+
+    with open(os.path.join(run_dir, "error.txt"), "w") as f:
+        f.write("epoch\tw2_error\n")
+        for ep, w2 in error_history:
+            f.write(f"{ep}\t{w2:.6f}\n")
+
     total_time = time.perf_counter() - train_start
     print(f"  Results saved to: {run_dir}")
-    return loss_history, total_params, total_time
+    return loss_history, total_params, total_time, error_history
 
 
 def train_flat_2moons(
@@ -460,7 +601,6 @@ def train_flat_2moons(
             x0_paired, x1_paired = ot_sampler.sample_plan(x0, x1)
 
             x_pred, x_states = model(x0_paired, return_x1_hats=True)
-            # x_states = [x^(1), ..., x^(N)]
             x_traj  = [x0_paired] + list(x_states)
             t_sched = model.get_schedule(device=device)
 
@@ -506,48 +646,64 @@ def train_flat_2moons(
                 gen_direct   = model(x0_test, mode="direct").cpu().numpy()
                 gen_lookahead = model(x0_test, mode="velocity_step").cpu().numpy()
 
-                for tag, gen in [("lookahead", gen_lookahead)]: # [("direct", gen_direct), ("lookahead", gen_lookahead)]:
+                for tag, gen in [("direct", gen_direct)]: # [("direct", gen_direct), ("lookahead", gen_lookahead)]:
                     save_scatter(
                         gen,
                         title=f"{model_name} — epoch {epoch+1} ({tag})",
                         path=os.path.join(run_dir, f"epoch_{epoch+1}_{tag}.png"),
                         ref=ref_data,
                     )
-                # save_overview(
-                #     x0_test.cpu().numpy(), ref_data, gen_direct,
-                #     title=f"{model_name} — epoch {epoch+1}",
-                #     path=os.path.join(run_dir, f"overview_direct_epoch_{epoch+1}.png"),
-                # )
                 save_overview(
-                    x0_test.cpu().numpy(), ref_data, gen_lookahead,
+                    x0_test.cpu().numpy(), ref_data, gen_direct,
                     title=f"{model_name} — epoch {epoch+1}",
-                    path=os.path.join(run_dir, f"overview_lookahead_epoch_{epoch+1}.png"),
+                    path=os.path.join(run_dir, f"overview_direct_epoch_{epoch+1}.png"),
                 )
-                # save_flat_unn_paths(
-                #     model, x0_test, ref_data, device,
+                # save_overview(
+                #     x0_test.cpu().numpy(), ref_data, gen_lookahead,
                 #     title=f"{model_name} — epoch {epoch+1}",
-                #     path=os.path.join(run_dir, f"unn_paths_epoch_{epoch+1}.png"),
-                #     mode="direct",
+                #     path=os.path.join(run_dir, f"overview_lookahead_epoch_{epoch+1}.png"),
                 # )
                 save_flat_unn_paths(
                     model, x0_test, ref_data, device,
                     title=f"{model_name} — epoch {epoch+1}",
                     path=os.path.join(run_dir, f"unn_paths_epoch_{epoch+1}.png"),
-                    mode="velocity_step",
+                    mode="direct",
                 )
-                # save_flat_transport_field(
-                #     model, ref_data, device,
+                # save_flat_unn_paths(
+                #     model, x0_test, ref_data, device,
                 #     title=f"{model_name} — epoch {epoch+1}",
-                #     path=os.path.join(run_dir, f"transport_field_epoch_{epoch+1}.png"),
-                #     mode="direct",
+                #     path=os.path.join(run_dir, f"unn_paths_epoch_{epoch+1}.png"),
+                #     mode="velocity_step",
                 # )
                 save_flat_transport_field(
                     model, ref_data, device,
                     title=f"{model_name} — epoch {epoch+1}",
                     path=os.path.join(run_dir, f"transport_field_epoch_{epoch+1}.png"),
-                    mode="velocity_step",
+                    mode="direct",
                 )
-                
+                # save_flat_transport_field(
+                #     model, ref_data, device,
+                #     title=f"{model_name} — epoch {epoch+1}",
+                #     path=os.path.join(run_dir, f"transport_field_epoch_{epoch+1}.png"),
+                #     mode="velocity_step",
+                # )
+                save_per_layer_updates(
+                    model, ref_data, device,
+                    title=f"{model_name} — epoch {epoch+1}",
+                    path=os.path.join(run_dir, f"per_layer_updates_epoch_{epoch+1}.png"),
+                    mode="direct"
+                )
+                # save_per_layer_updates(
+                #     model, ref_data, device,
+                #     title=f"{model_name} — epoch {epoch+1}",
+                #     path=os.path.join(run_dir, f"per_layer_updates_epoch_{epoch+1}.png"),
+                #     mode="velocity_step"
+                # )
+                # save_density_diff(
+                #     gen_lookahead, ref_data,
+                #     title=f"{model_name} — epoch {epoch+1} (lookahead)",
+                #     path=os.path.join(run_dir, f"density_diff_epoch_{epoch+1}.png"),
+                # )
             model.train()
 
     plt.figure()
@@ -571,210 +727,280 @@ def train_flat_2moons(
     print(f"  Results saved to: {run_dir}")
     return loss_history, total_params, total_time
 
+# ---------------------------------------------------------------------------
+# FM-FLAT training  (entraînement "à la Flow Matching")
+# ---------------------------------------------------------------------------
+
+def train_flat_fm_2moons(
+    model,
+    train_loader,
+    device,
+    results_dir,
+    model_name,
+    nb_epochs=100,
+    lr=1e-3,
+    w_velocity=2.0,
+):
+    """
+    Entraînement FM-FLAT :
+      - pour chaque batch, t ~ U[0,1] et x_t = (1-t)*x0 + t*x1  (comme FM)
+      - on passe x_t dans les N couches DFB avec sous-schedule adapté à [t, 1]
+      - loss = MSE(x_hat_N, x1)  +  w_vel * (1/N) * Σ_k L1(x_hat_k, x_{t_{k+1}^n})
+
+    L'inférence peut utiliser soit :
+      - mode "direct" depuis x0 (identique à FLAT classique)
+      - NeuralODE avec mode "fm_velocity" (champ de vitesse estimé par K pas DFB)
+    """
+    run_dir = os.path.join(results_dir, model_name)
+    os.makedirs(run_dir, exist_ok=True)
+    ref_data = torch.cat([x for (x,) in train_loader])[:2000].numpy()
+
+    optimizer    = torch.optim.Adam(model.parameters(), lr=lr)
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"\n{'='*60}\nModel : {model_name} (FM-FLAT, alpha={model.alpha})\nParams: {total_params:,}\n{'='*60}")
+
+    K            = model.N
+    loss_history = []
+    loss_recon_h = []
+    loss_vel_h   = []
+    train_start  = time.perf_counter()
+    eval_every   = max(1, nb_epochs // 5)
+
+    ot_sampler = OTPlanSampler(method="exact")
+
+    for epoch in range(nb_epochs):
+        model.train()
+        total_loss = total_recon = total_vel = 0.0
+        t0 = time.perf_counter()
+
+        for (x1_batch,) in tqdm(train_loader, desc=f"Epoch {epoch+1}/{nb_epochs}", leave=False):
+            x1 = x1_batch.to(device)
+            B  = x1.shape[0]
+            x0 = torch.randn(B, DIM, device=device)
+
+            x0_paired, x1_paired = ot_sampler.sample_plan(x0, x1)
+
+            # ── Tirage FM : t ~ U[0,1] par exemple, x_t = interpolant ──────
+            t   = torch.rand(B, device=device) * 1e-3 + 1e-3                                    # (B,)
+            x_t = (1.0 - t[:, None]) * x0_paired + t[:, None] * x1_paired       # (B, dim)
+
+            # ── Forward : toutes les couches depuis x_t, sous-schedule [t, 1] ──
+            x_pred, x_states = model(x_t, t_start=t, return_x1_hats=True)
+            x_traj = [x_t] + list(x_states)
+
+            # sous-schedule per-exemple pour les cibles intermédiaires
+            t_base = model.get_schedule(device=device)                            # (N+1,)
+            t_s    = t[:, None] + (1.0 - t[:, None]) * t_base[None, :]           # (B, N+1)
+
+            # ── Loss I : reconstruction end-to-end ──────────────────────────
+            loss_recon = F.mse_loss(x_pred, x1_paired)
+
+            # ── Loss II : supervision FLAT par couche (teacher forcing sur cibles vraies) ──
+            loss_vel = torch.zeros(1, device=device)
+            for k in range(K):
+                t_kp1  = t_s[:, k + 1].unsqueeze(1)                              # (B, 1)
+                x_star = (1.0 - t_kp1) * x0_paired + t_kp1 * x1_paired          # (B, dim)
+                loss_vel = loss_vel + F.l1_loss(x_traj[k + 1], x_star)
+            loss_vel = loss_vel / K
+
+            loss = loss_recon + w_velocity * loss_vel
+
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            optimizer.step()
+            total_loss  += loss.item()
+            total_recon += loss_recon.item()
+            total_vel   += loss_vel.item()
+
+        n_batches = len(train_loader)
+        avg_loss  = total_loss  / n_batches
+        avg_recon = total_recon / n_batches
+        avg_vel   = total_vel   / n_batches
+        elapsed   = time.perf_counter() - t0
+        loss_history.append(avg_loss)
+        loss_recon_h.append(avg_recon)
+        loss_vel_h.append(avg_vel)
+        print(f"  Epoch {epoch+1}/{nb_epochs} — loss: {avg_loss:.4f} "
+              f"(recon: {avg_recon:.4f}, vel: {avg_vel:.4f})  ({elapsed:.1f}s)")
+
+        if (epoch + 1) % eval_every == 0 or epoch == nb_epochs - 1:
+            model.eval()
+            with torch.no_grad():
+                x0_test = torch.randn(2000, DIM, device=device)
+                t_span  = torch.linspace(0, 1, 2, device=device)
+
+                # Option A : FLAT direct depuis x0 (inference sans ODE)
+                gen_direct = model(x0_test).cpu().numpy()
+                save_scatter(gen_direct,
+                             title=f"{model_name} — epoch {epoch+1} (direct)",
+                             path=os.path.join(run_dir, f"epoch_{epoch+1}_direct.png"),
+                             ref=ref_data)
+
+                # Option B : NeuralODE avec le champ de vitesse fm_velocity
+                ode_fn = lambda t, x, **kw: model(
+                    torch.cat([x, t * torch.ones(x.shape[0], 1, device=x.device)], dim=-1),
+                    mode="fm_velocity",
+                )
+                node = NeuralODE(ode_fn, solver="dopri5", atol=1e-4, rtol=1e-4, optimizable_params=[])
+                gen_ode = node.trajectory(x0_test, t_span=t_span)[-1].cpu().numpy()
+                save_scatter(gen_ode,
+                             title=f"{model_name} — epoch {epoch+1} (ODE)",
+                             path=os.path.join(run_dir, f"epoch_{epoch+1}_ode.png"),
+                             ref=ref_data)
+
+                save_overview(x0_test.cpu().numpy(), ref_data, gen_ode,
+                              title=f"{model_name} — epoch {epoch+1}",
+                              path=os.path.join(run_dir, f"overview_epoch_{epoch+1}.png"))
+            model.train()
+
+    plt.figure()
+    plt.plot(range(1, nb_epochs + 1), loss_history, marker="o", markersize=3, label="total")
+    plt.plot(range(1, nb_epochs + 1), loss_recon_h,  marker="o", markersize=3, label="recon (MSE)")
+    plt.plot(range(1, nb_epochs + 1), loss_vel_h,    marker="o", markersize=3, label="vel (L1, /N)")
+    plt.xlabel("Epoch"); plt.ylabel("FM-FLAT loss")
+    plt.title(f"Training loss — {model_name}")
+    plt.legend(); plt.tight_layout()
+    plt.savefig(os.path.join(run_dir, "loss.png")); plt.close()
+
+    total_time = time.perf_counter() - train_start
+    print(f"  Results saved to: {run_dir}")
+    return loss_history, total_params, total_time
+
 
 # ---------------------------------------------------------------------------
 # Experiments
 # ---------------------------------------------------------------------------
+#
+# DFB and ScCP UNNs (LFO / LNO), prox L1 only, with two ablations:
+#   - "K study"    : impact of the number of layers K, dual_dim fixed.
+#   - "dual study" : impact of the number of features (dual_dim), K fixed.
+
+K_STUDY_VALUES    = [5, 10, 15]
+K_STUDY_DUAL_DIM  = 32
+
+DUAL_STUDY_VALUES = [16, 32, 64]
+DUAL_STUDY_K      = 10
+
 
 def build_experiments(device):
-    return [
-        # ---- Baselines ----
+    experiments = [
         dict(
             name  = "MLP_baseline",
             build = lambda: small_MLP(dim=DIM, w=64, time_varying=True).to(device),
             kwargs= {},
         ),
-        # ---- Standard UNNs (flat, per-layer W, dual_dim=16) ----
-        dict(
-            name  = "DiFB_UNN_LFO",
-            build = lambda: DiFB_UNN(dim=DIM, K=10, w=32, dual_dim=2, version="LFO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "DiFB_UNN_LNO",
-            build = lambda: DiFB_UNN(dim=DIM, K=10, w=64, dual_dim=32, version="LNO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "ScCP_UNN_LFO",
-            build = lambda: ScCP_UNN(dim=DIM, K=10, w=64, dual_dim=32, version="LFO").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "ScCP_UNN_LNO",
-            build = lambda: ScCP_UNN(dim=DIM, K=10, w=64, dual_dim=32, version="LNO").to(device),
-            kwargs= {},
-        ),
-        # ---- Standard UNNs + L1 prox ----
-        dict(
-            name  = "DiFB_UNN_L1_LFO",
-            build = lambda: DiFB_UNN(dim=DIM, K=10, w=64, dual_dim=32, version="LFO", prox_type="l1").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "DiFB_UNN_L1_LNO",
-            build = lambda: DiFB_UNN(dim=DIM, K=10, w=64, dual_dim=32, version="LNO", prox_type="l1").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "ScCP_UNN_L1_LFO",
-            build = lambda: ScCP_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LFO", prox_type="l1").to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "ScCP_UNN_L1_LNO",
-            build = lambda: ScCP_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO", prox_type="l1").to(device),
-            kwargs= {},
-        ),
-        # ---- DFB + L1 prox (dual L1 ball projection) ----
-        dict(
-            name  = "DFB_UNN_L1_LFO",
-            build = lambda: DFB_UNN(dim=DIM, K=10, dual_dim=32, version="LFO", learned_prox=False).to(device),
-            kwargs= {},
-        ),
-        dict(
-            name  = "DFB_UNN_L1_LNO",
-            build = lambda: DFB_UNN(dim=DIM, K=10, dual_dim=32, version="LNO", learned_prox=False).to(device),
-            kwargs= {},
-        ),
-        # ---- Shared DFB (flat, shared W, dual_dim=32) ----
-        dict(
-            name  = "SharedDFB_UNN_LFO_rand",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, w=64, dual_dim=2, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_LNO_rand",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_LFO_fixed",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_LNO_fixed",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- Shared DFB + L1 prox ----
-        dict(
-            name  = "SharedDFB_UNN_L1_LFO_rand",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, dual_dim=64, version="LFO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_L1_LNO_rand",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, dual_dim=64, version="LNO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_L1_LFO_fixed",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, dual_dim=1024, version="LFO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDFB_UNN_L1_LNO_fixed",
-            build = lambda: SharedDFB_UNN(dim=DIM, K=10, dual_dim=1024, version="LNO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- Shared DiFB (flat, shared W, momentum on dual variable) ----
-        dict(
-            name  = "SharedDiFB_UNN_LFO_rand",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, w=64, dual_dim=2, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDiFB_UNN_LNO_rand",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDiFB_UNN_LFO_fixed",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDiFB_UNN_LNO_fixed",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- Shared DiFB + L1 prox ----
-        dict(
-            name  = "SharedDiFB_UNN_L1_LFO_rand",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, dual_dim=64, version="LFO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDiFB_UNN_L1_LNO_rand",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, dual_dim=64, version="LNO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDiFB_UNN_L1_LFO_fixed",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, dual_dim=1024, version="LFO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedDiFB_UNN_L1_LNO_fixed",
-            build = lambda: SharedDiFB_UNN(dim=DIM, K=10, dual_dim=1024, version="LNO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- Shared ScCP (flat, shared W, adaptive tau/sigma/alpha schedule) ----
-        dict(
-            name  = "SharedScCP_UNN_LFO_rand",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, w=64, dual_dim=2, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedScCP_UNN_LNO_rand",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedScCP_UNN_LFO_fixed",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LFO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedScCP_UNN_LNO_fixed",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, w=64, dual_dim=64, version="LNO").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- Shared ScCP + L1 prox ----
-        dict(
-            name  = "SharedScCP_UNN_L1_LFO_rand",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, dual_dim=64, version="LFO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedScCP_UNN_L1_LNO_rand",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, dual_dim=64, version="LNO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=True, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedScCP_UNN_L1_LFO_fixed",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, dual_dim=1024, version="LFO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        dict(
-            name  = "SharedScCP_UNN_L1_LNO_fixed",
-            build = lambda: SharedScCP_UNN(dim=DIM, K=10, dual_dim=1024, version="LNO", prox_type="l1").to(device),
-            kwargs= dict(randomized_layer_nb=False, multi_iter=True),
-        ),
-        # ---- FLAT DFB  ----
-        dict(
-            name  = "FLAT_DFB_UNN_LFO",
-            build = lambda: FLAT_DFB_UNN(dim=DIM, N=16, dual_dim=32, version="LFO", alpha=2.0).to(device),
-            kwargs= dict(is_flat=True),
-        ),
-        # dict(
-        #     name  = "SharedFLAT_DFB_UNN_LFO",
-        #     build = lambda: SharedFLAT_DFB_UNN(dim=DIM, N=10, dual_dim=64, version="LFO").to(device),
-        #     kwargs= dict(is_flat=True),
-        # ),
     ]
+
+    # ---- Study 1: impact of the number of layers K (dual_dim fixed) ----
+    for K in K_STUDY_VALUES:
+        for version in ["LFO", "LNO"]:
+            experiments.append(dict(
+                name  = f"DFB_UNN_L1_{version}_K{K}",
+                build = (lambda K=K, version=version: DFB_UNN(
+                    dim=DIM, K=K, dual_dim=K_STUDY_DUAL_DIM,
+                    version=version, learned_prox=False,
+                ).to(device)),
+                kwargs= {},
+            ))
+            experiments.append(dict(
+                name  = f"ScCP_UNN_L1_{version}_K{K}",
+                build = (lambda K=K, version=version: ScCP_UNN(
+                    dim=DIM, K=K, dual_dim=K_STUDY_DUAL_DIM,
+                    version=version, prox_type="l1",
+                ).to(device)),
+                kwargs= {},
+            ))
+
+    # ---- Study 2: impact of the number of features / dual_dim (K fixed) ----
+    for D in DUAL_STUDY_VALUES:
+        for version in ["LFO", "LNO"]:
+            experiments.append(dict(
+                name  = f"DFB_UNN_L1_{version}_dual{D}",
+                build = (lambda D=D, version=version: DFB_UNN(
+                    dim=DIM, K=DUAL_STUDY_K, dual_dim=D,
+                    version=version, learned_prox=False,
+                ).to(device)),
+                kwargs= {},
+            ))
+            experiments.append(dict(
+                name  = f"ScCP_UNN_L1_{version}_dual{D}",
+                build = (lambda D=D, version=version: ScCP_UNN(
+                    dim=DIM, K=DUAL_STUDY_K, dual_dim=D,
+                    version=version, prox_type="l1",
+                ).to(device)),
+                kwargs= {},
+            ))
+
+    return experiments
+
+
+def merge_shard_summaries(results_dir, num_shards):
+    """Read summary_shard{0..num_shards-1}.txt from results_dir, merge them
+    into summary.txt, and regenerate the ablation-study plots."""
+    summary = []
+    for shard_id in range(num_shards):
+        path = os.path.join(results_dir, f"summary_shard{shard_id}.txt")
+        if not os.path.exists(path):
+            print(f"  [warn] missing {path}, skipping")
+            continue
+        with open(path) as f:
+            next(f)  # header
+            for line in f:
+                name, n_params, final_loss, final_error, train_time, status = line.rstrip("\n").split("\t")
+                summary.append((name, float(final_loss), float(final_error),
+                                 int(n_params), float(train_time), status))
+
+    summary_path = os.path.join(results_dir, "summary.txt")
+    with open(summary_path, "w") as f:
+        f.write("model_name\tn_params\tfinal_loss\tfinal_w2_error\ttrain_time_s\tstatus\n")
+        for name, final_loss, final_error, n_params, train_time, status in summary:
+            f.write(f"{name}\t{n_params}\t{final_loss:.6f}\t{final_error:.6f}\t{train_time:.1f}\t{status}\n")
+    print(f"Merged {len(summary)} run(s) from {num_shards} shard(s) into: {summary_path}")
+
+    plot_ablation_studies(summary, results_dir)
+
+
+def plot_ablation_studies(summary, results_dir):
+    """From the run summary, build comparison plots of final loss / W2 error
+    vs. the swept hyperparameter (K or dual_dim), one line per model+version,
+    for the two ablations defined in build_experiments()."""
+    by_metric = {"final_loss": {}, "final_w2": {}}
+    k_pattern    = re.compile(r"^(DFB_UNN_L1|ScCP_UNN_L1)_(LFO|LNO)_K(\d+)$")
+    dual_pattern = re.compile(r"^(DFB_UNN_L1|ScCP_UNN_L1)_(LFO|LNO)_dual(\d+)$")
+
+    studies = {"K": {}, "dual": {}}
+    for name, final_loss, final_error, n_params, train_time, status in summary:
+        if status != "OK":
+            continue
+        m = k_pattern.match(name)
+        if m:
+            model, version, x = m.group(1), m.group(2), int(m.group(3))
+            studies["K"].setdefault((model, version), []).append((x, final_loss, final_error))
+            continue
+        m = dual_pattern.match(name)
+        if m:
+            model, version, x = m.group(1), m.group(2), int(m.group(3))
+            studies["dual"].setdefault((model, version), []).append((x, final_loss, final_error))
+
+    labels = {"K": "Number of layers K", "dual": "Feature / dual dimension"}
+    for study_name, data in studies.items():
+        if not data:
+            continue
+        for metric_idx, metric_name in [(1, "loss"), (2, "w2_error")]:
+            plt.figure()
+            for (model, version), points in sorted(data.items()):
+                points = sorted(points, key=lambda p: p[0])
+                xs = [p[0] for p in points]
+                ys = [p[metric_idx] for p in points]
+                plt.plot(xs, ys, marker="o", label=f"{model}_{version}")
+            plt.xlabel(labels[study_name])
+            plt.ylabel("Final training loss" if metric_name == "loss" else "Final W2 error")
+            plt.title(f"Impact of {labels[study_name].lower()} on final {metric_name}")
+            plt.legend(fontsize=8)
+            plt.tight_layout()
+            plt.savefig(os.path.join(results_dir, f"study_{study_name}_{metric_name}.png"))
+            plt.close()
 
 
 # ---------------------------------------------------------------------------
@@ -783,18 +1009,36 @@ def build_experiments(device):
 
 def main():
     parser = argparse.ArgumentParser(description="Flow Matching: 2-moons from 8 Gaussians.")
-    parser.add_argument("--epochs",      type=int, default=100)
+    parser.add_argument("--epochs",      type=int, default=50)
     parser.add_argument("--results-dir", type=str, default="results_2moons")
     parser.add_argument("--skip",        type=str, default="")
     parser.add_argument("--only",        type=str, default="")
     parser.add_argument("--batch-size",  type=int, default=BATCH_SIZE)
     parser.add_argument("--seed",        type=int, default=42)
+    parser.add_argument("--device",      type=str, default="",
+                         help="Torch device to use, e.g. 'cuda:0', 'cuda:1', 'cpu'. "
+                              "Defaults to cuda if available, else cpu.")
+    parser.add_argument("--num-shards",  type=int, default=1,
+                         help="Split the experiment list into this many shards "
+                              "(use with --shard-id to run shards in parallel, e.g. on separate GPUs).")
+    parser.add_argument("--shard-id",    type=int, default=0,
+                         help="Index (0-based) of the shard to run, in [0, num_shards).")
+    parser.add_argument("--merge-shards", action="store_true",
+                         help="Merge summary_shard*.txt files in --results-dir into summary.txt "
+                              "and (re)generate the ablation-study plots, then exit.")
     args = parser.parse_args()
+
+    if args.merge_shards:
+        merge_shard_summaries(args.results_dir, args.num_shards)
+        return
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.device:
+        device = torch.device(args.device)
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
     os.makedirs(args.results_dir, exist_ok=True)
@@ -806,19 +1050,40 @@ def main():
     if args.skip:
         experiments = [e for e in experiments if args.skip not in e["name"]]
 
+    if args.num_shards > 1:
+        assert 0 <= args.shard_id < args.num_shards, "--shard-id must be in [0, num_shards)"
+        experiments = experiments[args.shard_id::args.num_shards]
+        print(f"\nShard {args.shard_id}/{args.num_shards} on {device}: "
+              f"{len(experiments)} experiment(s) assigned.")
+
     print(f"\n{len(experiments)} experiment(s) to run.\n")
+    print("List of experiments:")
+    for exp in experiments:
+        print(f"  - {exp['name']}")
 
     summary = []
     for i, exp in enumerate(experiments, 1):
         name = exp["name"]
         print(f"\n[{i}/{len(experiments)}] {name}")
 
-        kwargs  = exp.get("kwargs", {})
-        is_flat = kwargs.pop("is_flat", False)
+        kwargs      = exp.get("kwargs", {})
+        is_flat     = kwargs.pop("is_flat",    False)
+        is_flat_fm  = kwargs.pop("is_flat_fm", False)
 
         try:
             model = exp["build"]()
-            if is_flat:
+            if is_flat_fm:
+                losses, n_params, train_time = train_flat_fm_2moons(
+                    model        = model,
+                    train_loader = train_loader,
+                    device       = device,
+                    results_dir  = args.results_dir,
+                    model_name   = name,
+                    nb_epochs    = args.epochs,
+                    **kwargs
+                )
+                final_error = float("nan")
+            elif is_flat:
                 losses, n_params, train_time = train_flat_2moons(
                     model        = model,
                     train_loader = train_loader,
@@ -828,9 +1093,10 @@ def main():
                     nb_epochs    = args.epochs,
                     **kwargs
                 )
+                final_error = float("nan")
             else:
                 model = exp["build"]()
-                losses, n_params, train_time = train_2moons(
+                losses, n_params, train_time, errors = train_2moons(
                     model        = model,
                     train_loader = train_loader,
                     device       = device,
@@ -839,23 +1105,33 @@ def main():
                     nb_epochs    = args.epochs,
                     **exp.get("kwargs", {}),
                 )
-            summary.append((name, losses[-1], n_params, train_time, "OK"))
+                final_error = errors[-1][1] if errors else float("nan")
+            summary.append((name, losses[-1], final_error, n_params, train_time, "OK"))
         except Exception as exc:
             import traceback; traceback.print_exc()
-            summary.append((name, float("nan"), 0, 0.0, str(exc)))
+            summary.append((name, float("nan"), float("nan"), 0, 0.0, str(exc)))
 
     print("\n" + "=" * 60)
     print("Summary")
     print("=" * 60)
-    for name, final_loss, n_params, train_time, status in summary:
-        print(f"  {name:<40} params={n_params:>8,}  final_loss={final_loss:.4f}  time={train_time:6.0f}s  [{status}]")
+    for name, final_loss, final_error, n_params, train_time, status in summary:
+        print(f"  {name:<40} params={n_params:>8,}  final_loss={final_loss:.4f}  "
+              f"final_w2={final_error:.4f}  time={train_time:6.0f}s  [{status}]")
 
-    summary_path = os.path.join(args.results_dir, "summary.txt")
+    summary_name = "summary.txt" if args.num_shards <= 1 else f"summary_shard{args.shard_id}.txt"
+    summary_path = os.path.join(args.results_dir, summary_name)
     with open(summary_path, "w") as f:
-        f.write("model_name\tn_params\tfinal_loss\ttrain_time_s\tstatus\n")
-        for name, final_loss, n_params, train_time, status in summary:
-            f.write(f"{name}\t{n_params}\t{final_loss:.6f}\t{train_time:.1f}\t{status}\n")
+        f.write("model_name\tn_params\tfinal_loss\tfinal_w2_error\ttrain_time_s\tstatus\n")
+        for name, final_loss, final_error, n_params, train_time, status in summary:
+            f.write(f"{name}\t{n_params}\t{final_loss:.6f}\t{final_error:.6f}\t{train_time:.1f}\t{status}\n")
     print(f"\nSummary saved to: {summary_path}")
+
+    if args.num_shards > 1:
+        print(f"\nThis was shard {args.shard_id}/{args.num_shards} — once all shards have finished, run:\n"
+              f"  python run_2moons.py --merge-shards --results-dir {args.results_dir} --num-shards {args.num_shards}\n"
+              f"to combine the summaries and generate the ablation-study plots.")
+    else:
+        plot_ablation_studies(summary, args.results_dir)
 
 
 if __name__ == "__main__":
