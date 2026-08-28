@@ -1,0 +1,13 @@
+# ConvScCP_UNN image x-pred + baseline SmallUNet, version=LNO coupling=indep epochs=50 batch=128 digit=0 GE_reel=0.2998
+ScCP	K=5	ic=32	params=13250	final_loss=0.323386	std_gen=0.2973	grad_energy=0.3420
+ScCP	K=5	ic=64	params=26370	final_loss=0.292827	std_gen=0.2489	grad_energy=0.2974
+ScCP	K=5	ic=128	params=52610	final_loss=0.269270	std_gen=0.2509	grad_energy=0.3371
+ScCP	K=10	ic=32	params=26500	final_loss=0.278801	std_gen=0.2371	grad_energy=0.2784
+ScCP	K=10	ic=64	params=52740	final_loss=0.277744	std_gen=0.2269	grad_energy=0.3356
+ScCP	K=10	ic=128	params=105220	final_loss=0.306439	std_gen=0.2691	grad_energy=0.3433
+ScCP	K=20	ic=32	params=53000	final_loss=0.315304	std_gen=0.1375	grad_energy=0.1513
+ScCP	K=20	ic=64	params=105480	final_loss=0.278212	std_gen=0.2292	grad_energy=0.2918
+ScCP	K=20	ic=128	params=210440	final_loss=0.282441	std_gen=0.2557	grad_energy=0.3378
+SmallUNet	base_ch=32	params=176705	final_loss=0.308972	std_gen=0.3061	grad_energy=0.4994
+SmallUNet	base_ch=64	params=703617	final_loss=0.308836	std_gen=0.3037	grad_energy=0.4995
+SmallUNet	base_ch=128	params=2808065	final_loss=0.313462	std_gen=0.2853	grad_energy=0.5054

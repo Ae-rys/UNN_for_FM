@@ -1,0 +1,44 @@
+==========================================================================
+A. conv_transpose2d(., W, p) est-il l'adjoint de conv2d(., W, p) ?
+==========================================================================
+  <A x, y>  = -1057.2562082617
+  <x, A* y> = -1057.2562082617
+  ecart relatif = 0.00e+00   -> adjoint exact
+
+==========================================================================
+B/C. L^2 = ||B o A|| : iteration de la puissance vs matrice explicite
+==========================================================================
+cas                          exact   power iter     ecart   reshape LNO
+V independant (LFO)        2.99250      2.99250   3.0e-16       1.52410
+V = W  (LNO)               7.03635      7.03635   1.8e-11       1.97723
+                      ||A||^2 = 7.03635  -> V=W redonne bien ||A||^2
+
+  La colonne 'reshape LNO' est sigma_max_power_iter(W)^2, ce qu'utilise LNO.
+  Elle SOUS-ESTIME le gain de boucle, donc autorise des pas trop grands.
+
+==========================================================================
+D. v3 : la condition tau_k . sigma_k . L^2_k <= 1 tient-elle partout ?
+==========================================================================
+  t=0.05  tau.sigma.L^2 = 0.990000..0.990000 | theta_0=0.9997 | sigma x0.9 sur 8 iter
+  t=0.2   tau.sigma.L^2 = 0.990000..0.990000 | theta_0=0.9936 | sigma x0.9 sur 8 iter
+  t=0.5   tau.sigma.L^2 = 0.990000..0.990000 | theta_0=0.9104 | sigma x1.5 sur 8 iter
+  t=0.8   tau.sigma.L^2 = 0.990000..0.990000 | theta_0=0.4821 | sigma x9.2 sur 8 iter
+  t=0.9   tau.sigma.L^2 = 0.990000..0.990000 | theta_0=0.2375 | sigma x38.7 sur 8 iter
+  t=0.95  tau.sigma.L^2 = 0.990000..0.990000 | theta_0=0.1151 | sigma x154.4 sur 8 iter
+
+  ecart max a cp_safety=0.99 : 2.22e-16  -> condition tenue
+
+==========================================================================
+E. v2 a t = 0.9 (mu = 81) : le defaut que v3 corrige
+==========================================================================
+  mu(0.9) = 81.0,  tau_0 = 0.4741
+   k    tau_k (v2)   sigma_k (v2)   sigma voulu
+   0       0.47408          1.000         1.000
+   1       0.05375          1.000         8.820
+   2       0.01725          1.000        27.481
+   3       0.00886          1.000        53.533
+   4       0.00568          1.000        83.529
+
+  v2 garde sigma = 1 pendant que tau perd un facteur ~50 en 3 iterations :
+  les iterations suivantes ne font presque plus rien. v3 recalcule sigma
+  depuis tau, donc l'accroissement est automatique.

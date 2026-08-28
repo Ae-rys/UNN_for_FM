@@ -1,0 +1,37 @@
+UNet_kamb  : MinimalUNetFM_kamb  step=160,000  poids=ema_model  (2,107,366 params)
+ScCP       : ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO  step=115,000  poids=ema_model  (1,248,661 params)
+
+== 1. ERREUR D'EQUIVARIANCE CYCLIQUE  ||f(roll x) - roll f(x)|| / ||f(x)||
+   (0 = exactement equivariant -> ne peut pas ancrer de position absolue)
+   UNet_kamb  : decalage MULTIPLE DE 8 -> 2.48e-07   decalage quelconque -> 2.06e-01
+   ScCP       : decalage MULTIPLE DE 8 -> 2.67e-01   decalage quelconque -> 2.75e-01
+   -> exactement equivariant sur un sous-groupe = loi generee INVARIANTE sous
+      ce sous-groupe : le modele ne peut pas choisir la position du chat.
+
+== 2. RF EFFECTIF vs t   (R_unif plat = 12.25 px, R_unif cyclique = 12.25 px)
+   UNet_kamb  (tore) : t=0.05: 8.5  t=0.15: 9.7  t=0.30:10.2  t=0.50: 9.5  t=0.70: 8.1  t=0.85: 6.2  t=0.95: 3.1   | moyenne 7.92 px = 65 % de R_unif
+   ScCP       (plan) : t=0.05:10.1  t=0.15: 9.2  t=0.30: 8.6  t=0.50: 7.7  t=0.70: 7.1  t=0.85: 6.5  t=0.95: 6.5   | moyenne 7.97 px = 65 % de R_unif
+
+== 3. GENERATION (memes x0 pour les deux modeles)
+   UNet_kamb : 32 samples, Euler 100 pas
+   ScCP : 32 samples, Euler 100 pas
+
+== 4. PROFIL DE COUTURE
+   (a) rapport pic/mediane de l'energie de bord — NON discriminant, garde
+       comme negatif : une vraie photo de chat a aussi des bords francs.
+   UNet_kamb  : lignes  4.01   colonnes  3.33
+   ScCP       : lignes  4.84   colonnes  3.92
+   AFHQ_reel  : lignes  4.84   colonnes  3.89
+
+   coutures INTERNES (j = 0..30, bord d'image exclu) alignees sur la grille
+   des 3 poolings (j = 7, 15 ou 23, i.e. j = 7 mod 8 ; hasard = 3/31 = 9.7 %) :
+   UNet_kamb  :  62.5 %
+   ScCP       :   4.7 %
+   AFHQ_reel  :   9.4 %
+
+   apres de-enroulement des samples UNet (couture renvoyee sur le bord) :
+   pic/mediane sur les frontieres INTERNES : lignes 1.95   colonnes 1.95
+   position de la couture (colonne) modulo 8, comptes : [0, 1, 1, 3, 2, 0, 0, 25] (indices 0..7)
+   -> concentree sur j = 7 mod 8 : le decalage cyclique est QUANTIFIE au pas de 8 px,
+      exactement le sous-groupe sur lequel le reseau est exactement equivariant.
+

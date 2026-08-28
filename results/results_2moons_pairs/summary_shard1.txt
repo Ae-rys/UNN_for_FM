@@ -1,0 +1,3 @@
+model_name	n_params	final_loss	final_w2_error	train_time_s	status
+DFB_UNN_L1_LFO_K35_dual16	6545	0.109837	0.411717	162.8	OK
+DFB_UNN_L1_LNO_K35_dual16	5390	0.060313	0.280427	201.6	OK

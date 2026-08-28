@@ -1,0 +1,4 @@
+ckpt=results/temp-5/ConvScCP_k3_K6_ic128_L1_LNO/model.pt  P=3 nsub=6000 nseed=8
+median r2(model, IS-FM)  = 0.471
+median r2(model, ELS-FM) = 0.374
+ELS>IS on 2/8 seeds

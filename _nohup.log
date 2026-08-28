@@ -1,0 +1,176 @@
+nohup: ignoring input
+Device: cuda:0  |  dataset: cifar10  |  coupling: ot  |  steps: 400,000
+CIFAR-10 (cache ./data/cifar10_train_rgb.pt) : 50000 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k25_K19_ic512_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k25_K19_ic512_L1_LFO
+Params: 36,491,572 (36.49M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 400,000  |  coupling: ot
+==================================================================
+  step     100/400,000  loss 30.4137  lr 4.04e-06  0.22 it/s  ETA 514.0h
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 43, in <module>
+    from run_cifar10_torchcfm_recipe import RECIPE, build_experiments, train_one
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 89, in <module>
+    from models.architectures import ConvScCP_UNN, MinimalUNetFM, weights_init_kaiming
+  File "/home/ec4036/UNN_for_FM/models/__init__.py", line 1, in <module>
+    from .architectures import (
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2277
+    -# =========================================================================== #
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 43, in <module>
+    from run_cifar10_torchcfm_recipe import RECIPE, build_experiments, train_one
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 89, in <module>
+    from models.architectures import ConvScCP_UNN, MinimalUNetFM, weights_init_kaiming
+  File "/home/ec4036/UNN_for_FM/models/__init__.py", line 1, in <module>
+    from .architectures import (
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2286
+    -# =========================================================================== #
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 109, in main
+    model = exp["build"]()
+            ^^^^^^^^^^^^^^
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 247, in <lambda>
+    build=lambda: ConvScCP_UNN(
+                  ^^^^^^^^^^^^^
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2367, in __init__
+    self.layers = nn.ModuleList([
+                                ^
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2368, in <listcomp>
+    _OrigConvScCP_Iteration(internal_channel=internal_channel,
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2309, in __init__
+    self.in_conv = nn.Conv2d(in_channels=channels, out_channels=features, kernel_size=kernel_size, padding=padding,
+                                         ^^^^^^^^
+NameError: name 'channels' is not defined
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO     params=          0  final_loss=nan  time=  0.0h  [name 'channels' is not defined]
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+Params: 2,121,074 (2.12M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 4.332 GFLOPs
+/home/ec4036/UNN_for_FM/models/architectures.py:2279: FutureWarning: `nn.init.kaiming_normal` is now deprecated in favor of `nn.init.kaiming_normal_`.
+  nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+/home/ec4036/UNN_for_FM/models/architectures.py:2281: FutureWarning: `nn.init.kaiming_normal` is now deprecated in favor of `nn.init.kaiming_normal_`.
+  nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 110, in main
+    final_loss, n_params, dt = train_one(
+                               ^^^^^^^^^^
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 332, in train_one
+    model.apply(weights_init_kaiming)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1075, in apply
+    module.apply(fn)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1075, in apply
+    module.apply(fn)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1075, in apply
+    module.apply(fn)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1076, in apply
+    fn(self)
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2279, in weights_init_kaiming
+    nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+                           ^^^^^^^^
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1967, in __getattr__
+    raise AttributeError(
+AttributeError: 'L1ProxConv' object has no attribute 'weight'
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO     params=          0  final_loss=nan  time=  0.0h  ['L1ProxConv' object has no attribute 'weight']
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+Params: 2,121,074 (2.12M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 4.332 GFLOPs
+/home/ec4036/UNN_for_FM/models/architectures.py:2279: FutureWarning: `nn.init.kaiming_normal` is now deprecated in favor of `nn.init.kaiming_normal_`.
+  nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+/home/ec4036/UNN_for_FM/models/architectures.py:2281: FutureWarning: `nn.init.kaiming_normal` is now deprecated in favor of `nn.init.kaiming_normal_`.
+  nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 110, in main
+    final_loss, n_params, dt = train_one(
+                               ^^^^^^^^^^
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 332, in train_one
+    model.apply(weights_init_kaiming)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1075, in apply
+    module.apply(fn)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1075, in apply
+    module.apply(fn)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1075, in apply
+    module.apply(fn)
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1076, in apply
+    fn(self)
+  File "/home/ec4036/UNN_for_FM/models/architectures.py", line 2279, in weights_init_kaiming
+    nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+                           ^^^^^^^^
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/nn/modules/module.py", line 1967, in __getattr__
+    raise AttributeError(
+AttributeError: 'L1ProxConv' object has no attribute 'weight'
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO     params=          0  final_loss=nan  time=  0.0h  ['L1ProxConv' object has no attribute 'weight']
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K17_ic256_L1_LFO
+Params: 2,121,074 (2.12M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 4.332 GFLOPs
+  step     100/200,000  loss 34.7564  lr 4.04e-06  1.09 it/s  ETA 50.9h

@@ -1,0 +1,4 @@
+model_class=ConvScCP_UNN
+K=20
+dual_dim=256
+version=LNO

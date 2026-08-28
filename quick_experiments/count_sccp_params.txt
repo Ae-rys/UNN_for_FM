@@ -1,0 +1,18 @@
+
+=== dim=2  K=10  dual_dim=32  prox=l1 ===
+  LNO: total=1940   [log_tau=10  time_scaling.0.weight=320  time_scaling.0.bias=320  time_scaling.2.weight=320  time_scaling.2.bias=10  W_weight=640  W_bias=320]
+        formule -> 1940  OK
+  LFO: total=2571   [log_tau0=1  time_scaling.0.weight=320  time_scaling.0.bias=320  time_scaling.2.weight=320  time_scaling.2.bias=10  W_weight=640  V_weight=640  W_bias=320]
+        formule -> 2571  OK
+
+=== dim=2  K=10  dual_dim=64  prox=l1 ===
+  LNO: total=2900   [log_tau=10  time_scaling.0.weight=320  time_scaling.0.bias=320  time_scaling.2.weight=320  time_scaling.2.bias=10  W_weight=1280  W_bias=640]
+        formule -> 2900  OK
+  LFO: total=4171   [log_tau0=1  time_scaling.0.weight=320  time_scaling.0.bias=320  time_scaling.2.weight=320  time_scaling.2.bias=10  W_weight=1280  V_weight=1280  W_bias=640]
+        formule -> 4171  OK
+
+=== dim=2  K=10  dual_dim=128  prox=l1 ===
+  LNO: total=4820   [log_tau=10  time_scaling.0.weight=320  time_scaling.0.bias=320  time_scaling.2.weight=320  time_scaling.2.bias=10  W_weight=2560  W_bias=1280]
+        formule -> 4820  OK
+  LFO: total=7371   [log_tau0=1  time_scaling.0.weight=320  time_scaling.0.bias=320  time_scaling.2.weight=320  time_scaling.2.bias=10  W_weight=2560  V_weight=2560  W_bias=1280]
+        formule -> 7371  OK

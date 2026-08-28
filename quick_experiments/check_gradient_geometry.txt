@@ -1,0 +1,37 @@
+============================================================================
+A. Batchs realistes : t ~ U(0, 0.95), OT, 24 x 128 images, grad_clip=1.0
+============================================================================
+modele                                 loss  |grad| med  |grad| p95  clip mord
+UNet_torchcfm_ch32 (v-pred)          0.1500       0.090       0.123         0%
+ConvScCP k9/K10/ic128 (x-pred)       0.1712       0.153       0.196         0%
+
+loss : identique par construction (meme t, meme quantite). |grad| : norme
+AVANT clipping. « clip mord » = part des steps ou grad_clip la rabote,
+donc ou la DIRECTION est conservee mais l'amplitude perdue.
+
+============================================================================
+B. Norme du gradient a t FIXE (meme batch pour les deux)
+============================================================================
+      t  UNet_torchcfm_ch32 (v-pr  ConvScCP k9/K10/ic128 (x
+   0.05                     0.176                     0.144
+   0.20                     0.112                     0.084
+   0.40                     0.081                     0.079
+   0.60                     0.079                     0.084
+   0.80                     0.109                     0.216
+   0.90                     0.157                     0.638
+   0.95                     0.244                     2.464
+
+Un v-pred a un gradient d'amplitude comparable a tous les t. Un x-pred le
+voit croitre comme 1/(1-t)^2, borne a 400 par t_max : c'est
+la meme loss, mais pas le meme probleme d'optimisation.
+
+============================================================================
+C. Part du gradient du batch portee par les echantillons t > 0.9
+============================================================================
+modele                              % du batch   ||g_queue||/||g||
+UNet_torchcfm_ch32 (v-pred)               5.6%                0.21
+ConvScCP k9/K10/ic128 (x-pred)            5.6%                0.47
+
+Si la queue portait tout, le ratio vaudrait ~1 ; s'il vaut ~ sa part en
+nombre (6 %), aucun regime ne domine.
+

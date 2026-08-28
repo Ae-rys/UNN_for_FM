@@ -1,0 +1,878 @@
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 50,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO
+Params: 10,377,136 (10.38M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 50,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 21.234 GFLOPs
+  step     100/50,000  loss 48.5434  lr 4.04e-06  0.49 it/s  ETA 28.5h
+  step   1,000/50,000  loss 8.4416  lr 4.00e-05  0.43 it/s  ETA 31.9h
+  step   2,000/50,000  loss 0.8098  lr 8.00e-05  0.43 it/s  ETA 30.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 2,500)
+  step   3,000/50,000  loss 0.4150  lr 1.20e-04  0.34 it/s  ETA 38.6h
+  step   4,000/50,000  loss 0.3213  lr 1.60e-04  0.43 it/s  ETA 29.4h
+  step   5,000/50,000  loss 0.2772  lr 2.00e-04  0.43 it/s  ETA 29.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 5,000)
+  step   6,000/50,000  loss 0.2358  lr 2.00e-04  0.37 it/s  ETA 33.1h
+  step   7,000/50,000  loss 0.2040  lr 2.00e-04  0.43 it/s  ETA 27.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 7,500)
+  step   8,000/50,000  loss 0.1877  lr 2.00e-04  0.39 it/s  ETA 29.9h
+  step   9,000/50,000  loss 0.1808  lr 2.00e-04  0.43 it/s  ETA 26.3h
+  step  10,000/50,000  loss 0.1697  lr 2.00e-04  0.44 it/s  ETA 25.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 10,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/ckpt_step_10000.pt
+  step  11,000/50,000  loss 0.1656  lr 2.00e-04  0.43 it/s  ETA 25.1h
+  step  12,000/50,000  loss 0.1607  lr 2.00e-04  0.43 it/s  ETA 24.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 12,500)
+  step  13,000/50,000  loss 0.1583  lr 2.00e-04  0.43 it/s  ETA 23.8h
+  step  14,000/50,000  loss 0.1544  lr 2.00e-04  0.44 it/s  ETA 22.8h
+  step  15,000/50,000  loss 0.1531  lr 2.00e-04  0.44 it/s  ETA 22.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 15,000)
+  step  16,000/50,000  loss 0.1509  lr 2.00e-04  0.43 it/s  ETA 21.8h
+  step  17,000/50,000  loss 0.1487  lr 2.00e-04  0.45 it/s  ETA 20.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 17,500)
+  step  18,000/50,000  loss 0.1472  lr 2.00e-04  0.44 it/s  ETA 20.2h
+  step  19,000/50,000  loss 0.1483  lr 2.00e-04  0.44 it/s  ETA 19.5h
+  step  20,000/50,000  loss 0.1466  lr 2.00e-04  0.44 it/s  ETA 18.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 20,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/ckpt_step_20000.pt
+  step  21,000/50,000  loss 0.1461  lr 2.00e-04  0.44 it/s  ETA 18.3h
+  step  22,000/50,000  loss 0.1438  lr 2.00e-04  0.44 it/s  ETA 17.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 22,500)
+  step  23,000/50,000  loss 0.1428  lr 2.00e-04  0.44 it/s  ETA 17.0h
+  step  24,000/50,000  loss 0.1423  lr 2.00e-04  0.44 it/s  ETA 16.3h
+  step  25,000/50,000  loss 0.1443  lr 2.00e-04  0.44 it/s  ETA 15.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 25,000)
+  step  26,000/50,000  loss 0.1421  lr 2.00e-04  0.44 it/s  ETA 15.2h
+  step  27,000/50,000  loss 0.1410  lr 2.00e-04  0.43 it/s  ETA 14.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 27,500)
+  step  28,000/50,000  loss 0.1404  lr 2.00e-04  0.44 it/s  ETA 14.0h
+  step  29,000/50,000  loss 0.1402  lr 2.00e-04  0.43 it/s  ETA 13.5h
+  step  30,000/50,000  loss 0.1392  lr 2.00e-04  0.43 it/s  ETA 12.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 30,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/ckpt_step_30000.pt
+  step  31,000/50,000  loss 0.1389  lr 2.00e-04  0.43 it/s  ETA 12.4h
+  step  32,000/50,000  loss 0.1382  lr 2.00e-04  0.43 it/s  ETA 11.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 32,500)
+  step  33,000/50,000  loss 0.1380  lr 2.00e-04  0.42 it/s  ETA 11.1h
+  step  34,000/50,000  loss 0.1371  lr 2.00e-04  0.43 it/s  ETA 10.4h
+  step  35,000/50,000  loss 0.1369  lr 2.00e-04  0.43 it/s  ETA 9.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 35,000)
+  step  36,000/50,000  loss 0.1373  lr 2.00e-04  0.42 it/s  ETA 9.2h
+  step  37,000/50,000  loss 0.1368  lr 2.00e-04  0.43 it/s  ETA 8.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 37,500)
+  step  38,000/50,000  loss 0.1361  lr 2.00e-04  0.43 it/s  ETA 7.8h
+  step  39,000/50,000  loss 0.1361  lr 2.00e-04  0.43 it/s  ETA 7.2h
+  step  40,000/50,000  loss 0.1359  lr 2.00e-04  0.43 it/s  ETA 6.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 40,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/ckpt_step_40000.pt
+  step  41,000/50,000  loss 0.1356  lr 2.00e-04  0.43 it/s  ETA 5.9h
+  step  42,000/50,000  loss 0.1351  lr 2.00e-04  0.43 it/s  ETA 5.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 42,500)
+  step  43,000/50,000  loss 0.1352  lr 2.00e-04  0.43 it/s  ETA 4.6h
+  step  44,000/50,000  loss 0.1348  lr 2.00e-04  0.43 it/s  ETA 3.9h
+  step  45,000/50,000  loss 0.1346  lr 2.00e-04  0.43 it/s  ETA 3.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 45,000)
+  step  46,000/50,000  loss 0.1346  lr 2.00e-04  0.43 it/s  ETA 2.6h
+  step  47,000/50,000  loss 0.1345  lr 2.00e-04  0.43 it/s  ETA 1.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 47,500)
+  step  48,000/50,000  loss 0.1347  lr 2.00e-04  0.43 it/s  ETA 1.3h
+  step  49,000/50,000  loss 0.1341  lr 2.00e-04  0.44 it/s  ETA 0.6h
+  step  50,000/50,000  loss 0.1338  lr 2.00e-04  0.43 it/s  ETA 0.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/latest.pt (step 50,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO/ckpt_step_50000.pt
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k15_K15_ic512_L1_LFO    params= 10,377,136  final_loss=0.1338  time= 32.4h  [OK]
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 100,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO
+Params: 624,331 (0.62M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 100,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 1.274 GFLOPs
+  step     100/100,000  loss 15.5769  lr 4.04e-06  5.56 it/s  ETA 5.0h
+  step   1,000/100,000  loss 3.5493  lr 4.00e-05  5.24 it/s  ETA 5.2h
+  step   2,000/100,000  loss 0.4752  lr 8.00e-05  5.09 it/s  ETA 5.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 2,500)
+  step   3,000/100,000  loss 0.3305  lr 1.20e-04  4.98 it/s  ETA 5.4h
+  step   4,000/100,000  loss 0.2727  lr 1.60e-04  5.10 it/s  ETA 5.2h
+  step   5,000/100,000  loss 0.2342  lr 2.00e-04  5.11 it/s  ETA 5.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 5,000)
+  step   6,000/100,000  loss 0.2068  lr 2.00e-04  4.92 it/s  ETA 5.3h
+  step   7,000/100,000  loss 0.1910  lr 2.00e-04  5.11 it/s  ETA 5.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 7,500)
+  step   8,000/100,000  loss 0.1804  lr 2.00e-04  4.96 it/s  ETA 5.2h
+  step   9,000/100,000  loss 0.1735  lr 2.00e-04  5.11 it/s  ETA 4.9h
+  step  10,000/100,000  loss 0.1683  lr 2.00e-04  5.10 it/s  ETA 4.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 10,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_10000.pt
+  step  11,000/100,000  loss 0.1645  lr 2.00e-04  4.96 it/s  ETA 5.0h
+  step  12,000/100,000  loss 0.1609  lr 2.00e-04  5.10 it/s  ETA 4.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 12,500)
+  step  13,000/100,000  loss 0.1581  lr 2.00e-04  5.04 it/s  ETA 4.8h
+  step  14,000/100,000  loss 0.1568  lr 2.00e-04  5.11 it/s  ETA 4.7h
+  step  15,000/100,000  loss 0.1545  lr 2.00e-04  5.12 it/s  ETA 4.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 15,000)
+  step  16,000/100,000  loss 0.1533  lr 2.00e-04  5.04 it/s  ETA 4.6h
+  step  17,000/100,000  loss 0.1519  lr 2.00e-04  5.14 it/s  ETA 4.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 17,500)
+  step  18,000/100,000  loss 0.1505  lr 2.00e-04  5.06 it/s  ETA 4.5h
+  step  19,000/100,000  loss 0.1501  lr 2.00e-04  5.14 it/s  ETA 4.4h
+  step  20,000/100,000  loss 0.1488  lr 2.00e-04  5.14 it/s  ETA 4.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 20,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_20000.pt
+  step  21,000/100,000  loss 0.1483  lr 2.00e-04  5.06 it/s  ETA 4.3h
+  step  22,000/100,000  loss 0.1474  lr 2.00e-04  5.14 it/s  ETA 4.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 22,500)
+  step  23,000/100,000  loss 0.1467  lr 2.00e-04  5.11 it/s  ETA 4.2h
+  step  24,000/100,000  loss 0.1459  lr 2.00e-04  5.12 it/s  ETA 4.1h
+  step  25,000/100,000  loss 0.1454  lr 2.00e-04  5.10 it/s  ETA 4.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 25,000)
+  step  26,000/100,000  loss 0.1452  lr 2.00e-04  5.10 it/s  ETA 4.0h
+  step  27,000/100,000  loss 0.1447  lr 2.00e-04  5.10 it/s  ETA 4.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 27,500)
+  step  28,000/100,000  loss 0.1442  lr 2.00e-04  5.08 it/s  ETA 3.9h
+  step  29,000/100,000  loss 0.1436  lr 2.00e-04  5.11 it/s  ETA 3.9h
+  step  30,000/100,000  loss 0.1431  lr 2.00e-04  5.12 it/s  ETA 3.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 30,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_30000.pt
+  step  31,000/100,000  loss 0.1429  lr 2.00e-04  5.05 it/s  ETA 3.8h
+  step  32,000/100,000  loss 0.1425  lr 2.00e-04  5.08 it/s  ETA 3.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 32,500)
+  step  33,000/100,000  loss 0.1422  lr 2.00e-04  5.08 it/s  ETA 3.7h
+  step  34,000/100,000  loss 0.1421  lr 2.00e-04  5.11 it/s  ETA 3.6h
+  step  35,000/100,000  loss 0.1415  lr 2.00e-04  5.12 it/s  ETA 3.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 35,000)
+  step  36,000/100,000  loss 0.1411  lr 2.00e-04  5.10 it/s  ETA 3.5h
+  step  37,000/100,000  loss 0.1406  lr 2.00e-04  5.12 it/s  ETA 3.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 37,500)
+  step  38,000/100,000  loss 0.1405  lr 2.00e-04  5.12 it/s  ETA 3.4h
+  step  39,000/100,000  loss 0.1402  lr 2.00e-04  5.14 it/s  ETA 3.3h
+  step  40,000/100,000  loss 0.1399  lr 2.00e-04  5.14 it/s  ETA 3.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 40,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_40000.pt
+  step  41,000/100,000  loss 0.1397  lr 2.00e-04  5.12 it/s  ETA 3.2h
+  step  42,000/100,000  loss 0.1394  lr 2.00e-04  5.13 it/s  ETA 3.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 42,500)
+  step  43,000/100,000  loss 0.1394  lr 2.00e-04  5.09 it/s  ETA 3.1h
+  step  44,000/100,000  loss 0.1393  lr 2.00e-04  5.10 it/s  ETA 3.0h
+  step  45,000/100,000  loss 0.1388  lr 2.00e-04  5.11 it/s  ETA 3.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 45,000)
+  step  46,000/100,000  loss 0.1387  lr 2.00e-04  5.08 it/s  ETA 3.0h
+  step  47,000/100,000  loss 0.1384  lr 2.00e-04  5.10 it/s  ETA 2.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 47,500)
+  step  48,000/100,000  loss 0.1382  lr 2.00e-04  5.10 it/s  ETA 2.8h
+  step  49,000/100,000  loss 0.1380  lr 2.00e-04  5.11 it/s  ETA 2.8h
+  step  50,000/100,000  loss 0.1379  lr 2.00e-04  5.11 it/s  ETA 2.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 50,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_50000.pt
+  step  51,000/100,000  loss 0.1377  lr 2.00e-04  5.09 it/s  ETA 2.7h
+  step  52,000/100,000  loss 0.1374  lr 2.00e-04  5.07 it/s  ETA 2.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 52,500)
+  step  53,000/100,000  loss 0.1372  lr 2.00e-04  5.06 it/s  ETA 2.6h
+  step  54,000/100,000  loss 0.1371  lr 2.00e-04  5.11 it/s  ETA 2.5h
+  step  55,000/100,000  loss 0.1370  lr 2.00e-04  5.11 it/s  ETA 2.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 55,000)
+  step  56,000/100,000  loss 0.1372  lr 2.00e-04  5.09 it/s  ETA 2.4h
+  step  57,000/100,000  loss 0.1369  lr 2.00e-04  5.11 it/s  ETA 2.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 57,500)
+  step  58,000/100,000  loss 0.1367  lr 2.00e-04  5.10 it/s  ETA 2.3h
+  step  59,000/100,000  loss 0.1366  lr 2.00e-04  5.14 it/s  ETA 2.2h
+  step  60,000/100,000  loss 0.1366  lr 2.00e-04  5.14 it/s  ETA 2.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 60,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_60000.pt
+  step  61,000/100,000  loss 0.1366  lr 2.00e-04  5.12 it/s  ETA 2.1h
+  step  62,000/100,000  loss 0.1362  lr 2.00e-04  5.13 it/s  ETA 2.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 62,500)
+  step  63,000/100,000  loss 0.1360  lr 2.00e-04  5.12 it/s  ETA 2.0h
+  step  64,000/100,000  loss 0.1360  lr 2.00e-04  5.11 it/s  ETA 2.0h
+  step  65,000/100,000  loss 0.1360  lr 2.00e-04  5.11 it/s  ETA 1.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 65,000)
+  step  66,000/100,000  loss 0.1359  lr 2.00e-04  5.09 it/s  ETA 1.9h
+  step  67,000/100,000  loss 0.1358  lr 2.00e-04  5.11 it/s  ETA 1.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 67,500)
+  step  68,000/100,000  loss 0.1354  lr 2.00e-04  5.09 it/s  ETA 1.7h
+  step  69,000/100,000  loss 0.1357  lr 2.00e-04  5.10 it/s  ETA 1.7h
+  step  70,000/100,000  loss 0.1354  lr 2.00e-04  5.11 it/s  ETA 1.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 70,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_70000.pt
+  step  71,000/100,000  loss 0.1356  lr 2.00e-04  5.09 it/s  ETA 1.6h
+  step  72,000/100,000  loss 0.1352  lr 2.00e-04  5.08 it/s  ETA 1.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 72,500)
+  step  73,000/100,000  loss 0.1352  lr 2.00e-04  5.04 it/s  ETA 1.5h
+  step  74,000/100,000  loss 0.1353  lr 2.00e-04  5.10 it/s  ETA 1.4h
+  step  75,000/100,000  loss 0.1350  lr 2.00e-04  5.11 it/s  ETA 1.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 75,000)
+  step  76,000/100,000  loss 0.1350  lr 2.00e-04  5.07 it/s  ETA 1.3h
+  step  77,000/100,000  loss 0.1348  lr 2.00e-04  5.11 it/s  ETA 1.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 77,500)
+  step  78,000/100,000  loss 0.1348  lr 2.00e-04  5.09 it/s  ETA 1.2h
+  step  79,000/100,000  loss 0.1346  lr 2.00e-04  5.13 it/s  ETA 1.1h
+  step  80,000/100,000  loss 0.1344  lr 2.00e-04  5.14 it/s  ETA 1.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 80,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_80000.pt
+  step  81,000/100,000  loss 0.1346  lr 2.00e-04  5.13 it/s  ETA 1.0h
+  step  82,000/100,000  loss 0.1343  lr 2.00e-04  5.14 it/s  ETA 1.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 82,500)
+  step  83,000/100,000  loss 0.1342  lr 2.00e-04  5.12 it/s  ETA 0.9h
+  step  84,000/100,000  loss 0.1343  lr 2.00e-04  5.13 it/s  ETA 0.9h
+  step  85,000/100,000  loss 0.1343  lr 2.00e-04  5.13 it/s  ETA 0.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 85,000)
+  step  86,000/100,000  loss 0.1343  lr 2.00e-04  5.09 it/s  ETA 0.8h
+  step  87,000/100,000  loss 0.1341  lr 2.00e-04  5.11 it/s  ETA 0.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 87,500)
+  step  88,000/100,000  loss 0.1341  lr 2.00e-04  5.09 it/s  ETA 0.7h
+  step  89,000/100,000  loss 0.1342  lr 2.00e-04  5.10 it/s  ETA 0.6h
+  step  90,000/100,000  loss 0.1340  lr 2.00e-04  5.10 it/s  ETA 0.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 90,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_90000.pt
+  step  91,000/100,000  loss 0.1340  lr 2.00e-04  5.08 it/s  ETA 0.5h
+  step  92,000/100,000  loss 0.1336  lr 2.00e-04  5.10 it/s  ETA 0.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 92,500)
+  step  93,000/100,000  loss 0.1338  lr 2.00e-04  5.07 it/s  ETA 0.4h
+  step  94,000/100,000  loss 0.1339  lr 2.00e-04  5.07 it/s  ETA 0.3h
+  step  95,000/100,000  loss 0.1338  lr 2.00e-04  5.08 it/s  ETA 0.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 95,000)
+  step  96,000/100,000  loss 0.1338  lr 2.00e-04  5.08 it/s  ETA 0.2h
+  step  97,000/100,000  loss 0.1334  lr 2.00e-04  5.12 it/s  ETA 0.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 97,500)
+  step  98,000/100,000  loss 0.1334  lr 2.00e-04  5.09 it/s  ETA 0.1h
+  step  99,000/100,000  loss 0.1335  lr 2.00e-04  5.11 it/s  ETA 0.1h
+  step 100,000/100,000  loss 0.1334  lr 2.00e-04  5.12 it/s  ETA 0.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 100,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_100000.pt
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO     params=    624,331  final_loss=0.1334  time=  5.4h  [OK]
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO
+Params: 624,331 (0.62M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 1.274 GFLOPs
+    reprise depuis results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt au step 100,000 (5.45h d'entrainement deja cumulees)
+  step 101,000/200,000  loss 0.1336  lr 2.00e-04  4.58 it/s  ETA 6.0h
+  step 102,000/200,000  loss 0.1333  lr 2.00e-04  5.07 it/s  ETA 5.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 102,500)
+  step 103,000/200,000  loss 0.1332  lr 2.00e-04  5.05 it/s  ETA 5.3h
+  step 104,000/200,000  loss 0.1330  lr 2.00e-04  4.90 it/s  ETA 5.4h
+  step 105,000/200,000  loss 0.1331  lr 2.00e-04  5.06 it/s  ETA 5.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 105,000)
+  step 106,000/200,000  loss 0.1331  lr 2.00e-04  5.08 it/s  ETA 5.1h
+  step 107,000/200,000  loss 0.1330  lr 2.00e-04  5.06 it/s  ETA 5.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 107,500)
+  step 108,000/200,000  loss 0.1328  lr 2.00e-04  5.06 it/s  ETA 5.1h
+  step 109,000/200,000  loss 0.1330  lr 2.00e-04  5.06 it/s  ETA 5.0h
+  step 110,000/200,000  loss 0.1330  lr 2.00e-04  5.05 it/s  ETA 5.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 110,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_110000.pt
+  step 111,000/200,000  loss 0.1330  lr 2.00e-04  5.04 it/s  ETA 4.9h
+  step 112,000/200,000  loss 0.1329  lr 2.00e-04  5.06 it/s  ETA 4.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 112,500)
+  step 113,000/200,000  loss 0.1326  lr 2.00e-04  5.03 it/s  ETA 4.8h
+  step 114,000/200,000  loss 0.1325  lr 2.00e-04  5.06 it/s  ETA 4.7h
+  step 115,000/200,000  loss 0.1328  lr 2.00e-04  5.05 it/s  ETA 4.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 115,000)
+  step 116,000/200,000  loss 0.1326  lr 2.00e-04  5.03 it/s  ETA 4.6h
+  step 117,000/200,000  loss 0.1326  lr 2.00e-04  5.03 it/s  ETA 4.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 117,500)
+  step 118,000/200,000  loss 0.1326  lr 2.00e-04  5.04 it/s  ETA 4.5h
+  step 119,000/200,000  loss 0.1327  lr 2.00e-04  5.06 it/s  ETA 4.4h
+  step 120,000/200,000  loss 0.1324  lr 2.00e-04  5.05 it/s  ETA 4.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 120,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_120000.pt
+  step 121,000/200,000  loss 0.1324  lr 2.00e-04  5.03 it/s  ETA 4.4h
+  step 122,000/200,000  loss 0.1321  lr 2.00e-04  5.06 it/s  ETA 4.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 122,500)
+  step 123,000/200,000  loss 0.1324  lr 2.00e-04  5.04 it/s  ETA 4.2h
+  step 124,000/200,000  loss 0.1324  lr 2.00e-04  5.06 it/s  ETA 4.2h
+  step 125,000/200,000  loss 0.1324  lr 2.00e-04  5.05 it/s  ETA 4.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 125,000)
+  step 126,000/200,000  loss 0.1322  lr 2.00e-04  5.05 it/s  ETA 4.1h
+  step 127,000/200,000  loss 0.1324  lr 2.00e-04  5.05 it/s  ETA 4.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 127,500)
+  step 128,000/200,000  loss 0.1321  lr 2.00e-04  5.05 it/s  ETA 4.0h
+  step 129,000/200,000  loss 0.1323  lr 2.00e-04  5.05 it/s  ETA 3.9h
+  step 130,000/200,000  loss 0.1322  lr 2.00e-04  5.07 it/s  ETA 3.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 130,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_130000.pt
+  step 131,000/200,000  loss 0.1320  lr 2.00e-04  5.03 it/s  ETA 3.8h
+  step 132,000/200,000  loss 0.1320  lr 2.00e-04  5.06 it/s  ETA 3.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 132,500)
+  step 133,000/200,000  loss 0.1318  lr 2.00e-04  5.05 it/s  ETA 3.7h
+  step 134,000/200,000  loss 0.1323  lr 2.00e-04  5.06 it/s  ETA 3.6h
+  step 135,000/200,000  loss 0.1319  lr 2.00e-04  5.07 it/s  ETA 3.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 135,000)
+  step 136,000/200,000  loss 0.1319  lr 2.00e-04  5.04 it/s  ETA 3.5h
+  step 137,000/200,000  loss 0.1321  lr 2.00e-04  5.07 it/s  ETA 3.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 137,500)
+  step 138,000/200,000  loss 0.1318  lr 2.00e-04  5.05 it/s  ETA 3.4h
+  step 139,000/200,000  loss 0.1318  lr 2.00e-04  5.04 it/s  ETA 3.4h
+  step 140,000/200,000  loss 0.1319  lr 2.00e-04  5.06 it/s  ETA 3.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 140,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_140000.pt
+  step 141,000/200,000  loss 0.1321  lr 2.00e-04  5.05 it/s  ETA 3.2h
+  step 142,000/200,000  loss 0.1318  lr 2.00e-04  5.06 it/s  ETA 3.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 142,500)
+  step 143,000/200,000  loss 0.1316  lr 2.00e-04  5.05 it/s  ETA 3.1h
+  step 144,000/200,000  loss 0.1316  lr 2.00e-04  5.08 it/s  ETA 3.1h
+  step 145,000/200,000  loss 0.1320  lr 2.00e-04  5.09 it/s  ETA 3.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 145,000)
+  step 146,000/200,000  loss 0.1318  lr 2.00e-04  5.04 it/s  ETA 3.0h
+  step 147,000/200,000  loss 0.1317  lr 2.00e-04  5.06 it/s  ETA 2.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 147,500)
+  step 148,000/200,000  loss 0.1316  lr 2.00e-04  5.06 it/s  ETA 2.9h
+  step 149,000/200,000  loss 0.1316  lr 2.00e-04  5.07 it/s  ETA 2.8h
+  step 150,000/200,000  loss 0.1316  lr 2.00e-04  5.07 it/s  ETA 2.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 150,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_150000.pt
+  step 151,000/200,000  loss 0.1315  lr 2.00e-04  5.04 it/s  ETA 2.7h
+  step 152,000/200,000  loss 0.1314  lr 2.00e-04  5.07 it/s  ETA 2.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 152,500)
+  step 153,000/200,000  loss 0.1314  lr 2.00e-04  5.04 it/s  ETA 2.6h
+  step 154,000/200,000  loss 0.1314  lr 2.00e-04  5.06 it/s  ETA 2.5h
+  step 155,000/200,000  loss 0.1316  lr 2.00e-04  5.07 it/s  ETA 2.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 155,000)
+  step 156,000/200,000  loss 0.1315  lr 2.00e-04  5.06 it/s  ETA 2.4h
+  step 157,000/200,000  loss 0.1314  lr 2.00e-04  5.06 it/s  ETA 2.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 157,500)
+  step 158,000/200,000  loss 0.1313  lr 2.00e-04  5.05 it/s  ETA 2.3h
+  step 159,000/200,000  loss 0.1313  lr 2.00e-04  5.06 it/s  ETA 2.2h
+  step 160,000/200,000  loss 0.1314  lr 2.00e-04  5.05 it/s  ETA 2.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 160,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_160000.pt
+  step 161,000/200,000  loss 0.1315  lr 2.00e-04  5.05 it/s  ETA 2.1h
+  step 162,000/200,000  loss 0.1311  lr 2.00e-04  5.05 it/s  ETA 2.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 162,500)
+  step 163,000/200,000  loss 0.1311  lr 2.00e-04  5.04 it/s  ETA 2.0h
+  step 164,000/200,000  loss 0.1311  lr 2.00e-04  5.06 it/s  ETA 2.0h
+  step 165,000/200,000  loss 0.1312  lr 2.00e-04  5.07 it/s  ETA 1.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 165,000)
+  step 166,000/200,000  loss 0.1312  lr 2.00e-04  5.05 it/s  ETA 1.9h
+  step 167,000/200,000  loss 0.1310  lr 2.00e-04  5.06 it/s  ETA 1.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 167,500)
+  step 168,000/200,000  loss 0.1310  lr 2.00e-04  5.03 it/s  ETA 1.8h
+  step 169,000/200,000  loss 0.1310  lr 2.00e-04  5.06 it/s  ETA 1.7h
+  step 170,000/200,000  loss 0.1309  lr 2.00e-04  5.08 it/s  ETA 1.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 170,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_170000.pt
+  step 171,000/200,000  loss 0.1313  lr 2.00e-04  5.06 it/s  ETA 1.6h
+  step 172,000/200,000  loss 0.1311  lr 2.00e-04  5.06 it/s  ETA 1.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 172,500)
+  step 173,000/200,000  loss 0.1308  lr 2.00e-04  5.05 it/s  ETA 1.5h
+  step 174,000/200,000  loss 0.1309  lr 2.00e-04  5.07 it/s  ETA 1.4h
+  step 175,000/200,000  loss 0.1309  lr 2.00e-04  5.07 it/s  ETA 1.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 175,000)
+  step 176,000/200,000  loss 0.1309  lr 2.00e-04  5.06 it/s  ETA 1.3h
+  step 177,000/200,000  loss 0.1309  lr 2.00e-04  5.07 it/s  ETA 1.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 177,500)
+  step 178,000/200,000  loss 0.1308  lr 2.00e-04  5.05 it/s  ETA 1.2h
+  step 179,000/200,000  loss 0.1309  lr 2.00e-04  5.06 it/s  ETA 1.2h
+  step 180,000/200,000  loss 0.1309  lr 2.00e-04  5.06 it/s  ETA 1.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 180,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_180000.pt
+  step 181,000/200,000  loss 0.1310  lr 2.00e-04  5.05 it/s  ETA 1.0h
+  step 182,000/200,000  loss 0.1306  lr 2.00e-04  5.06 it/s  ETA 1.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 182,500)
+  step 183,000/200,000  loss 0.1309  lr 2.00e-04  5.04 it/s  ETA 0.9h
+  step 184,000/200,000  loss 0.1306  lr 2.00e-04  5.07 it/s  ETA 0.9h
+  step 185,000/200,000  loss 0.1307  lr 2.00e-04  5.07 it/s  ETA 0.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 185,000)
+  step 186,000/200,000  loss 0.1306  lr 2.00e-04  5.05 it/s  ETA 0.8h
+  step 187,000/200,000  loss 0.1304  lr 2.00e-04  5.07 it/s  ETA 0.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 187,500)
+  step 188,000/200,000  loss 0.1307  lr 2.00e-04  5.06 it/s  ETA 0.7h
+  step 189,000/200,000  loss 0.1307  lr 2.00e-04  5.06 it/s  ETA 0.6h
+  step 190,000/200,000  loss 0.1305  lr 2.00e-04  5.07 it/s  ETA 0.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 190,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_190000.pt
+  step 191,000/200,000  loss 0.1305  lr 2.00e-04  5.05 it/s  ETA 0.5h
+  step 192,000/200,000  loss 0.1308  lr 2.00e-04  5.08 it/s  ETA 0.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 192,500)
+  step 193,000/200,000  loss 0.1304  lr 2.00e-04  5.05 it/s  ETA 0.4h
+  step 194,000/200,000  loss 0.1305  lr 2.00e-04  5.08 it/s  ETA 0.3h
+  step 195,000/200,000  loss 0.1304  lr 2.00e-04  5.07 it/s  ETA 0.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 195,000)
+  step 196,000/200,000  loss 0.1306  lr 2.00e-04  5.07 it/s  ETA 0.2h
+  step 197,000/200,000  loss 0.1304  lr 2.00e-04  5.06 it/s  ETA 0.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 197,500)
+  step 198,000/200,000  loss 0.1305  lr 2.00e-04  5.06 it/s  ETA 0.1h
+  step 199,000/200,000  loss 0.1304  lr 2.00e-04  5.07 it/s  ETA 0.1h
+  step 200,000/200,000  loss 0.1305  lr 2.00e-04  5.07 it/s  ETA 0.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt (step 200,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/ckpt_step_200000.pt
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO     params=    624,331  final_loss=0.1305  time= 11.0h  [OK]
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+Params: 1,248,661 (1.25M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 2.548 GFLOPs
+  step     100/200,000  loss 9.6012  lr 4.04e-06  2.51 it/s  ETA 22.2h
+  step   1,000/200,000  loss 2.3741  lr 4.00e-05  2.49 it/s  ETA 22.2h
+  step   2,000/200,000  loss 0.4143  lr 8.00e-05  2.53 it/s  ETA 21.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 2,500)
+  step   3,000/200,000  loss 0.2615  lr 1.20e-04  2.46 it/s  ETA 22.3h
+  step   4,000/200,000  loss 0.2154  lr 1.60e-04  2.53 it/s  ETA 21.5h
+  step   5,000/200,000  loss 0.1939  lr 2.00e-04  2.54 it/s  ETA 21.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 5,000)
+  step   6,000/200,000  loss 0.1816  lr 2.00e-04  2.42 it/s  ETA 22.3h
+  step   7,000/200,000  loss 0.1737  lr 2.00e-04  2.53 it/s  ETA 21.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 7,500)
+  step   8,000/200,000  loss 0.1690  lr 2.00e-04  2.48 it/s  ETA 21.5h
+  step   9,000/200,000  loss 0.1654  lr 2.00e-04  2.54 it/s  ETA 20.9h
+  step  10,000/200,000  loss 0.1620  lr 2.00e-04  2.55 it/s  ETA 20.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 10,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_10000.pt
+  step  11,000/200,000  loss 0.1597  lr 2.00e-04  2.51 it/s  ETA 21.0h
+  step  12,000/200,000  loss 0.1571  lr 2.00e-04  2.54 it/s  ETA 20.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 12,500)
+  step  13,000/200,000  loss 0.1549  lr 2.00e-04  2.51 it/s  ETA 20.7h
+  step  14,000/200,000  loss 0.1534  lr 2.00e-04  2.43 it/s  ETA 21.3h
+  step  15,000/200,000  loss 0.1518  lr 2.00e-04  2.11 it/s  ETA 24.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 15,000)
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K20_ic32_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K20_ic32_L1_LFO
+Params: 313,621 (0.31M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 637.012 MFLOPs
+  step     100/200,000  loss 3.1313  lr 4.04e-06  3.23 it/s  ETA 17.2h
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+Params: 1,248,661 (1.25M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 2.548 GFLOPs
+    reprise depuis results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt au step 15,000 (1.69h d'entrainement deja cumulees)
+  step  16,000/200,000  loss 0.1503  lr 2.00e-04  1.14 it/s  ETA 44.9h
+  step  17,000/200,000  loss 0.1492  lr 2.00e-04  1.14 it/s  ETA 44.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 17,500)
+  step  18,000/200,000  loss 0.1480  lr 2.00e-04  1.13 it/s  ETA 44.7h
+  step  19,000/200,000  loss 0.1470  lr 2.00e-04  0.93 it/s  ETA 53.8h
+  step  20,000/200,000  loss 0.1460  lr 2.00e-04  1.13 it/s  ETA 44.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 20,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_20000.pt
+  step  21,000/200,000  loss 0.1452  lr 2.00e-04  1.13 it/s  ETA 43.9h
+  step  22,000/200,000  loss 0.1443  lr 2.00e-04  1.13 it/s  ETA 43.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 22,500)
+  step  23,000/200,000  loss 0.1436  lr 2.00e-04  1.13 it/s  ETA 43.5h
+  step  24,000/200,000  loss 0.1428  lr 2.00e-04  1.13 it/s  ETA 43.2h
+  step  25,000/200,000  loss 0.1422  lr 2.00e-04  1.14 it/s  ETA 42.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 25,000)
+  step  26,000/200,000  loss 0.1415  lr 2.00e-04  1.14 it/s  ETA 42.5h
+  step  27,000/200,000  loss 0.1407  lr 2.00e-04  1.14 it/s  ETA 42.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 27,500)
+  step  28,000/200,000  loss 0.1401  lr 2.00e-04  1.13 it/s  ETA 42.2h
+  step  29,000/200,000  loss 0.1397  lr 2.00e-04  1.13 it/s  ETA 42.0h
+  step  30,000/200,000  loss 0.1392  lr 2.00e-04  2.28 it/s  ETA 20.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 30,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_30000.pt
+  step  31,000/200,000  loss 0.1391  lr 2.00e-04  2.53 it/s  ETA 18.5h
+  step  32,000/200,000  loss 0.1385  lr 2.00e-04  2.54 it/s  ETA 18.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 32,500)
+  step  33,000/200,000  loss 0.1380  lr 2.00e-04  2.52 it/s  ETA 18.4h
+  step  34,000/200,000  loss 0.1378  lr 2.00e-04  2.55 it/s  ETA 18.1h
+  step  35,000/200,000  loss 0.1372  lr 2.00e-04  2.54 it/s  ETA 18.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 35,000)
+  step  36,000/200,000  loss 0.1371  lr 2.00e-04  2.53 it/s  ETA 18.0h
+  step  37,000/200,000  loss 0.1368  lr 2.00e-04  2.54 it/s  ETA 17.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 37,500)
+  step  38,000/200,000  loss 0.1362  lr 2.00e-04  2.49 it/s  ETA 18.1h
+  step  39,000/200,000  loss 0.1363  lr 2.00e-04  2.51 it/s  ETA 17.8h
+  step  40,000/200,000  loss 0.1358  lr 2.00e-04  2.53 it/s  ETA 17.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 40,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_40000.pt
+  step  41,000/200,000  loss 0.1358  lr 2.00e-04  2.53 it/s  ETA 17.5h
+  step  42,000/200,000  loss 0.1355  lr 2.00e-04  2.55 it/s  ETA 17.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 42,500)
+  step  43,000/200,000  loss 0.1351  lr 2.00e-04  2.54 it/s  ETA 17.2h
+  step  44,000/200,000  loss 0.1350  lr 2.00e-04  2.54 it/s  ETA 17.0h
+  step  45,000/200,000  loss 0.1347  lr 2.00e-04  2.54 it/s  ETA 16.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 45,000)
+  step  46,000/200,000  loss 0.1349  lr 2.00e-04  2.54 it/s  ETA 16.8h
+  step  47,000/200,000  loss 0.1345  lr 2.00e-04  2.55 it/s  ETA 16.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 47,500)
+  step  48,000/200,000  loss 0.1341  lr 2.00e-04  2.51 it/s  ETA 16.8h
+  step  49,000/200,000  loss 0.1341  lr 2.00e-04  2.53 it/s  ETA 16.6h
+  step  50,000/200,000  loss 0.1338  lr 2.00e-04  2.53 it/s  ETA 16.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 50,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_50000.pt
+  step  51,000/200,000  loss 0.1337  lr 2.00e-04  2.53 it/s  ETA 16.3h
+  step  52,000/200,000  loss 0.1336  lr 2.00e-04  2.56 it/s  ETA 16.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 52,500)
+  step  53,000/200,000  loss 0.1335  lr 2.00e-04  2.54 it/s  ETA 16.1h
+  step  54,000/200,000  loss 0.1332  lr 2.00e-04  2.53 it/s  ETA 16.0h
+  step  55,000/200,000  loss 0.1331  lr 2.00e-04  1.99 it/s  ETA 20.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 55,000)
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+Params: 1,248,661 (1.25M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 2.548 GFLOPs
+    reprise depuis results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt au step 55,000 (8.06h d'entrainement deja cumulees)
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 110, in main
+    final_loss, n_params, dt = train_one(
+                               ^^^^^^^^^^
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 395, in train_one
+    optimizer.step()
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/lr_scheduler.py", line 166, in wrapper
+    return func.__get__(opt, opt.__class__)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/optimizer.py", line 535, in wrapper
+    out = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/optimizer.py", line 80, in _use_grad
+    ret = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/adam.py", line 248, in step
+    adam(
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/optimizer.py", line 148, in maybe_fallback
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/adam.py", line 970, in adam
+    func(
+  File "/home/ec4036/.venvs/unn/lib64/python3.11/site-packages/torch/optim/adam.py", line 704, in _multi_tensor_adam
+    torch._foreach_lerp_(
+RuntimeError: The size of tensor a (9) must match the size of tensor b (128) at non-singleton dimension 3
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO     params=          0  final_loss=nan  time=  0.0h  [The size of tensor a (9) must match the size of tensor b (128) at non-singleton dimension 3]
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO
+Params: 1,248,661 (1.25M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 2.548 GFLOPs
+    reprise depuis results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt au step 55,000 (8.06h d'entrainement deja cumulees)
+  step  56,000/200,000  loss 0.1331  lr 2.00e-04  1.48 it/s  ETA 27.1h
+  step  57,000/200,000  loss 0.1329  lr 2.00e-04  1.30 it/s  ETA 30.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 57,500)
+  step  58,000/200,000  loss 0.1327  lr 2.00e-04  1.30 it/s  ETA 30.3h
+  step  59,000/200,000  loss 0.1327  lr 2.00e-04  1.30 it/s  ETA 30.1h
+  step  60,000/200,000  loss 0.1324  lr 2.00e-04  1.30 it/s  ETA 30.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 60,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_60000.pt
+  step  61,000/200,000  loss 0.1326  lr 2.00e-04  1.28 it/s  ETA 30.1h
+  step  62,000/200,000  loss 0.1324  lr 2.00e-04  1.29 it/s  ETA 29.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 62,500)
+  step  63,000/200,000  loss 0.1323  lr 2.00e-04  1.30 it/s  ETA 29.3h
+  step  64,000/200,000  loss 0.1320  lr 2.00e-04  1.30 it/s  ETA 29.0h
+  step  65,000/200,000  loss 0.1318  lr 2.00e-04  1.30 it/s  ETA 28.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 65,000)
+  step  66,000/200,000  loss 0.1321  lr 2.00e-04  1.29 it/s  ETA 28.8h
+  step  67,000/200,000  loss 0.1317  lr 2.00e-04  1.29 it/s  ETA 28.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 67,500)
+  step  68,000/200,000  loss 0.1315  lr 2.00e-04  1.30 it/s  ETA 28.3h
+  step  69,000/200,000  loss 0.1316  lr 2.00e-04  1.30 it/s  ETA 27.9h
+  step  70,000/200,000  loss 0.1315  lr 2.00e-04  1.30 it/s  ETA 27.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 70,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_70000.pt
+  step  71,000/200,000  loss 0.1312  lr 2.00e-04  1.29 it/s  ETA 27.8h
+  step  72,000/200,000  loss 0.1314  lr 2.00e-04  1.28 it/s  ETA 27.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 72,500)
+  step  73,000/200,000  loss 0.1310  lr 2.00e-04  1.29 it/s  ETA 27.4h
+  step  74,000/200,000  loss 0.1313  lr 2.00e-04  1.30 it/s  ETA 26.9h
+  step  75,000/200,000  loss 0.1311  lr 2.00e-04  1.29 it/s  ETA 26.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 75,000)
+  step  76,000/200,000  loss 0.1309  lr 2.00e-04  1.29 it/s  ETA 26.7h
+  step  77,000/200,000  loss 0.1310  lr 2.00e-04  1.29 it/s  ETA 26.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 77,500)
+  step  78,000/200,000  loss 0.1306  lr 2.00e-04  1.29 it/s  ETA 26.3h
+  step  79,000/200,000  loss 0.1307  lr 2.00e-04  1.30 it/s  ETA 25.9h
+  step  80,000/200,000  loss 0.1305  lr 2.00e-04  1.30 it/s  ETA 25.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 80,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_80000.pt
+  step  81,000/200,000  loss 0.1304  lr 2.00e-04  1.29 it/s  ETA 25.6h
+  step  82,000/200,000  loss 0.1305  lr 2.00e-04  1.29 it/s  ETA 25.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 82,500)
+  step  83,000/200,000  loss 0.1303  lr 2.00e-04  1.28 it/s  ETA 25.3h
+  step  84,000/200,000  loss 0.1301  lr 2.00e-04  1.30 it/s  ETA 24.8h
+  step  85,000/200,000  loss 0.1302  lr 2.00e-04  1.30 it/s  ETA 24.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 85,000)
+  step  86,000/200,000  loss 0.1302  lr 2.00e-04  1.29 it/s  ETA 24.5h
+  step  87,000/200,000  loss 0.1300  lr 2.00e-04  1.29 it/s  ETA 24.3h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 87,500)
+  step  88,000/200,000  loss 0.1301  lr 2.00e-04  1.28 it/s  ETA 24.3h
+  step  89,000/200,000  loss 0.1302  lr 2.00e-04  1.29 it/s  ETA 23.8h
+  step  90,000/200,000  loss 0.1300  lr 2.00e-04  1.30 it/s  ETA 23.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 90,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_90000.pt
+  step  91,000/200,000  loss 0.1299  lr 2.00e-04  1.29 it/s  ETA 23.5h
+  step  92,000/200,000  loss 0.1296  lr 2.00e-04  1.29 it/s  ETA 23.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 92,500)
+  step  93,000/200,000  loss 0.1296  lr 2.00e-04  1.28 it/s  ETA 23.2h
+  step  94,000/200,000  loss 0.1296  lr 2.00e-04  1.29 it/s  ETA 22.8h
+  step  95,000/200,000  loss 0.1295  lr 2.00e-04  1.30 it/s  ETA 22.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 95,000)
+  step  96,000/200,000  loss 0.1296  lr 2.00e-04  1.35 it/s  ETA 21.4h
+  step  97,000/200,000  loss 0.1293  lr 2.00e-04  1.39 it/s  ETA 20.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 97,500)
+  step  98,000/200,000  loss 0.1293  lr 2.00e-04  1.38 it/s  ETA 20.6h
+  step  99,000/200,000  loss 0.1293  lr 2.00e-04  1.39 it/s  ETA 20.3h
+  step 100,000/200,000  loss 0.1294  lr 2.00e-04  1.39 it/s  ETA 20.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 100,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_100000.pt
+  step 101,000/200,000  loss 0.1293  lr 2.00e-04  1.39 it/s  ETA 19.8h
+  step 102,000/200,000  loss 0.1290  lr 2.00e-04  1.39 it/s  ETA 19.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 102,500)
+  step 103,000/200,000  loss 0.1290  lr 2.00e-04  1.38 it/s  ETA 19.5h
+  step 104,000/200,000  loss 0.1290  lr 2.00e-04  1.38 it/s  ETA 19.3h
+  step 105,000/200,000  loss 0.1289  lr 2.00e-04  1.39 it/s  ETA 19.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 105,000)
+  step 106,000/200,000  loss 0.1290  lr 2.00e-04  1.39 it/s  ETA 18.7h
+  step 107,000/200,000  loss 0.1287  lr 2.00e-04  1.40 it/s  ETA 18.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 107,500)
+  step 108,000/200,000  loss 0.1288  lr 2.00e-04  1.39 it/s  ETA 18.4h
+  step 109,000/200,000  loss 0.1288  lr 2.00e-04  1.39 it/s  ETA 18.2h
+  step 110,000/200,000  loss 0.1288  lr 2.00e-04  1.38 it/s  ETA 18.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 110,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/ckpt_step_110000.pt
+  step 111,000/200,000  loss 0.1286  lr 2.00e-04  1.39 it/s  ETA 17.8h
+  step 112,000/200,000  loss 0.1282  lr 2.00e-04  1.40 it/s  ETA 17.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 112,500)
+  step 113,000/200,000  loss 0.1286  lr 2.00e-04  1.39 it/s  ETA 17.4h
+  step 114,000/200,000  loss 0.1285  lr 2.00e-04  1.39 it/s  ETA 17.2h
+  step 115,000/200,000  loss 0.1285  lr 2.00e-04  1.38 it/s  ETA 17.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k9_K20_ic128_L1_LFO/latest.pt (step 115,000)
+  step 116,000/200,000  loss 0.1283  lr 2.00e-04  1.38 it/s  ETA 16.9h
+  step 117,000/200,000  loss 0.1283  lr 2.00e-04  1.39 it/s  ETA 16.6h
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k3_K10_ic32_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k3_K10_ic32_L1_LFO
+Params: 18,571 (0.02M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 35.391 MFLOPs
+  step     100/200,000  loss 8.0697  lr 4.04e-06  1.24 it/s  ETA 44.9h
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO
+Params: 9,603,531 (9.60M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+t ~ U(0, 0.95)  (Euler-20 : le sampler n'evalue jamais au-dela de 0.95)
+loss x-pred SANS clamp -> = MSE vitesse exacte ; poids max 1/(1-t_max)^2 = 400
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 19.661 GFLOPs
+    reprise depuis results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt au step 50,000 (0.00h d'entrainement deja cumulees, t_max=None)
+Traceback (most recent call last):
+  File "/home/ec4036/UNN_for_FM/run_afhq32.py", line 122, in main
+    final_loss, n_params, dt = train_one(
+                               ^^^^^^^^^^
+  File "/home/ec4036/UNN_for_FM/run_cifar10_torchcfm_recipe.py", line 418, in train_one
+    raise ValueError(
+ValueError: results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt a ete entraine avec t_max=None (None = ancienne loss avec clamp), or on demande t_max=0.95. Relance avec le meme --euler-steps, dans un run_dir neuf, ou passe allow_tmax_change=True si tu assumes le melange.
+
+==================================================================
+Summary
+==================================================================
+  ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO    params=          0  final_loss=nan  time=  0.0h  [results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt a ete entraine avec t_max=None (None = ancienne loss avec clamp), or on demande t_max=0.95. Relance avec le meme --euler-steps, dans un run_dir neuf, ou passe allow_tmax_change=True si tu assumes le melange.]
+nohup: ignoring input
+usage: run_afhq32.py [-h] [--cache CACHE] [--steps STEPS]
+                     [--results-dir RESULTS_DIR] [--batch-size BATCH_SIZE]
+                     [--coupling {indep,ot}] [--prox {l1,l1c}] [--no-flip]
+                     [--only ONLY] [--skip SKIP] [--kernel KERNEL] [--K K]
+                     [--ic IC] [--sample-every SAMPLE_EVERY]
+                     [--save-every SAVE_EVERY] [--keep-every KEEP_EVERY]
+                     [--no-resume] [--euler-steps EULER_STEPS] [--t-max T_MAX]
+                     [--allow-tmax-change] [--device DEVICE]
+run_afhq32.py: error: argument --allow-tmax-change: ignored explicit argument 'True'
+nohup: ignoring input
+Device: cuda:1  |  dataset: afhq_cat32  |  coupling: ot  |  steps: 200,000
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO
+Params: 9,603,531 (9.60M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 200,000  |  coupling: ot
+t ~ U(0, 0.95)  (Euler-20 : le sampler n'evalue jamais au-dela de 0.95)
+loss x-pred SANS clamp -> = MSE vitesse exacte ; poids max 1/(1-t_max)^2 = 400
+==================================================================
+FLOPs / eval. vitesse (batch 1) : 19.661 GFLOPs
+    reprise depuis results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt au step 50,000 (0.00h d'entrainement deja cumulees, t_max=None)
+  step  51,000/200,000  loss 0.1832  lr 2.00e-04  0.55 it/s  ETA 74.9h
+  step  52,000/200,000  loss 0.1817  lr 2.00e-04  0.54 it/s  ETA 76.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 52,500)
+  step  53,000/200,000  loss 0.1828  lr 2.00e-04  0.54 it/s  ETA 75.9h
+  step  54,000/200,000  loss 0.1825  lr 2.00e-04  0.55 it/s  ETA 74.2h
+  step  55,000/200,000  loss 0.1822  lr 2.00e-04  0.54 it/s  ETA 74.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 55,000)
+  step  56,000/200,000  loss 0.1813  lr 2.00e-04  0.54 it/s  ETA 73.8h
+  step  57,000/200,000  loss 0.1813  lr 2.00e-04  0.54 it/s  ETA 73.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 57,500)
+  step  58,000/200,000  loss 0.1801  lr 2.00e-04  0.54 it/s  ETA 72.9h
+  step  59,000/200,000  loss 0.1792  lr 2.00e-04  0.54 it/s  ETA 72.8h
+  step  60,000/200,000  loss 0.1791  lr 2.00e-04  0.53 it/s  ETA 73.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 60,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/ckpt_step_60000.pt
+  step  61,000/200,000  loss 0.1780  lr 2.00e-04  0.54 it/s  ETA 71.3h
+  step  62,000/200,000  loss 0.1779  lr 2.00e-04  0.53 it/s  ETA 72.1h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 62,500)
+  step  63,000/200,000  loss 0.1785  lr 2.00e-04  0.53 it/s  ETA 72.3h
+  step  64,000/200,000  loss 0.1782  lr 2.00e-04  0.53 it/s  ETA 71.6h
+  step  65,000/200,000  loss 0.1787  lr 2.00e-04  0.52 it/s  ETA 72.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 65,000)
+  step  66,000/200,000  loss 0.1775  lr 2.00e-04  0.53 it/s  ETA 70.5h
+  step  67,000/200,000  loss 0.1770  lr 2.00e-04  0.52 it/s  ETA 71.4h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 67,500)
+  step  68,000/200,000  loss 0.1772  lr 2.00e-04  0.53 it/s  ETA 69.4h
+  step  69,000/200,000  loss 0.1774  lr 2.00e-04  0.52 it/s  ETA 70.3h
+  step  70,000/200,000  loss 0.1771  lr 2.00e-04  0.53 it/s  ETA 68.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 70,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/ckpt_step_70000.pt
+  step  71,000/200,000  loss 0.1763  lr 2.00e-04  0.52 it/s  ETA 69.3h
+  step  72,000/200,000  loss 0.1761  lr 2.00e-04  0.53 it/s  ETA 67.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 72,500)
+  step  73,000/200,000  loss 0.1757  lr 2.00e-04  0.52 it/s  ETA 68.2h
+  step  74,000/200,000  loss 0.1767  lr 2.00e-04  0.53 it/s  ETA 66.1h
+  step  75,000/200,000  loss 0.1750  lr 2.00e-04  0.52 it/s  ETA 67.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 75,000)
+  step  76,000/200,000  loss 0.1755  lr 2.00e-04  0.53 it/s  ETA 65.2h
+  step  77,000/200,000  loss 0.1746  lr 2.00e-04  0.51 it/s  ETA 66.8h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 77,500)
+  step  78,000/200,000  loss 0.1746  lr 2.00e-04  0.49 it/s  ETA 68.6h
+  step  79,000/200,000  loss 0.1750  lr 2.00e-04  0.49 it/s  ETA 68.7h
+  step  80,000/200,000  loss 0.1760  lr 2.00e-04  0.49 it/s  ETA 67.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 80,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/ckpt_step_80000.pt
+  step  81,000/200,000  loss 0.1759  lr 2.00e-04  0.49 it/s  ETA 68.0h
+  step  82,000/200,000  loss 0.1757  lr 2.00e-04  0.49 it/s  ETA 67.2h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 82,500)
+  step  83,000/200,000  loss 0.1746  lr 2.00e-04  0.49 it/s  ETA 65.7h
+  step  84,000/200,000  loss 0.1744  lr 2.00e-04  0.51 it/s  ETA 62.8h
+  step  85,000/200,000  loss 0.1742  lr 2.00e-04  0.51 it/s  ETA 62.9h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 85,000)
+  step  86,000/200,000  loss 0.1744  lr 2.00e-04  0.52 it/s  ETA 61.4h
+  step  87,000/200,000  loss 0.1750  lr 2.00e-04  0.52 it/s  ETA 60.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 87,500)
+  step  88,000/200,000  loss 0.1736  lr 2.00e-04  0.52 it/s  ETA 59.7h
+  step  89,000/200,000  loss 0.1739  lr 2.00e-04  0.52 it/s  ETA 59.0h
+  step  90,000/200,000  loss 0.1734  lr 2.00e-04  0.52 it/s  ETA 58.7h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 90,000)
+    archive -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/ckpt_step_90000.pt
+  step  91,000/200,000  loss 0.1736  lr 2.00e-04  0.53 it/s  ETA 56.8h
+  step  92,000/200,000  loss 0.1740  lr 2.00e-04  0.53 it/s  ETA 57.0h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 92,500)
+  step  93,000/200,000  loss 0.1729  lr 2.00e-04  0.54 it/s  ETA 55.5h
+  step  94,000/200,000  loss 0.1732  lr 2.00e-04  0.52 it/s  ETA 56.1h
+  step  95,000/200,000  loss 0.1738  lr 2.00e-04  0.53 it/s  ETA 54.5h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 95,000)
+  step  96,000/200,000  loss 0.1727  lr 2.00e-04  0.52 it/s  ETA 55.3h
+  step  97,000/200,000  loss 0.1730  lr 2.00e-04  0.53 it/s  ETA 53.6h
+    latest -> results_afhq32/ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO/latest.pt (step 97,500)
+  step  98,000/200,000  loss 0.1728  lr 2.00e-04  0.52 it/s  ETA 54.6h

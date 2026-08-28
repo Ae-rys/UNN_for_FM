@@ -1,0 +1,26 @@
+GPU : NVIDIA GeForce RTX 2080 Ti
+
+=== 1. Equivalence numerique (memes poids) ===
+  max |sortie_func - sortie_mod|   = 2.297e-04   (erreur relative 2.51e-05)
+  max |grad_func   - grad_mod|     = 1.364e-02   (erreur relative 1.99e-02)
+  (float32 + deroule K=20 : le bruit d'arrondi est amplifie a chaque iteration)
+  meme test en float64/CPU : rel_sortie=0.00e+00  rel_grad=0.00e+00
+  -> les deux versions calculent la meme fonction.
+
+=== 2. Temps forward+backward+step (ms/iter, mediane sur 30) ===
+config                                       active (F.conv)   surlignee (nn.Conv2d)     ecart
+K=20 ic=64 k=9  B=128 (config rapport)           144.62±1.9              144.42±1.9      -0.1%
+K=20 ic=64 k=9  B=512                            488.71±124.5             491.07±6.6      +0.5%
+K=20 ic=64 k=9  B=128 +checkpoint                171.58±40.5             170.69±2.5      -0.5%
+K=20 ic=64 k=3  B=128                             94.05±6.6               93.86±6.5      -0.2%
+K=6  ic=64 k=9  B=128                             40.32±4.8               40.42±5.1      +0.3%
+
+=== 3. Ops CUDA lancees par forward+backward (B=128) ===
+  active (F.conv)        : 3750 ops
+  surlignee (nn.Conv2d)  : 3749 ops
+
+=== 4. Reference : ce qui change VRAIMENT la vitesse ===
+  ScCP pixel 28x28 (K=20)  : 144.62 ms
+  ScCP latent 7x7  (K=20)  : 44.71 ms   -> x3.2 plus rapide
+  ScCP pixel k=3   (K=20)  : 94.05 ms   -> x1.5
+  ScCP pixel K=6   (k=9)   : 40.32 ms   -> x3.6

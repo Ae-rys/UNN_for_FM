@@ -1,0 +1,16 @@
+nohup: ignoring input
+Device: cuda:0  |  dataset: cifar10  |  coupling: ot  |  steps: 400,000
+CIFAR-10 (cache ./data/cifar10_train_rgb.pt) : 50000 images.
+
+1 experiment(s) a lancer.
+
+
+[1/1] ConvScCP_UNN_rgb_k9_K20_ic256_L1_LNO
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k9_K20_ic256_L1_LNO
+Params: 1,251,240 (1.25M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 400,000  |  coupling: ot
+==================================================================
+  step     100/400,000  loss 78.2493  lr 4.04e-06  1.58 it/s  ETA 70.3h

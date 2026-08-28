@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	train_time_s	status
+ConvScCP_UNN_L1_LNO	128520	1.430118	581.2	OK

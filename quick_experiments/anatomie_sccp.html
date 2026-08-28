@@ -1,0 +1,467 @@
+<title>Anatomie d'une itération ScCP</title>
+<style>
+  :root{
+    --ground:#F6F7F5; --panel:#FFFFFF; --sunk:#ECEEEA;
+    --ink:#1A1C18; --ink-soft:#4C544B; --ink-faint:#7D857A;
+    --rule:#D9DDD5; --rule-soft:#E8EBE5;
+    --primal:#A0552A; --primal-soft:#F5E7DC;
+    --dual:#1A5F66; --dual-soft:#DFEDEE;
+    --moss:#3A6B43; --moss-soft:#E3EDE3;
+    --brick:#9A3B33; --brick-soft:#F4E4E2;
+    --serif:Charter,"Bitstream Charter","Iowan Old Style",Georgia,"Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#111412; --panel:#191D1A; --sunk:#1F241F;
+      --ink:#E5E9E2; --ink-soft:#A6AEA3; --ink-faint:#7B837A;
+      --rule:#2C322C; --rule-soft:#232823;
+      --primal:#E09A62; --primal-soft:#2A1D13;
+      --dual:#63B8BF; --dual-soft:#12282A;
+      --moss:#7FBA88; --moss-soft:#162317;
+      --brick:#DE8078; --brick-soft:#2A1816;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#111412; --panel:#191D1A; --sunk:#1F241F;
+    --ink:#E5E9E2; --ink-soft:#A6AEA3; --ink-faint:#7B837A;
+    --rule:#2C322C; --rule-soft:#232823;
+    --primal:#E09A62; --primal-soft:#2A1D13;
+    --dual:#63B8BF; --dual-soft:#12282A;
+    --moss:#7FBA88; --moss-soft:#162317;
+    --brick:#DE8078; --brick-soft:#2A1816;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--ground); color:var(--ink);
+       font-family:var(--serif); font-size:17px; line-height:1.62}
+  .wrap{max-width:1060px; margin:0 auto; padding:0 26px 90px}
+  .col{max-width:66ch}
+  p{margin:0 0 1.05em}
+  strong{font-weight:600}
+  code{font-family:var(--mono); font-size:.86em; background:var(--sunk); padding:1px 5px; border-radius:3px}
+
+  header.top{padding:60px 0 26px; border-bottom:2px solid var(--ink); margin-bottom:34px}
+  .eyebrow{font-family:var(--sans); font-size:11.5px; font-weight:600; letter-spacing:.13em;
+           text-transform:uppercase; color:var(--dual); margin:0 0 14px}
+  h1{font-family:var(--serif); font-weight:600; font-size:clamp(32px,5vw,50px); line-height:1.08;
+     letter-spacing:-.015em; margin:0 0 16px; text-wrap:balance}
+  .standfirst{font-size:19.5px; line-height:1.5; color:var(--ink-soft); max-width:60ch; margin:0}
+
+  section{margin:52px 0 0}
+  h2{font-family:var(--serif); font-weight:600; font-size:26px; letter-spacing:-.01em; margin:0 0 6px;
+     padding-top:12px; border-top:1px solid var(--rule); text-wrap:balance}
+  .sub{font-family:var(--sans); font-size:13px; color:var(--ink-faint); margin:0 0 20px}
+
+  figure{margin:30px 0; background:var(--panel); border:1px solid var(--rule); border-radius:5px; padding:22px 20px 0}
+  figure svg{display:block; width:100%; height:auto; max-width:100%}
+  figcaption{font-family:var(--sans); font-size:13px; color:var(--ink-soft); line-height:1.5;
+             padding:16px 0 18px; margin-top:14px; border-top:1px solid var(--rule-soft)}
+  figcaption b{color:var(--ink); font-weight:600}
+
+  .tw{overflow-x:auto; margin:22px 0; border:1px solid var(--rule); border-radius:5px; background:var(--panel)}
+  table{border-collapse:collapse; width:100%; font-family:var(--sans); font-size:14px}
+  th,td{padding:9px 14px; text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left; font-variant-numeric:normal}
+  thead th{font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint);
+           font-weight:600; border-bottom:1px solid var(--rule); background:var(--sunk)}
+  tbody tr{border-bottom:1px solid var(--rule-soft)}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{color:var(--ink-soft)}
+  tbody td:first-child{color:var(--ink); font-weight:500; font-family:var(--mono); font-size:13px}
+  td.p{color:var(--primal); font-weight:600}
+  td.d{color:var(--dual); font-weight:600}
+
+  .note{background:var(--dual-soft); border-left:3px solid var(--dual); padding:16px 20px;
+        margin:24px 0; border-radius:0 4px 4px 0; max-width:72ch}
+  .note p{margin:0; font-size:16px}
+  .note p+p{margin-top:.7em}
+  .note .lbl{font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--dual); display:block; margin-bottom:6px}
+  .warn{background:var(--brick-soft); border-left-color:var(--brick)}
+  .warn .lbl{color:var(--brick)}
+
+  .legend{display:flex; gap:22px; flex-wrap:wrap; font-family:var(--sans); font-size:12.5px;
+          color:var(--ink-soft); margin:0 0 4px}
+  .legend span{display:flex; align-items:center; gap:7px}
+  .sw{width:13px; height:13px; border-radius:3px; display:inline-block}
+  .sw.p{background:var(--primal)}
+  .sw.d{background:var(--dual)}
+
+  footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--rule);
+         font-family:var(--sans); font-size:13px; color:var(--ink-faint)}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">models/architectures.py — _OrigConvScCP_Iteration</p>
+  <h1>Anatomie d'une itération ScCP</h1>
+  <p class="standfirst">Ce que devient un tenseur en traversant un bloc, dimension par dimension, mesuré sur la configuration AFHQ : 3 canaux, 32×32, espace dual à 128 canaux, noyau 9×9.</p>
+</header>
+
+<div class="col">
+<p>Le bloc fait circuler l'information entre <strong>deux espaces de tailles très différentes</strong>. Tout le reste — les convolutions, le prox, l'inertie — se comprend à partir de cette asymétrie.</p>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Tenseur</th><th>Forme</th><th>Valeurs / image</th><th>Rôle</th></tr></thead>
+  <tbody>
+    <tr><td>z</td><td class="p">(B, 3, 32, 32)</td><td>3 072</td><td>l'observation bruitée, fixe pendant tout le déroulé</td></tr>
+    <tr><td>x<sub>k</sub></td><td class="p">(B, 3, 32, 32)</td><td>3 072</td><td>l'estimation courante de l'image</td></tr>
+    <tr><td>u<sub>k</sub></td><td class="d">(B, 128, 32, 32)</td><td><strong>131 072</strong></td><td>la variable duale — l'état réel du réseau</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p>Le dual est <strong>42,7 fois plus gros</strong> que le primal. C'est la signature du codage parcimonieux : on projette une image dans un dictionnaire surcomplet, on y applique une contrainte simple, on revient. Le primal reste une image à chaque étape — c'est ce qui rend les états internes affichables, contrairement à un UNet dont les activations intermédiaires vivent sur des grilles plus grossières.</p>
+</div>
+
+<section>
+<h2>La boucle primal–dual</h2>
+<p class="sub">Une itération complète, k → k+1.</p>
+
+<div class="legend">
+  <span><i class="sw p"></i> espace primal — 3 canaux, une image</span>
+  <span><i class="sw d"></i> espace dual — 128 canaux</span>
+</div>
+
+<figure>
+<svg viewBox="0 0 920 400" role="img" aria-label="Une itération ScCP : la variable duale à 128 canaux et la variable primale à 3 canaux échangent par une convolution W qui monte et une convolution transposée V qui descend, l'observation z étant réinjectée à chaque pas primal.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+    </marker>
+    <marker id="arD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="var(--dual)"/>
+    </marker>
+    <marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="var(--primal)"/>
+    </marker>
+  </defs>
+
+  <!-- lane labels -->
+  <text x="14" y="46" font-family="sans-serif" font-size="12" font-weight="700" fill="var(--dual)">DUAL</text>
+  <text x="14" y="62" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.65">128 canaux</text>
+  <text x="14" y="316" font-family="sans-serif" font-size="12" font-weight="700" fill="var(--primal)">PRIMAL</text>
+  <text x="14" y="332" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.65">3 canaux</text>
+
+  <!-- lane guides -->
+  <line x1="100" y1="70" x2="890" y2="70" stroke="var(--dual)" stroke-width="1" opacity="0.25"/>
+  <line x1="100" y1="300" x2="890" y2="300" stroke="var(--primal)" stroke-width="1" opacity="0.25"/>
+
+  <!-- dual states -->
+  <rect x="100" y="46" width="96" height="48" rx="4" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.5"/>
+  <text x="148" y="68" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="var(--dual)">u_k</text>
+  <text x="148" y="84" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.75">128×32×32</text>
+
+  <circle cx="600" cy="70" r="15" fill="var(--panel)" stroke="var(--dual)" stroke-width="1.5"/>
+  <text x="600" y="75" text-anchor="middle" font-family="sans-serif" font-size="15" fill="var(--dual)">+</text>
+
+  <rect x="648" y="46" width="86" height="48" rx="4" fill="var(--panel)" stroke="var(--dual)" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="691" y="68" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="var(--dual)">prox</text>
+  <text x="691" y="84" text-anchor="middle" font-family="sans-serif" font-size="10" fill="currentColor" opacity="0.75">clamp ±r(t)</text>
+
+  <rect x="786" y="46" width="96" height="48" rx="4" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.5"/>
+  <text x="834" y="68" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="var(--dual)">u_k+1</text>
+  <text x="834" y="84" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.75">128×32×32</text>
+
+  <!-- dual horizontal flow -->
+  <line x1="196" y1="70" x2="583" y2="70" stroke="var(--dual)" stroke-width="1.5" marker-end="url(#arD)"/>
+  <text x="380" y="60" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.75">report de l'état dual</text>
+  <line x1="615" y1="70" x2="644" y2="70" stroke="var(--dual)" stroke-width="1.5" marker-end="url(#arD)"/>
+  <line x1="734" y1="70" x2="782" y2="70" stroke="var(--dual)" stroke-width="1.5" marker-end="url(#arD)"/>
+
+  <!-- primal states -->
+  <rect x="100" y="276" width="96" height="48" rx="4" fill="var(--primal-soft)" stroke="var(--primal)" stroke-width="1.5"/>
+  <text x="148" y="298" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="var(--primal)">x_k</text>
+  <text x="148" y="314" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.75">3×32×32</text>
+
+  <rect x="290" y="276" width="112" height="48" rx="4" fill="var(--primal-soft)" stroke="var(--primal)" stroke-width="1.5"/>
+  <text x="346" y="298" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="var(--primal)">x_k+1</text>
+  <text x="346" y="314" text-anchor="middle" font-family="sans-serif" font-size="10" fill="currentColor" opacity="0.75">÷ (1+τ)</text>
+
+  <rect x="452" y="276" width="96" height="48" rx="4" fill="var(--panel)" stroke="var(--primal)" stroke-width="1.5"/>
+  <text x="500" y="298" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="var(--primal)">y</text>
+  <text x="500" y="314" text-anchor="middle" font-family="sans-serif" font-size="10" fill="currentColor" opacity="0.75">+ α (x_k+1 − x_k)</text>
+
+  <!-- primal horizontal flow -->
+  <line x1="196" y1="300" x2="286" y2="300" stroke="var(--primal)" stroke-width="1.5" marker-end="url(#arP)"/>
+  <line x1="402" y1="300" x2="448" y2="300" stroke="var(--primal)" stroke-width="1.5" marker-end="url(#arP)"/>
+
+  <!-- z re-injection -->
+  <rect x="290" y="352" width="112" height="34" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.2" opacity="0.85"/>
+  <text x="346" y="374" text-anchor="middle" font-family="sans-serif" font-size="12.5" font-weight="700" fill="currentColor">z  (observation)</text>
+  <line x1="346" y1="348" x2="346" y2="328" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="358" y="344" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.75">τ z — réinjectée à CHAQUE pas</text>
+
+  <!-- V : dual -> primal -->
+  <path d="M 148 94 L 148 190 L 300 190 L 300 272" fill="none" stroke="var(--dual)" stroke-width="1.8" marker-end="url(#arP)"/>
+  <rect x="176" y="172" width="196" height="36" rx="4" fill="var(--panel)" stroke="var(--dual)" stroke-width="1.3"/>
+  <text x="274" y="188" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="var(--dual)">V — conv_transpose2d 9×9</text>
+  <text x="274" y="202" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.8">128 → 3 canaux · 31 104 poids</text>
+
+  <!-- W : primal -> dual -->
+  <path d="M 500 272 L 500 230 L 600 230 L 600 88" fill="none" stroke="var(--primal)" stroke-width="1.8" marker-end="url(#arD)"/>
+  <rect x="520" y="212" width="196" height="36" rx="4" fill="var(--panel)" stroke="var(--primal)" stroke-width="1.3"/>
+  <text x="618" y="228" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="var(--primal)">W — conv2d 9×9 (+ biais)</text>
+  <text x="618" y="242" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.8">3 → 128 canaux · 31 104 poids</text>
+
+  <!-- t into prox -->
+  <line x1="691" y1="124" x2="691" y2="98" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text x="691" y="138" text-anchor="middle" font-family="sans-serif" font-size="11.5" font-weight="700" fill="currentColor">t → r(t)</text>
+  <text x="691" y="152" text-anchor="middle" font-family="sans-serif" font-size="10" fill="currentColor" opacity="0.7">97 paramètres</text>
+</svg>
+<figcaption><b>Le dual est le seul état qui traverse l'itération sans repasser par l'image.</b> W monte le primal dans l'espace à 128 canaux, V en redescend, et l'observation z est réinjectée à chaque pas primal — le réseau est donc ancré sur son entrée à toutes les couches, au lieu de construire une représentation de plus en plus abstraite. Le prox est la seule non-linéarité, et il n'agit que sur le dual.</figcaption>
+</figure>
+</section>
+
+<section>
+<h2>Les cinq lignes, dans l'ordre</h2>
+<p class="sub">Formes relevées sur un passage avant réel, batch = 8.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Opération</th><th>Entrée</th><th>Sortie</th><th>Ce qui se passe</th></tr></thead>
+  <tbody>
+    <tr><td>V·u</td><td class="d">(8, 128, 32, 32)</td><td class="p">(8, 3, 32, 32)</td><td>le dual redescend vers l'image</td></tr>
+    <tr><td>x_k+1</td><td class="p">(8, 3, 32, 32)</td><td class="p">(8, 3, 32, 32)</td><td>(x − τV·u + τz) ÷ (1+τ), avec τ = 0,474</td></tr>
+    <tr><td>y</td><td class="p">(8, 3, 32, 32)</td><td class="p">(8, 3, 32, 32)</td><td>extrapolation, α = 0,717, aucun paramètre</td></tr>
+    <tr><td>W·y</td><td class="p">(8, 3, 32, 32)</td><td class="d">(8, 128, 32, 32)</td><td>l'image remonte dans l'espace dual</td></tr>
+    <tr><td>prox</td><td class="d">(8, 128, 32, 32)</td><td class="d">(8, 128, 32, 32)</td><td>clamp(·, ±r(t)), pixel par pixel</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p>Deux détails que les formes révèlent et que le code ne dit pas à voix haute.</p>
+<p><strong>W et V ont exactement le même noyau <code>(128, 3, 9, 9)</code></strong>, parce que <code>conv_transpose2d</code> avec ce noyau est l'adjoint exact de <code>conv2d</code>. En version LNO, on pose d'ailleurs V = W et l'adjonction est stricte. En LFO — celle qui est entraînée ici — <code>V_weight</code> est un paramètre <em>indépendant</em> : l'aller et le retour ne sont plus adjoints l'un de l'autre, et l'itération n'est plus un vrai Chambolle–Pock, seulement une itération qui en a la forme.</p>
+<p><strong>τ, σ et α ne sont pas des paramètres appris par couche.</strong> En LFO, un seul scalaire <code>log_tau0</code> est appris pour tout le réseau ; τ, σ et α des couches suivantes s'en déduisent par la récursion accélérée. Vingt couches, un seul degré de liberté pour les pas.</p>
+</div>
+</section>
+
+<section>
+<h2>Où sont les paramètres</h2>
+<p class="sub">62 433 par couche, 1 248 661 pour K = 20.</p>
+
+<figure>
+<svg viewBox="0 0 900 150" role="img" aria-label="Répartition des paramètres d'une couche : W et V pèsent chacun 49,8 %, le biais 0,2 %, le prox 0,16 %.">
+  <rect x="30" y="34" width="404" height="42" rx="3" fill="var(--primal-soft)" stroke="var(--primal)" stroke-width="1.5"/>
+  <text x="232" y="53" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="var(--primal)">W — 31 104</text>
+  <text x="232" y="68" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.75">49,8 %</text>
+
+  <rect x="438" y="34" width="404" height="42" rx="3" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.5"/>
+  <text x="640" y="53" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="var(--dual)">V — 31 104</text>
+  <text x="640" y="68" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.75">49,8 %</text>
+
+  <rect x="846" y="34" width="2" height="42" rx="1" fill="currentColor"/>
+  <rect x="850" y="34" width="20" height="42" rx="3" fill="var(--panel)" stroke="currentColor" stroke-width="1.3"/>
+
+  <line x1="860" y1="82" x2="860" y2="104" stroke="currentColor" stroke-width="1.2"/>
+  <text x="860" y="120" text-anchor="middle" font-family="sans-serif" font-size="11.5" font-weight="700" fill="currentColor">biais 128 + prox 97</text>
+  <text x="860" y="135" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">0,36 % à eux deux</text>
+
+  <text x="30" y="22" font-family="sans-serif" font-size="11.5" fill="currentColor" opacity="0.7">une couche = 62 433 paramètres</text>
+</svg>
+<figcaption><b>Les deux convolutions absorbent 99,6 % du budget.</b> Le prox — la seule partie qui dépend du temps, et la seule non-linéarité — pèse <b>97 paramètres</b> : un MLP 1 → 32 → 1. Toute la conditionnalité en t du réseau tient dans ces 97 poids par couche, soit 1 940 pour K = 20.</figcaption>
+</figure>
+
+<div class="note">
+<span class="lbl">Ce que le prox voit, et ce qu'il ne voit pas</span>
+<p>Il reçoit 131 072 valeurs et leur applique <code>clamp(u, −r(t), +r(t))</code> — <strong>pixel par pixel, canal par canal</strong>, avec un rayon r(t) qui est <em>un seul nombre</em> pour toute l'image et tous les canaux.</p>
+<p>Aucune interaction spatiale, aucune interaction entre canaux. Tout le mélange spatial est fait par W et V, tout le mélange des canaux couleur aussi. Le prox ne fait que décider, à ce niveau de bruit, quelle amplitude est du signal et laquelle est du bruit.</p>
+</div>
+
+</section>
+
+<section>
+<h2>Un seuil, ou cent vingt-huit</h2>
+<p class="sub">La seule différence entre <code>prox="l1"</code> et <code>prox="l1c"</code>.</p>
+
+<div class="col">
+<p>La variante change une seule chose : la <strong>dimension de sortie du MLP temporel</strong>. Tout le reste — noyaux, profondeur, espace dual, pas τ et σ — est identique.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 900 330" role="img" aria-label="Avec le prox l1 un unique seuil est appliqué à tous les canaux duaux ; avec l1c chaque canal reçoit son propre seuil, appris en fonction du temps.">
+  <!-- LEFT : l1 -->
+  <text x="30" y="24" font-family="sans-serif" font-size="13" font-weight="700" fill="currentColor">prox = "l1"</text>
+  <text x="30" y="42" font-family="sans-serif" font-size="11.5" fill="currentColor" opacity="0.72">MLP 1 → 32 → 1  ·  97 paramètres</text>
+
+  <line x1="30" y1="250" x2="410" y2="250" stroke="currentColor" stroke-width="1.1" opacity="0.5"/>
+  <text x="30" y="268" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.6">canaux duaux (14 des 128 montrés)</text>
+
+  <rect x="42"  y="120" width="16" height="130" fill="var(--dual)" opacity="0.30"/>
+  <rect x="68"  y="86"  width="16" height="164" fill="var(--dual)" opacity="0.30"/>
+  <rect x="94"  y="160" width="16" height="90"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="120" y="104" width="16" height="146" fill="var(--dual)" opacity="0.30"/>
+  <rect x="146" y="196" width="16" height="54"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="172" y="74"  width="16" height="176" fill="var(--dual)" opacity="0.30"/>
+  <rect x="198" y="140" width="16" height="110" fill="var(--dual)" opacity="0.30"/>
+  <rect x="224" y="112" width="16" height="138" fill="var(--dual)" opacity="0.30"/>
+  <rect x="250" y="180" width="16" height="70"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="276" y="92"  width="16" height="158" fill="var(--dual)" opacity="0.30"/>
+  <rect x="302" y="150" width="16" height="100" fill="var(--dual)" opacity="0.30"/>
+  <rect x="328" y="128" width="16" height="122" fill="var(--dual)" opacity="0.30"/>
+  <rect x="354" y="204" width="16" height="46"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="380" y="98"  width="16" height="152" fill="var(--dual)" opacity="0.30"/>
+
+  <!-- single clamp level -->
+  <line x1="36" y1="150" x2="402" y2="150" stroke="var(--brick)" stroke-width="2.4"/>
+  <text x="406" y="146" font-family="sans-serif" font-size="11.5" font-weight="700" fill="var(--brick)">r(t)</text>
+  <text x="36" y="140" font-family="sans-serif" font-size="10.5" fill="var(--brick)">un seul seuil pour les 128 canaux</text>
+
+  <!-- divider -->
+  <line x1="452" y1="16" x2="452" y2="300" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+  <!-- RIGHT : l1c -->
+  <text x="482" y="24" font-family="sans-serif" font-size="13" font-weight="700" fill="currentColor">prox = "l1c"</text>
+  <text x="482" y="42" font-family="sans-serif" font-size="11.5" fill="currentColor" opacity="0.72">MLP 1 → 32 → 128  ·  4 288 paramètres</text>
+
+  <line x1="482" y1="250" x2="862" y2="250" stroke="currentColor" stroke-width="1.1" opacity="0.5"/>
+  <text x="482" y="268" font-family="sans-serif" font-size="10.5" fill="currentColor" opacity="0.6">canaux duaux (14 des 128 montrés)</text>
+
+  <rect x="494" y="120" width="16" height="130" fill="var(--dual)" opacity="0.30"/>
+  <rect x="520" y="86"  width="16" height="164" fill="var(--dual)" opacity="0.30"/>
+  <rect x="546" y="160" width="16" height="90"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="572" y="104" width="16" height="146" fill="var(--dual)" opacity="0.30"/>
+  <rect x="598" y="196" width="16" height="54"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="624" y="74"  width="16" height="176" fill="var(--dual)" opacity="0.30"/>
+  <rect x="650" y="140" width="16" height="110" fill="var(--dual)" opacity="0.30"/>
+  <rect x="676" y="112" width="16" height="138" fill="var(--dual)" opacity="0.30"/>
+  <rect x="702" y="180" width="16" height="70"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="728" y="92"  width="16" height="158" fill="var(--dual)" opacity="0.30"/>
+  <rect x="754" y="150" width="16" height="100" fill="var(--dual)" opacity="0.30"/>
+  <rect x="780" y="128" width="16" height="122" fill="var(--dual)" opacity="0.30"/>
+  <rect x="806" y="204" width="16" height="46"  fill="var(--dual)" opacity="0.30"/>
+  <rect x="832" y="98"  width="16" height="152" fill="var(--dual)" opacity="0.30"/>
+
+  <!-- per-channel clamp levels -->
+  <polyline points="488,166 514,166 514,112 540,112 540,192 566,192 566,138 592,138 592,214 618,214 618,100 644,100 644,176 670,176 670,144 696,144 696,206 722,206 722,124 748,124 748,182 774,182 774,158 800,158 800,222 826,222 826,132 854,132"
+            fill="none" stroke="var(--brick)" stroke-width="2.4"/>
+  <text x="482" y="88" font-family="sans-serif" font-size="10.5" fill="var(--brick)">un seuil r_c(t) par canal</text>
+  <text x="858" y="128" font-family="sans-serif" font-size="11.5" font-weight="700" fill="var(--brick)">r_c(t)</text>
+
+  <!-- shared caption row -->
+  <text x="30" y="304" font-family="sans-serif" font-size="11.5" fill="currentColor" opacity="0.8">boule duale = cube de côté r(t)</text>
+  <text x="482" y="304" font-family="sans-serif" font-size="11.5" fill="currentColor" opacity="0.8">boule duale = pavé de demi-largeurs r_c(t)</text>
+</svg>
+<figcaption><b>À gauche, tous les canaux subissent le même écrêtage ; à droite, chacun le sien.</b> Le prox reste dans les deux cas la projection sur la boule duale d'une norme ℓ₁ — un cube pour la norme ℓ₁ usuelle, un pavé pour la norme pondérée ‖u‖<sub>1,w</sub> = Σ<sub>c</sub> w<sub>c</sub>‖u<sub>c</sub>‖<sub>1</sub>. La propriété structurelle « la sortie est un opérateur proximal » survit donc intégralement, ce qui n'est pas le cas de <code>prox="silu"</code>.</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+  <thead><tr><th>&nbsp;</th><th>Sortie du MLP</th><th>Prox / couche</th><th>Modèle (K = 20)</th><th>Scalaires de conditionnement</th></tr></thead>
+  <tbody>
+    <tr><td>l1</td><td>1</td><td>97</td><td>1 248 661</td><td>20</td></tr>
+    <tr><td>l1c</td><td>128</td><td>4 288</td><td>1 332 481</td><td><strong>2 560</strong></td></tr>
+    <tr><td>écart</td><td>×128</td><td>+4 191</td><td>+83 820 (+6,7 %)</td><td>×128</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p>C'est l'intervention la moins chère possible sur le goulot identifié plus haut : le conditionnement temporel passe de 20 nombres à 2 560, pour 6,7 % de paramètres en plus et sans toucher ni au champ récepteur, ni à l'équivariance par translation, ni à la nature proximale du bloc.</p>
+<p>Elle a aussi le mérite de rapprocher le code du rapport, dont la §&nbsp;Model Variants décrit déjà un <em>channel-wise bias</em> — c'est-à-dire <code>l1c</code>, et non ce qui a été entraîné jusqu'ici.</p>
+</div>
+
+<div class="note warn">
+<span class="lbl">Mesure en cours — pas encore de résultat</span>
+<p>Le run <code>l1c</code> est lancé sous exactement le protocole du baseline : 20 000 steps, <code>loss=x1</code>, couplage indépendant, mêmes t, mêmes images de validation, même bruit fixe. Fin attendue en fin de matinée.</p>
+<p>Les repères pour lire le résultat, sur cette même métrique : le baseline <code>l1</code> est à <strong>0,2086</strong>, et un UNet torchcfm de 1,11M paramètres — donc plus petit — atteint <strong>0,1904</strong>. Si <code>l1c</code> récupère une part notable de ces 9,6 %, l'hypothèse « le goulot est la largeur du canal temporel » tient. S'il ne bouge pas de plus de 2 %, l'écart ne sera pas distinguable du bruit d'entraînement, une seule graine ayant été lancée — le verdict passera alors par un bootstrap apparié.</p>
+</div>
+</section>
+
+<section>
+<h2>Jusqu'où chaque pixel voit</h2>
+<p class="sub">Champ récepteur théorique contre champ récepteur mesuré.</p>
+
+<figure>
+<svg viewBox="0 0 900 300" role="img" aria-label="Le champ récepteur théorique dépasse l'image dès la deuxième itération, mais le champ récepteur effectif mesuré ne fait que 6,9 pixels de rayon moyen, et rétrécit encore quand t augmente.">
+  <defs>
+    <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- left: theoretical growth -->
+  <text x="20" y="24" font-family="sans-serif" font-size="12.5" font-weight="700" fill="currentColor">Théorique — croissance par itération</text>
+  <line x1="40" y1="250" x2="380" y2="250" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+  <text x="390" y="254" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">K</text>
+
+  <!-- image size reference line -->
+  <line x1="40" y1="150" x2="380" y2="150" stroke="var(--brick)" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="44" y="144" font-family="sans-serif" font-size="11" font-weight="700" fill="var(--brick)">taille de l'image : 32 px</text>
+
+  <!-- bars: RF = 16k+1 px, capped visually -->
+  <rect x="64" y="196" width="26" height="54" rx="2" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.3"/>
+  <text x="77" y="190" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor">17</text>
+  <text x="77" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">1</text>
+
+  <rect x="124" y="140" width="26" height="110" rx="2" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.3"/>
+  <text x="137" y="134" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor">33</text>
+  <text x="137" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">2</text>
+
+  <rect x="184" y="96" width="26" height="154" rx="2" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.3"/>
+  <text x="197" y="90" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor">81</text>
+  <text x="197" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">5</text>
+
+  <rect x="244" y="72" width="26" height="178" rx="2" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.3"/>
+  <text x="257" y="66" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor">161</text>
+  <text x="257" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">10</text>
+
+  <rect x="304" y="56" width="26" height="194" rx="2" fill="var(--dual-soft)" stroke="var(--dual)" stroke-width="1.3"/>
+  <text x="317" y="50" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="currentColor">321</text>
+  <text x="317" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">20</text>
+
+  <!-- divider -->
+  <line x1="440" y1="20" x2="440" y2="270" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+  <!-- right: measured effective RF vs t -->
+  <text x="470" y="24" font-family="sans-serif" font-size="12.5" font-weight="700" fill="currentColor">Mesuré — rayon effectif selon t</text>
+  <line x1="490" y1="250" x2="860" y2="250" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+  <text x="866" y="254" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">t</text>
+  <line x1="490" y1="250" x2="490" y2="50" stroke="currentColor" stroke-width="1.2"/>
+
+  <!-- reference: uniform reach 12.25 px -->
+  <line x1="490" y1="106" x2="856" y2="106" stroke="var(--brick)" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="494" y="100" font-family="sans-serif" font-size="11" font-weight="700" fill="var(--brick)">portée uniforme sur 32×32 : 12,25 px</text>
+
+  <!-- curve: t=0.05..0.95, R from 8.79 to 5.40 ; y = 250 - R*11.7 -->
+  <polyline points="510,147 552,151 610,159 668,170 726,182 784,186 842,187"
+            fill="none" stroke="var(--dual)" stroke-width="2.4"/>
+  <circle cx="510" cy="147" r="4" fill="var(--dual)"/>
+  <circle cx="842" cy="187" r="4" fill="var(--dual)"/>
+  <text x="510" y="138" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="var(--dual)">8,8 px</text>
+  <text x="842" y="178" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="var(--dual)">5,4 px</text>
+  <text x="510" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">0,05</text>
+  <text x="842" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">0,95</text>
+  <text x="676" y="266" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.7">bruit décroissant →</text>
+</svg>
+<figcaption><b>Le réseau pourrait voir toute l'image, il ne le fait pas.</b> À gauche : deux convolutions 9×9 par itération ajoutent ±8 pixels, donc dès la deuxième itération le champ récepteur théorique dépasse les 32 pixels de l'image. À droite, le rayon effectif mesuré sur un checkpoint entraîné (<code>erf_afhq_K10_k9_metrics.txt</code>) ne vaut que 6,9 px en moyenne, 57 % d'une portée uniforme — et il rétrécit encore quand le bruit diminue, de 8,8 px à 5,4 px. La localité n'est pas imposée par l'architecture ; elle est <em>apprise</em>.</figcaption>
+</figure>
+
+<div class="note warn">
+<span class="lbl">Ce que ça change pour le rapport</span>
+<p>Le § « Structural differences with a UNet » attribue la localité du ScCP au fait que le champ récepteur « croît seulement linéairement avec K ». C'est exact, mais à 32×32 avec un noyau 9×9 cette croissance suffit dès K = 2 : l'architecture n'impose aucune contrainte de portée à cette résolution.</p>
+<p>Ce qui reste vrai en revanche, c'est que le modèle <em>choisit</em> une portée courte, et d'autant plus courte que l'image est propre. L'argument de localité doit donc porter sur le comportement appris, pas sur la structure — sinon il ne tient pas à cette taille d'image.</p>
+</div>
+</section>
+
+<section>
+<h2>Pourquoi c'est lent</h2>
+<div class="col">
+<p>Les dimensions expliquent aussi le coût, mieux que le compte de FLOPs. Chaque itération fait <strong>deux convolutions à pleine résolution</strong> — 32×32 du début à la fin, sans jamais sous-échantillonner. Un UNet, lui, descend à 4×4 dès le troisième étage et y concentre l'essentiel de son calcul.</p>
+<p>Et l'état dual doit être conservé pour la rétropropagation : 4,2 Mo par couche à batch 8, soit <strong>84 Mo d'activations</strong> sur K = 20 couches, contre 0,1 Mo si l'état était resté en espace image. C'est pourquoi <code>use_checkpoint=True</code> est indispensable dès que K grandit — et pourquoi le ScCP mesure 2,6 it/s là où un UNet de taille comparable en fait 15,7.</p>
+</div>
+</section>
+
+<footer>
+<p>Configuration mesurée : <code>in_channels=3</code>, <code>img_size=32</code>, <code>internal_channel=128</code>, <code>kernel_size=9</code>, <code>K=20</code>, <code>version="LFO"</code>, <code>use_Unet="l1"</code>.</p>
+<p>Trace reproductible : <code>python explain_sccp_dims.py --out sccp_dims.txt</code>. Champ récepteur effectif : <code>erf_afhq_K10_k9_metrics.txt</code>.</p>
+</footer>
+
+</div>

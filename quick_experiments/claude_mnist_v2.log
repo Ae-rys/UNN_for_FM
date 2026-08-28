@@ -1,0 +1,196 @@
+Donnees ./data/mnist_train.pt : 57952 train / 2048 val, (1, 28, 28)
+Device cuda:1 | loss=v coupling=ot | train t=[0.2, 0.4, 0.6, 0.8] | eval sur 19 niveaux [0.05 .. 0.95] | var(donnees)=0.2691
+
+6 config(s) : ScCP_k9_K10_ic128_l1_LFO, ScCPv2_k9_K10_ic128_l1_LFO, ScCPv2_k9_K10_ic128_l1_LFO_x0xt, ScCP_k9_K20_ic128_l1_LFO, ScCPv2_k9_K20_ic128_l1_LFO, unet_kamb
+
+
+[1/6] ScCP_k9_K10_ic128_l1_LFO
+
+======================================================================
+ScCP_k9_K10_ic128_l1_LFO
+Params : 209,611 (0.21M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 30.3463  12.71 it/s  ETA 26.2 min
+  step    500/20,000  train_mse 2.5556  13.60 it/s  ETA 23.9 min
+  step  1,000/20,000  train_mse 0.2986  13.28 it/s  ETA 23.8 min
+  step  1,500/20,000  train_mse 0.2240  13.11 it/s  ETA 23.5 min
+  step  2,000/20,000  train_mse 0.1999  13.21 it/s  ETA 22.7 min
+  step  2,500/20,000  train_mse 0.1865  13.14 it/s  ETA 22.2 min
+  step  3,000/20,000  train_mse 0.1765  13.24 it/s  ETA 21.4 min
+  step  3,500/20,000  train_mse 0.1695  13.18 it/s  ETA 20.9 min
+  step  4,000/20,000  train_mse 0.1647  13.19 it/s  ETA 20.2 min
+  step  4,500/20,000  train_mse 0.1599  13.33 it/s  ETA 19.4 min
+  step  5,000/20,000  train_mse 0.1571  13.32 it/s  ETA 18.8 min
+  step  5,500/20,000  train_mse 0.1552  13.26 it/s  ETA 18.2 min
+  step  6,000/20,000  train_mse 0.1526  13.28 it/s  ETA 17.6 min
+  step  6,500/20,000  train_mse 0.1510  13.33 it/s  ETA 16.9 min
+  step  7,000/20,000  train_mse 0.1491  13.27 it/s  ETA 16.3 min
+  step  7,500/20,000  train_mse 0.1480  13.31 it/s  ETA 15.6 min
+  step  8,000/20,000  train_mse 0.1461  13.41 it/s  ETA 14.9 min
+  step  8,500/20,000  train_mse 0.1453  13.38 it/s  ETA 14.3 min
+  step  9,000/20,000  train_mse 0.1444  13.31 it/s  ETA 13.8 min
+  step  9,500/20,000  train_mse 0.1436  13.32 it/s  ETA 13.1 min
+  step 10,000/20,000  train_mse 0.1422  13.41 it/s  ETA 12.4 min
+  step 10,500/20,000  train_mse 0.1411  13.29 it/s  ETA 11.9 min
+  step 11,000/20,000  train_mse 0.1411  13.43 it/s  ETA 11.2 min
+  step 11,500/20,000  train_mse 0.1403  13.31 it/s  ETA 10.6 min
+  step 12,000/20,000  train_mse 0.1393  13.40 it/s  ETA 9.9 min
+  step 12,500/20,000  train_mse 0.1387  13.33 it/s  ETA 9.4 min
+  step 13,000/20,000  train_mse 0.1380  13.34 it/s  ETA 8.7 min
+  step 13,500/20,000  train_mse 0.1382  13.42 it/s  ETA 8.1 min
+  step 14,000/20,000  train_mse 0.1376  13.32 it/s  ETA 7.5 min
+  step 14,500/20,000  train_mse 0.1367  13.45 it/s  ETA 6.8 min
+  step 15,000/20,000  train_mse 0.1366  13.43 it/s  ETA 6.2 min
+  step 15,500/20,000  train_mse 0.1364  13.36 it/s  ETA 5.6 min
+  step 16,000/20,000  train_mse 0.1352  13.33 it/s  ETA 5.0 min
+  step 16,500/20,000  train_mse 0.1354  13.41 it/s  ETA 4.4 min
+  step 17,000/20,000  train_mse 0.1347  13.32 it/s  ETA 3.8 min
+  step 17,500/20,000  train_mse 0.1340  13.42 it/s  ETA 3.1 min
+  step 18,000/20,000  train_mse 0.1341  13.35 it/s  ETA 2.5 min
+  step 18,500/20,000  train_mse 0.1343  13.46 it/s  ETA 1.9 min
+  step 19,000/20,000  train_mse 0.1336  13.39 it/s  ETA 1.2 min
+  step 19,500/20,000  train_mse 0.1327  13.41 it/s  ETA 0.6 min
+  step 20,000/20,000  train_mse 0.1330  13.51 it/s  ETA 0.0 min
+  -> nmse moyenne 0.2961 | t=0.2:0.816 t=0.4:0.273 t=0.6:0.077 t=0.8:0.019 | 25.0 min | reste ~126 min
+
+[2/6] ScCPv2_k9_K10_ic128_l1_LFO
+
+======================================================================
+ScCPv2_k9_K10_ic128_l1_LFO
+Params : 209,611 (0.21M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 65.7059  13.81 it/s  ETA 24.1 min
+  step    500/20,000  train_mse 6.2720  13.40 it/s  ETA 24.3 min
+  step  1,000/20,000  train_mse 1.1966  13.29 it/s  ETA 23.8 min
+  step  1,500/20,000  train_mse 0.6249  13.42 it/s  ETA 23.0 min
+  step  2,000/20,000  train_mse 0.4434  13.31 it/s  ETA 22.5 min
+  step  2,500/20,000  train_mse 0.3500  13.45 it/s  ETA 21.7 min
+  step  3,000/20,000  train_mse 0.2893  13.33 it/s  ETA 21.3 min
+  step  3,500/20,000  train_mse 0.2631  13.45 it/s  ETA 20.4 min
+  step  4,000/20,000  train_mse 0.2376  13.35 it/s  ETA 20.0 min
+  step  4,500/20,000  train_mse 0.2194  13.41 it/s  ETA 19.3 min
+  step  5,000/20,000  train_mse 0.2058  13.35 it/s  ETA 18.7 min
+  step  5,500/20,000  train_mse 0.1924  13.37 it/s  ETA 18.1 min
+  step  6,000/20,000  train_mse 0.1838  13.44 it/s  ETA 17.4 min
+  step  6,500/20,000  train_mse 0.1781  13.29 it/s  ETA 16.9 min
+  step  7,000/20,000  train_mse 0.1720  13.45 it/s  ETA 16.1 min
+  step  7,500/20,000  train_mse 0.1681  13.36 it/s  ETA 15.6 min
+  step  8,000/20,000  train_mse 0.1642  13.42 it/s  ETA 14.9 min
+  step  8,500/20,000  train_mse 0.1612  13.32 it/s  ETA 14.4 min
+  step  9,000/20,000  train_mse 0.1604  13.35 it/s  ETA 13.7 min
+  step  9,500/20,000  train_mse 0.1577  13.44 it/s  ETA 13.0 min
+  step 10,000/20,000  train_mse 0.1558  13.43 it/s  ETA 12.4 min
+  step 10,500/20,000  train_mse 0.1537  13.35 it/s  ETA 11.9 min
+  step 11,000/20,000  train_mse 0.1524  13.34 it/s  ETA 11.2 min
+  step 11,500/20,000  train_mse 0.1508  13.41 it/s  ETA 10.6 min
+  step 12,000/20,000  train_mse 0.1489  13.34 it/s  ETA 10.0 min
+  step 12,500/20,000  train_mse 0.1487  13.33 it/s  ETA 9.4 min
+  step 13,000/20,000  train_mse 0.1472  13.45 it/s  ETA 8.7 min
+  step 13,500/20,000  train_mse 0.1463  13.41 it/s  ETA 8.1 min
+  step 14,000/20,000  train_mse 0.1456  13.35 it/s  ETA 7.5 min
+  step 14,500/20,000  train_mse 0.1438  13.34 it/s  ETA 6.9 min
+  step 15,000/20,000  train_mse 0.1435  13.42 it/s  ETA 6.2 min
+  step 15,500/20,000  train_mse 0.1428  13.33 it/s  ETA 5.6 min
+  step 16,000/20,000  train_mse 0.1411  13.32 it/s  ETA 5.0 min
+  step 16,500/20,000  train_mse 0.1407  13.44 it/s  ETA 4.3 min
+  step 17,000/20,000  train_mse 0.1402  13.33 it/s  ETA 3.8 min
+  step 17,500/20,000  train_mse 0.1398  13.40 it/s  ETA 3.1 min
+  step 18,000/20,000  train_mse 0.1392  13.34 it/s  ETA 2.5 min
+  step 18,500/20,000  train_mse 0.1390  13.33 it/s  ETA 1.9 min
+  step 19,000/20,000  train_mse 0.1384  13.43 it/s  ETA 1.2 min
+  step 19,500/20,000  train_mse 0.1372  13.40 it/s  ETA 0.6 min
+  step 20,000/20,000  train_mse 0.1373  13.32 it/s  ETA 0.0 min
+  -> nmse moyenne 0.3022 | t=0.2:0.828 t=0.4:0.281 t=0.6:0.080 t=0.8:0.020 | 24.9 min | reste ~101 min
+
+[3/6] ScCPv2_k9_K10_ic128_l1_LFO_x0xt
+
+======================================================================
+ScCPv2_k9_K10_ic128_l1_LFO_x0xt
+Params : 209,611 (0.21M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 51.4600  13.70 it/s  ETA 24.3 min
+  step    500/20,000  train_mse 5.5108  13.30 it/s  ETA 24.4 min
+  step  1,000/20,000  train_mse 0.8084  13.18 it/s  ETA 24.0 min
+  step  1,500/20,000  train_mse 0.4771  13.29 it/s  ETA 23.2 min
+  step  2,000/20,000  train_mse 0.3688  13.23 it/s  ETA 22.7 min
+  step  2,500/20,000  train_mse 0.3049  13.31 it/s  ETA 21.9 min
+  step  3,000/20,000  train_mse 0.2694  13.25 it/s  ETA 21.4 min
+  step  3,500/20,000  train_mse 0.2405  13.37 it/s  ETA 20.6 min
+  step  4,000/20,000  train_mse 0.2192  13.30 it/s  ETA 20.1 min
+  step  4,500/20,000  train_mse 0.2102  13.33 it/s  ETA 19.4 min
+  step  5,000/20,000  train_mse 0.2086  13.27 it/s  ETA 18.8 min
+  step  5,500/20,000  train_mse 0.1993  13.28 it/s  ETA 18.2 min
+  step  6,000/20,000  train_mse 0.1907  13.37 it/s  ETA 17.4 min
+  step  6,500/20,000  train_mse 0.1851  13.27 it/s  ETA 17.0 min
+  step  7,000/20,000  train_mse 0.1799  13.35 it/s  ETA 16.2 min
+  step  7,500/20,000  train_mse 0.1761  13.32 it/s  ETA 15.6 min
+  step  8,000/20,000  train_mse 0.1740  13.36 it/s  ETA 15.0 min
+  step  8,500/20,000  train_mse 0.1698  13.27 it/s  ETA 14.4 min
+  step  9,000/20,000  train_mse 0.1682  13.27 it/s  ETA 13.8 min
+  step  9,500/20,000  train_mse 0.1654  13.39 it/s  ETA 13.1 min
+  step 10,000/20,000  train_mse 0.1619  13.38 it/s  ETA 12.5 min
+  step 10,500/20,000  train_mse 0.1587  13.29 it/s  ETA 11.9 min
+  step 11,000/20,000  train_mse 0.1576  13.29 it/s  ETA 11.3 min
+  step 11,500/20,000  train_mse 0.1555  13.37 it/s  ETA 10.6 min
+  step 12,000/20,000  train_mse 0.1533  13.30 it/s  ETA 10.0 min
+  step 12,500/20,000  train_mse 0.1524  13.30 it/s  ETA 9.4 min
+  step 13,000/20,000  train_mse 0.1510  13.43 it/s  ETA 8.7 min
+  step 13,500/20,000  train_mse 0.1515  13.37 it/s  ETA 8.1 min
+  step 14,000/20,000  train_mse 0.1501  13.23 it/s  ETA 7.6 min
+  step 14,500/20,000  train_mse 0.1494  13.21 it/s  ETA 6.9 min
+  step 15,000/20,000  train_mse 0.1488  13.28 it/s  ETA 6.3 min
+  step 15,500/20,000  train_mse 0.1477  13.22 it/s  ETA 5.7 min
+  step 16,000/20,000  train_mse 0.1473  13.21 it/s  ETA 5.0 min
+  step 16,500/20,000  train_mse 0.1465  13.29 it/s  ETA 4.4 min
+  step 17,000/20,000  train_mse 0.1461  13.26 it/s  ETA 3.8 min
+  step 17,500/20,000  train_mse 0.1464  13.33 it/s  ETA 3.1 min
+  step 18,000/20,000  train_mse 0.1452  13.28 it/s  ETA 2.5 min
+  step 18,500/20,000  train_mse 0.1451  13.30 it/s  ETA 1.9 min
+  step 19,000/20,000  train_mse 0.1440  13.36 it/s  ETA 1.2 min
+  step 19,500/20,000  train_mse 0.1439  13.36 it/s  ETA 0.6 min
+  step 20,000/20,000  train_mse 0.1437  13.30 it/s  ETA 0.0 min
+  -> nmse moyenne 0.3074 | t=0.2:0.830 t=0.4:0.298 t=0.6:0.082 t=0.8:0.020 | 25.1 min | reste ~76 min
+
+[4/6] ScCP_k9_K20_ic128_l1_LFO
+
+======================================================================
+ScCP_k9_K20_ic128_l1_LFO
+Params : 419,221 (0.42M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 19.7720  6.76 it/s  ETA 49.2 min
+  step    500/20,000  train_mse 1.8313  6.59 it/s  ETA 49.3 min
+  step  1,000/20,000  train_mse 0.4217  6.61 it/s  ETA 47.9 min
+  step  1,500/20,000  train_mse 0.2654  6.60 it/s  ETA 46.7 min
+  step  2,000/20,000  train_mse 0.2188  6.66 it/s  ETA 45.0 min
+  step  2,500/20,000  train_mse 0.2027  6.63 it/s  ETA 44.0 min
+  step  3,000/20,000  train_mse 0.1908  6.66 it/s  ETA 42.5 min
+  step  3,500/20,000  train_mse 0.1853  6.65 it/s  ETA 41.4 min
+  step  4,000/20,000  train_mse 0.1803  6.67 it/s  ETA 40.0 min
+  step  4,500/20,000  train_mse 0.1760  6.66 it/s  ETA 38.8 min
+  step  5,000/20,000  train_mse 0.1739  6.66 it/s  ETA 37.5 min
+  step  5,500/20,000  train_mse 0.1711  6.64 it/s  ETA 36.4 min
+  step  6,000/20,000  train_mse 0.1686  6.67 it/s  ETA 35.0 min
+  step  6,500/20,000  train_mse 0.1666  6.69 it/s  ETA 33.6 min
+  step  7,000/20,000  train_mse 0.1657  6.71 it/s  ETA 32.3 min
+  step  7,500/20,000  train_mse 0.1632  6.69 it/s  ETA 31.1 min
+  step  8,000/20,000  train_mse 0.1632  6.71 it/s  ETA 29.8 min
+  step  8,500/20,000  train_mse 0.1613  6.69 it/s  ETA 28.6 min
+  step  9,000/20,000  train_mse 0.1609  6.70 it/s  ETA 27.4 min
+  step  9,500/20,000  train_mse 0.1599  6.67 it/s  ETA 26.2 min
+  step 10,000/20,000  train_mse 0.1589  6.70 it/s  ETA 24.9 min
+  step 10,500/20,000  train_mse 0.1576  6.70 it/s  ETA 23.6 min
+  step 11,000/20,000  train_mse 0.1575  6.68 it/s  ETA 22.4 min
+  step 11,500/20,000  train_mse 0.1566  6.66 it/s  ETA 21.3 min
+  step 12,000/20,000  train_mse 0.1555  6.69 it/s  ETA 19.9 min
+  step 12,500/20,000  train_mse 0.1550  6.68 it/s  ETA 18.7 min
+  step 13,000/20,000  train_mse 0.1545  6.69 it/s  ETA 17.4 min
+  step 13,500/20,000  train_mse 0.1551  6.68 it/s  ETA 16.2 min
+  step 14,000/20,000  train_mse 0.1545  6.70 it/s  ETA 14.9 min
+  step 14,500/20,000  train_mse 0.1537  6.70 it/s  ETA 13.7 min
+  step 15,000/20,000  train_mse 0.1529  6.70 it/s  ETA 12.4 min
+  step 15,500/20,000  train_mse 0.1528  6.67 it/s  ETA 11.2 min
+  step 16,000/20,000  train_mse 0.1525  6.70 it/s  ETA 9.9 min
+  step 16,500/20,000  train_mse 0.1522  5.27 it/s  ETA 11.1 min
+  step 17,000/20,000  train_mse 0.1512  5.16 it/s  ETA 9.7 min
+  step 17,500/20,000  train_mse 0.1504  4.29 it/s  ETA 9.7 min
+  step 18,000/20,000  train_mse 0.1510  6.68 it/s  ETA 5.0 min

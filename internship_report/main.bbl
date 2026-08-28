@@ -1,0 +1,104 @@
+\begin{thebibliography}{10}
+
+\bibitem{arrow1958}
+Kenneth~J. Arrow, Leonid Hurwicz, and Hirofumi Uzawa.
+\newblock {\em Studies in Linear and Non-Linear Programming}.
+\newblock Stanford University Press, Stanford, CA, 1958.
+
+\bibitem{beck2009fast}
+Amir Beck and Marc Teboulle.
+\newblock A fast iterative shrinkage-thresholding algorithm for linear inverse
+  problems.
+\newblock {\em SIAM J. Imaging Sci.}, 2(1):183--202, 2009.
+
+\bibitem{chambolle2011first}
+Antonin Chambolle and Thomas Pock.
+\newblock A first-order primal-dual algorithm for convex problems with
+  applications to imaging.
+\newblock {\em Journal of Mathematical Imaging and Vision}, 40(1):120--145,
+  2011.
+
+\bibitem{NEURIPS2018_69386f6b}
+Ricky T.~Q. Chen, Yulia Rubanova, Jesse Bettencourt, and David~K. Duvenaud.
+\newblock Neural ordinary differential equations.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  volume~31, 2018.
+
+\bibitem{combettes2005signal}
+Patrick~L. Combettes and Val{\'e}rie~R. Wajs.
+\newblock Signal recovery by proximal forward-backward splitting.
+\newblock {\em Multiscale Modeling \& Simulation}, 4(4):1168--1200, 2005.
+
+\bibitem{fukumizu2026proximal}
+Kenji Fukumizu, Wei Huang, Han Bao, Shuntuo Xu, and Nisha Chandramoorthy.
+\newblock Flow matching from viewpoint of proximal operators, 2026.
+
+\bibitem{gagneux2025generation}
+Anne Gagneux, S{\'e}gol{\`e}ne Martin, R{\'e}mi Gribonval, and Mathurin
+  Massias.
+\newblock The generation phases of flow matching: a denoising perspective.
+\newblock {\em arXiv preprint arXiv:2510.24830}, 2025.
+
+\bibitem{gagneux2025avisualdive}
+Anne Gagneux, Ségolène Martin, Rémi Emonet, Quentin Bertrand, and Mathurin
+  Massias.
+\newblock A visual dive into conditional flow matching.
+\newblock In {\em ICLR Blogposts 2025}, 2025.
+\newblock
+  https://dl.heeere.com/conditional-flow-matching/blog/conditional-flow-matching/.
+
+\bibitem{gregor2010learning}
+Karol Gregor and Yann LeCun.
+\newblock Learning fast approximations of sparse coding.
+\newblock In {\em Proceedings of the 27th international conference on
+  international conference on machine learning}, pages 399--406, 2010.
+
+\bibitem{jabri2023rin}
+Allan Jabri, David~J. Fleet, and Ting Chen.
+\newblock Scalable adaptive computation for iterative generation.
+\newblock In {\em International Conference on Machine Learning (ICML)}, PMLR,
+  2023.
+
+\bibitem{le2024unfolded}
+H.T.V. Le, A.~Repetti, and N.~Pustelnik.
+\newblock Unfolded proximal neural networks for robust image {G}aussian
+  denoising.
+\newblock {\em IEEE Trans. Image Process.}, 33:4475--4487, 2024.
+
+\bibitem{li2026back}
+Tianhong Li and Kaiming He.
+\newblock Back to basics: Let denoising generative models denoise.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition}, pages 36115--36125, 2026.
+
+\bibitem{lipman2023flowmatching}
+Yaron Lipman, Ricky T.~Q. Chen, Heli Ben-Hamu, Maximilian Nickel, and Matt Le.
+\newblock Flow matching for generative modeling, 2023.
+
+\bibitem{monga2021algorithm}
+Vishal Monga, Yuelong Li, and Yonina~C. Eldar.
+\newblock Algorithm unrolling: Interpretable, efficient deep learning for
+  signal and image processing.
+\newblock {\em IEEE Signal Processing Magazine}, 38(2):18--44, 2021.
+
+\bibitem{pesquet2021learning}
+Jean-Christophe Pesquet, Audrey Repetti, Matthieu Terris, and Yves Wiaux.
+\newblock Learning maximally monotone operators for image recovery.
+\newblock {\em SIAM Journal on Imaging Sciences}, 14(3):1206--1237, 2021.
+
+\bibitem{repetti_eusipco}
+Audrey Repetti.
+\newblock Proximal neural networks: Marrying variational methods and artificial
+  intelligence.
+\newblock EUSIPCO tutorial, 2025.
+\newblock
+  \texttt{https://sites.google.com/view/audreyrepetti/events/2025-eusipco-tutorial}.
+
+\bibitem{tong2024improving}
+Alexander Tong, Kilian Fatras, Nikolay Malkin, Guillaume Huguet, Yanlei Zhang,
+  Jarrid Rector-Brooks, Guy Wolf, and Yoshua Bengio.
+\newblock Improving and generalizing flow-based generative models with
+  minibatch optimal transport.
+\newblock {\em Transactions on Machine Learning Research}, 2024.
+
+\end{thebibliography}

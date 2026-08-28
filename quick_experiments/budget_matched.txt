@@ -1,0 +1,115 @@
+
+==========================================================================
+COMPARAISONS A BUDGET APPARIE  (reference lineaire optimale : 0.2193)
+==========================================================================
+
+10,000 steps — 7 configuration(s)
+  config                 params     nmse   regime
+  k9/K20/ic128        1,248,661   0.4101   SOUS-ENTRAINE (+87.0 % vs lineaire)
+  k9/K20/ic256        2,495,381   0.4762   SOUS-ENTRAINE (+117.1 % vs lineaire)
+  k9/K10/ic128          624,331   0.6177   SOUS-ENTRAINE (+181.7 % vs lineaire)
+  k15/K20/ic256       6,919,061   0.6380   SOUS-ENTRAINE (+190.9 % vs lineaire)
+  k25/K10/ic256       9,603,531   0.6526   SOUS-ENTRAINE (+197.6 % vs lineaire)
+  k15/K15/ic512      10,377,136   0.7116   SOUS-ENTRAINE (+224.5 % vs lineaire)
+  k9/K10/ic256        1,247,691   1.5212   SOUS-ENTRAINE (+593.7 % vs lineaire)
+
+20,000 steps — 6 configuration(s)
+  config                 params     nmse   regime
+  k9/K10/ic128          624,331   0.3231   SOUS-ENTRAINE (+47.4 % vs lineaire)
+  k9/K20/ic256        2,495,381   0.3650   SOUS-ENTRAINE (+66.5 % vs lineaire)
+  k25/K10/ic256       9,603,531   0.3816   SOUS-ENTRAINE (+74.0 % vs lineaire)
+  k15/K15/ic512      10,377,136   0.3951   SOUS-ENTRAINE (+80.2 % vs lineaire)
+  k15/K20/ic256       6,919,061   0.4216   SOUS-ENTRAINE (+92.3 % vs lineaire)
+  k9/K10/ic256        1,247,691   0.5593   SOUS-ENTRAINE (+155.0 % vs lineaire)
+
+30,000 steps — 6 configuration(s)
+  config                 params     nmse   regime
+  k9/K10/ic128          624,331   0.2410   SOUS-ENTRAINE (+9.9 % vs lineaire)
+  k9/K20/ic256        2,495,381   0.2489   SOUS-ENTRAINE (+13.5 % vs lineaire)
+  k9/K10/ic256        1,247,691   0.2598   SOUS-ENTRAINE (+18.5 % vs lineaire)
+  k15/K20/ic256       6,919,061   0.2769   SOUS-ENTRAINE (+26.3 % vs lineaire)
+  k25/K10/ic256       9,603,531   0.2968   SOUS-ENTRAINE (+35.4 % vs lineaire)
+  k15/K15/ic512      10,377,136   0.3000   SOUS-ENTRAINE (+36.8 % vs lineaire)
+
+40,000 steps — 6 configuration(s)
+  config                 params     nmse   regime
+  k9/K20/ic256        2,495,381   0.2205   SOUS-ENTRAINE (+0.5 % vs lineaire)
+  k9/K10/ic128          624,331   0.2220   SOUS-ENTRAINE (+1.2 % vs lineaire)
+  k9/K10/ic256        1,247,691   0.2222   SOUS-ENTRAINE (+1.3 % vs lineaire)
+  k15/K20/ic256       6,919,061   0.2264   SOUS-ENTRAINE (+3.2 % vs lineaire)
+  k25/K10/ic256       9,603,531   0.2406   SOUS-ENTRAINE (+9.7 % vs lineaire)
+  k15/K15/ic512      10,377,136   0.2434   SOUS-ENTRAINE (+11.0 % vs lineaire)
+
+50,000 steps — 5 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2122   valide
+  k9/K10/ic256        1,247,691   0.2155   valide
+  k9/K10/ic128          624,331   0.2161   valide
+  k25/K10/ic256       9,603,531   0.2198   SOUS-ENTRAINE (+0.2 % vs lineaire)
+  k15/K15/ic512      10,377,136   0.2239   SOUS-ENTRAINE (+2.1 % vs lineaire)
+
+60,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2075   valide
+  k9/K10/ic128          624,331   0.2134   valide
+
+70,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2050   valide
+  k9/K10/ic128          624,331   0.2118   valide
+
+80,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2036   valide
+  k9/K10/ic128          624,331   0.2107   valide
+
+90,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2022   valide
+  k9/K10/ic128          624,331   0.2098   valide
+
+100,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2009   valide
+  k9/K10/ic128          624,331   0.2091   valide
+
+110,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.2003   valide
+  k9/K10/ic128          624,331   0.2086   valide
+
+120,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.1996   valide
+  k9/K10/ic128          624,331   0.2080   valide
+
+130,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.1991   valide
+  k9/K10/ic128          624,331   0.2076   valide
+
+140,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.1986   valide
+  k9/K10/ic128          624,331   0.2072   valide
+
+150,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.1980   valide
+  k9/K10/ic128          624,331   0.2069   valide
+
+160,000 steps — 2 configuration(s)
+  config                 params     nmse   regime
+  k15/K20/ic256       6,919,061   0.1977   valide
+  k9/K10/ic128          624,331   0.2066   valide
+
+==========================================================================
+BUDGET A PARTIR DUQUEL LA CONFIGURATION DEVIENT COMPARABLE
+==========================================================================
+  k9/K10/ic128          624,331  passe sous 0.2193 des 50,000 steps
+  k9/K10/ic256        1,247,691  passe sous 0.2193 des 50,000 steps
+  k9/K20/ic128        1,248,661  jamais (meilleur : 0.4101 a 10,000 steps)
+  k9/K20/ic256        2,495,381  jamais (meilleur : 0.2205 a 40,000 steps)
+  k15/K20/ic256       6,919,061  passe sous 0.2193 des 50,000 steps
+  k25/K10/ic256       9,603,531  jamais (meilleur : 0.2198 a 50,000 steps)
+  k15/K15/ic512      10,377,136  jamais (meilleur : 0.2239 a 50,000 steps)

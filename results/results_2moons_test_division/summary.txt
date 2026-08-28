@@ -1,0 +1,9 @@
+model_name	n_params	final_loss	final_w2_error	train_time_s	status
+DFB_UNN_L1_LNO_K25_dual16_beginFalse_endFalse_predx	1425	1.002722	0.997896	129.8	OK
+DFB_UNN_L1_LNO_K25_dual16_beginFalse_endFalse_predv	1425	0.044119	0.277712	128.8	OK
+DFB_UNN_L1_LNO_K25_dual16_beginFalse_endTrue_predx	1425	1.002125	1.401944	132.5	OK
+DFB_UNN_L1_LNO_K25_dual16_beginFalse_endTrue_predv	1425	0.049997	0.232755	127.2	OK
+DFB_UNN_L1_LNO_K25_dual16_beginTrue_endFalse_predx	1425	1.032407	0.948581	133.3	OK
+DFB_UNN_L1_LNO_K25_dual16_beginTrue_endFalse_predv	1425	0.094774	0.303662	133.0	OK
+DFB_UNN_L1_LNO_K25_dual16_beginTrue_endTrue_predx	1425	1.026650	1.379138	136.3	OK
+DFB_UNN_L1_LNO_K25_dual16_beginTrue_endTrue_predv	1425	0.078694	0.306890	132.0	OK

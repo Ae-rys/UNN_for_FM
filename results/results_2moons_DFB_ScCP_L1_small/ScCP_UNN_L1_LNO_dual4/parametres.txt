@@ -1,0 +1,4 @@
+model_class=ScCP_UNN
+K=3
+dual_dim=4
+version=LNO

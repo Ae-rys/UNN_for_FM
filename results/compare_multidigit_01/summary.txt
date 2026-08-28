@@ -1,0 +1,5 @@
+# digits=[0, 1] nb_epochs=12 batch_size=512 c_lat=16 n_samples=64
+ScCP_L1_perchannel_xpred	params=2977414	final_loss=0.487460	std_global=0.8643	std_intraclass=0.8643	counts={0: 0, 1: 64}
+ScCP_L1_perchannel_vpred	params=2977414	final_loss=0.600164	std_global=1.0779	std_intraclass=0.8520	counts={0: 10, 1: 54}
+SmallUNetLatentV2_xpred	params=901776	final_loss=0.372673	std_global=0.0183	std_intraclass=0.0183	counts={0: 0, 1: 64}
+SmallUNetLatentV2_vpred	params=901776	final_loss=0.343886	std_global=0.4810	std_intraclass=0.4150	counts={0: 21, 1: 43}

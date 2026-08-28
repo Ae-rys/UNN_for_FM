@@ -1,0 +1,4 @@
+model_name	n_params	final_loss	final_w2_error	train_time_s	status
+MLP_baseline	4546	0.038821	0.207042	37.1	OK
+ScCP_UNN_L1_LFO_K35_dual16	5636	0.061072	0.270669	158.7	OK
+ScCP_UNN_L1_LNO_K35_dual16	4550	0.032001	0.174089	214.8	OK

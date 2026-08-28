@@ -1,0 +1,13 @@
+========================================================================
+ScCP k9/K10/ic128 — memes graines, Euler-20, budget 120,000
+========================================================================
+
+distance RMS ancien vs nouveau : 0.0692
+echelle de reference (2 images AFHQ au hasard) : 0.6772
+soit 10.2 % de l'echelle -> meme image, details differents
+
+par graine :
+  0:0.055  1:0.068  2:0.079  3:0.064  4:0.075  5:0.086  6:0.067  7:0.066  8:0.070  9:0.066  10:0.063  11:0.065
+
+le plus proche  : graine 0 (0.0554)
+le plus eloigne : graine 5 (0.0860)

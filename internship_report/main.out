@@ -1,0 +1,55 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Preliminaries}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Convex Analysis}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Vector Calculus and Dynamical Systems}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Linear Algebra and Stability}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Feedforward Networks}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.5}{Proximal Algorithms}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.5.1}{Some Proximal Algorithms}{subsection.2.5}% 8
+\BOOKMARK [3][-]{subsubsection.2.5.2}{A simple case: ISTA}{subsection.2.5}% 9
+\BOOKMARK [2][-]{subsection.2.6}{Unrolled Neural Networks \(UNN\)}{section.2}% 10
+\BOOKMARK [3][-]{subsubsection.2.6.1}{Example: LISTA}{subsection.2.6}% 11
+\BOOKMARK [2][-]{subsection.2.7}{Conditional Flow Matching \(CFM\)}{section.2}% 12
+\BOOKMARK [3][-]{subsubsection.2.7.1}{Background: Continuous Normalizing Flows}{subsection.2.7}% 13
+\BOOKMARK [3][-]{subsubsection.2.7.2}{The Flow Matching Objective}{subsection.2.7}% 14
+\BOOKMARK [3][-]{subsubsection.2.7.3}{The Conditional Approach}{subsection.2.7}% 15
+\BOOKMARK [3][-]{subsubsection.2.7.4}{Gaussian Paths}{subsection.2.7}% 16
+\BOOKMARK [3][-]{subsubsection.2.7.5}{Choice of the coupling}{subsection.2.7}% 17
+\BOOKMARK [3][-]{subsubsection.2.7.6}{Summary}{subsection.2.7}% 18
+\BOOKMARK [1][-]{section.3}{Related Work}{}% 19
+\BOOKMARK [1][-]{section.4}{Our Contribution}{}% 20
+\BOOKMARK [2][-]{subsection.4.1}{A Denoising Perspective on Flow Matching}{section.4}% 21
+\BOOKMARK [2][-]{subsection.4.2}{Building the Velocity Field with an Unrolled Network}{section.4}% 22
+\BOOKMARK [3][-]{subsubsection.4.2.1}{Role of the UNN}{subsection.4.2}% 23
+\BOOKMARK [3][-]{subsubsection.4.2.2}{Recovering the velocity}{subsection.4.2}% 24
+\BOOKMARK [3][-]{subsubsection.4.2.3}{Output parameterisation: x-prediction with a velocity-based loss}{subsection.4.2}% 25
+\BOOKMARK [3][-]{subsubsection.4.2.4}{Inference}{subsection.4.2}% 26
+\BOOKMARK [2][-]{subsection.4.3}{Architectural Design Choices}{section.4}% 27
+\BOOKMARK [3][-]{subsubsection.4.3.1}{Choice of the Algorithm Family}{subsection.4.3}% 28
+\BOOKMARK [3][-]{subsubsection.4.3.2}{LNO vs. LFO}{subsection.4.3}% 29
+\BOOKMARK [3][-]{subsubsection.4.3.3}{Choice of Proximal Operator}{subsection.4.3}% 30
+\BOOKMARK [2][-]{subsection.4.4}{Algorithm Parameterisations}{section.4}% 31
+\BOOKMARK [3][-]{subsubsection.4.4.1}{Dual Forward-Backward \(DFB\)}{subsection.4.4}% 32
+\BOOKMARK [3][-]{subsubsection.4.4.2}{Strongly-Convex Chambolle\205Pock \(ScCP\)}{subsection.4.4}% 33
+\BOOKMARK [2][-]{subsection.4.5}{Implemented Models}{section.4}% 34
+\BOOKMARK [3][-]{subsubsection.4.5.1}{Baselines}{subsection.4.5}% 35
+\BOOKMARK [3][-]{subsubsection.4.5.2}{Standard UNNs}{subsection.4.5}% 36
+\BOOKMARK [3][-]{subsubsection.4.5.3}{Convolutional UNNs}{subsection.4.5}% 37
+\BOOKMARK [3][-]{subsubsection.4.5.4}{Breaking the odd symmetry of the proximal velocity field}{subsection.4.5}% 38
+\BOOKMARK [2][-]{subsection.4.6}{Structural Differences with a UNet}{section.4}% 39
+\BOOKMARK [2][-]{subsection.4.7}{Hyperparameters}{section.4}% 40
+\BOOKMARK [1][-]{section.5}{Numerical Experiments}{}% 41
+\BOOKMARK [2][-]{subsection.5.1}{Results on Two Moons}{section.5}% 42
+\BOOKMARK [2][-]{subsection.5.2}{Results on MNIST}{section.5}% 43
+\BOOKMARK [2][-]{subsection.5.3}{Results on AFHQ}{section.5}% 44
+\BOOKMARK [1][-]{section.6}{Conclusion and Future Work}{}% 45
+\BOOKMARK [1][-]{section.7}{Personal Remarks}{}% 46
+\BOOKMARK [1][-]{section.8}{Appendix}{}% 47
+\BOOKMARK [2][-]{subsection.8.1}{Explored Directions}{section.8}% 48
+\BOOKMARK [3][-]{subsubsection.8.1.1}{What did not work}{subsection.8.1}% 49
+\BOOKMARK [3][-]{subsubsection.8.1.2}{Warm-starting the dual variable across ODE steps}{subsection.8.1}% 50
+\BOOKMARK [3][-]{subsubsection.8.1.3}{Different choices of proximal operators}{subsection.8.1}% 51
+\BOOKMARK [2][-]{subsection.8.2}{A prototyping bench: denoising at fixed noise levels}{section.8}% 52
+\BOOKMARK [3][-]{subsubsection.8.2.1}{The computational cost of unrolling}{subsection.8.2}% 53
+\BOOKMARK [3][-]{subsubsection.8.2.2}{Scaling up: CIFAR-10 and AFHQ-32}{subsection.8.2}% 54
+\BOOKMARK [1][-]{paragraph*.23}{References}{}% 55

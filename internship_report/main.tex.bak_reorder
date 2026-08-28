@@ -1,0 +1,1899 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}   % accented characters in the source (É, é, ...)
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[official]{eurosym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{theorem}
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{euscript}
+\usepackage{graphicx}
+\graphicspath{{images/}{./}}
+% --- Robustness: a figure that is not on disk yet is replaced by a visible
+% --- placeholder box instead of aborting the compilation. Remove this block
+% --- once every figure of the report exists.
+\newcommand{\incfig}[2][width=\linewidth]{%
+  \IfFileExists{#2}%
+    {\includegraphics[#1]{#2}}%
+    {\fbox{\begin{minipage}[c][0.28\textheight][c]{0.8\linewidth}%
+       \centering\ttfamily\small [figure not found]\\[2mm]\detokenize{#2}%
+     \end{minipage}}}%
+}
+\usepackage{minted}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\usepackage{comment}
+
+\input alphabet
+
+\renewcommand{\baselinestretch}{1.0}
+
+\newcommand{\email}{}%[1]{\href{mailto:#1}{\nolinkurl{#1}}}
+%--------------------------------------------------------------------
+\oddsidemargin 0.2cm
+\textwidth     16.4cm
+\topmargin     -0.55cm
+\headheight    0.0cm
+\headsep       0.0cm
+\textheight    25.4cm
+\footskip      1.0cm
+\parindent     5mm
+\parskip       2pt plus 1pt
+\tolerance     1000
+%------------------------ DENSITY ---------------------------------
+% Everything below only tightens vertical whitespace; remove this block
+% to get the airier layout back.
+\setlength{\abovedisplayskip}{4pt plus 2pt minus 1pt}
+\setlength{\belowdisplayskip}{4pt plus 2pt minus 1pt}
+\setlength{\abovedisplayshortskip}{2pt plus 1pt}
+\setlength{\belowdisplayshortskip}{3pt plus 1pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{0pt}
+\usepackage{enumitem}
+\setlist{topsep=2pt, itemsep=2pt, parsep=0pt, partopsep=0pt}
+\IfFileExists{titlesec.sty}{%
+  \usepackage[compact]{titlesec}
+  \titlespacing*{\section}      {0pt}{2.2ex plus .6ex}{1.2ex plus .2ex}
+  \titlespacing*{\subsection}   {0pt}{1.8ex plus .5ex}{0.8ex plus .2ex}
+  \titlespacing*{\subsubsection}{0pt}{1.4ex plus .4ex}{0.6ex plus .2ex}
+  \titlespacing*{\paragraph}    {0pt}{1.0ex plus .3ex}{1em}%
+}{}
+%------------------------ HYPERLINKS -----------------------------
+\definecolor{labelkey}{rgb}{0,0.08,0.45}
+\definecolor{refkey}{rgb}{0,0.6,0.0}
+\definecolor{Brown}{rgb}{0.45,0.0,0.05}
+\definecolor{dgreen}{rgb}{0.00,0.49,0.00}
+\definecolor{dblue}{rgb}{0,0.08,0.75}
+\RequirePackage[colorlinks,hyperindex]{hyperref}
+\hypersetup{linktocpage=true,citecolor=dblue,linkcolor=dgreen}
+\usepackage{cleveref}
+%-------------------------------------------------------------------
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+\renewcommand{\leq}{\ensuremath{\leqslant}}
+\renewcommand{\geq}{\ensuremath{\geqslant}}
+\renewcommand{\le}{\ensuremath{\leqslant}}
+\renewcommand{\ge}{\ensuremath{\geqslant}}
+\newcommand{\minimize}[2]{\ensuremath{\underset{\substack{{#1}}}%
+{\text{\rm minimize}}\;\;#2 }}
+\newcommand{\moyo}[2]{\ensuremath{\sideset{^{#2}}{}{\operatorname{}}\!\!#1}}
+\newcommand{\EC}[2]{{\mathsf E}(#1\! \mid\! #2)}
+\newcommand{\PC}[2]{{\mathsf P}(#1\! \mid\! #2)}
+\newcommand{\Frac}[2]{\displaystyle{\frac{#1}{#2}}}
+\newcommand{\Scal}[2]{\bigg\langle{#1}\;\bigg|\:{#2}\bigg\rangle}
+\newcommand{\scal}[2]{{\left\langle{{#1}\mid{#2}}\right\rangle}}
+\newcommand{\pair}[2]{{\left\langle{{#1},{#2}}\right\rangle}}
+\newcommand{\menge}[2]{\big\{{#1}~\big |~{#2}\big\}}
+\newcommand{\Menge}[2]{\left\{{#1}~\Big|~{#2}\right\}}
+\newcommand{\HHH}{{\ensuremath{\boldsymbol{\mathsf H}}}}
+\newcommand{\GGG}{{\ensuremath{\boldsymbol{\mathsf G}}}}
+\newcommand{\KKK}{{\ensuremath{\boldsymbol{\mathsf K}}}}
+\newcommand{\HH}{\ensuremath{{\mathsf H}}}
+\newcommand{\GG}{\ensuremath{{\mathsf G}}}
+\newcommand{\KK}{\ensuremath{{\mathsf K}}}
+\newcommand{\FF}{\ensuremath{{\EuScript F}}}
+\newcommand{\XX}{\ensuremath{\EuScript{X}}}
+\newcommand{\ZZZ}{\ensuremath{\EuScript{Z}}}
+\newcommand{\XXX}{\ensuremath{\boldsymbol{\EuScript{X}}}}
+\newcommand{\Sum}{\ensuremath{\displaystyle\sum}}
+\newcommand{\emp}{\ensuremath{{\varnothing}}}
+\newcommand{\lev}[1]{{\ensuremath{{{{\operatorname{lev}}}_{\leq #1}}\,}}}
+\newcommand{\Id}{\ensuremath{\operatorname{I}}}
+\newcommand{\IDt}{\ensuremath{\mathbf{Id}}\,}
+\newcommand{\cart}{\ensuremath{\raisebox{-0.5mm}{\mbox{\LARGE{$\times$}}}}}
+\newcommand{\Cart}{\ensuremath{\raisebox{-0.5mm}{\mbox{\huge{$\times$}}}}}
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+\newcommand{\RP}{\ensuremath{\left[0,+\infty\right[}}
+\newcommand{\RM}{\ensuremath{\left]-\infty,0\right]}}
+\newcommand{\RMM}{\ensuremath{\left]-\infty,0\right[}}
+\newcommand{\BL}{\ensuremath{\EuScript B}}
+\newcommand{\RPP}{\ensuremath{\left]0,+\infty\right[}}
+\newcommand{\RPPX}{\ensuremath{\left]0,+\infty\right]}}
+\newcommand{\soft}[1]{\ensuremath{{\:\operatorname{soft}}_{{#1}}\,}}
+\newcommand{\RPX}{\ensuremath{\left[0,+\infty\right]}}
+\newcommand{\RX}{\ensuremath{\left]-\infty,+\infty\right]}}
+\newcommand{\RXX}{\ensuremath{\left[-\infty,+\infty\right]}}
+\newcommand{\EE}{\ensuremath{\mathsf E}}
+\newcommand{\PP}{\ensuremath{\mathsf P}}
+\newcommand{\Pas}{\ensuremath{\text{\rm $\PP$-a.s.}}}
+\newcommand{\QQ}{\ensuremath{\mathsf Q}}
+\newcommand{\NN}{\ensuremath{\mathbb N}}
+\newcommand{\ZZ}{\ensuremath{\mathbb Z}}
+\newcommand{\intdom}{\ensuremath{\text{int\,dom}}}
+\newcommand{\weakly}{\ensuremath{\:\rightharpoonup\:}}
+\newcommand{\exi}{\ensuremath{\exists\,}}
+\newcommand{\ran}{\ensuremath{\text{\rm ran}\,}}
+\newcommand{\cran}{\ensuremath{\overline{\text{\rm ran}}\,}}
+\newcommand{\zer}{\ensuremath{\text{\rm zer}\,}}
+\newcommand{\pinf}{\ensuremath{{+\infty}}}
+\newcommand{\minf}{\ensuremath{{-\infty}}}
+\newcommand{\dom}{\ensuremath{\text{\rm dom}\,}}
+\newcommand{\graph}{\ensuremath{\text{\rm graph}\,}}
+\newcommand{\prox}{\ensuremath{\text{\rm prox}}}
+\newcommand{\Fix}{\ensuremath{\text{\rm Fix}\,}}
+\newcommand{\spc}{\ensuremath{\overline{\operatorname{span}}\,}}
+\newcommand{\spa}{\ensuremath{\text{span}\,}}
+\newcommand{\card}{\ensuremath{\text{\rm card}}}
+\newcommand{\sign}{\ensuremath{\text{\rm sign}}}
+\newcommand{\gra}{\ensuremath{\text{\rm gra}\,}}
+\newcommand{\inte}{\ensuremath{\text{\rm int}}}
+\newcommand{\core}{\ensuremath{\text{\rm core}}}
+\newcommand{\cone}{\ensuremath{\text{\rm cone}}}
+\newcommand{\sri}{\ensuremath{\text{\rm sri}\,}}
+\newcommand{\reli}{\ensuremath{\text{\rm ri}\,}}
+\newcommand{\infconv}{\ensuremath{\mbox{\small$\,\square\,$}}}
+\newcommand{\pushfwd}{\ensuremath{\mbox{\Large$\,\triangleright\,$}}}
+\newcommand{\zeroun}{\ensuremath{\left]0,1\right[}}
+\newcommand{\rzeroun}{\ensuremath{\left]0,1\right]}}
+\newcommand{\EEE}{\ensuremath{\boldsymbol{\EuScript{E}}}}
+\newcommand{\PPP}{\ensuremath{\boldsymbol{\EuScript{P}}}}
+\newcommand{\LLL}{\ensuremath{\boldsymbol{\EuScript{L}}}}
+\newcommand{\argmind}[2]{\ensuremath{\underset{\substack{{#1}}}%
+{\mathrm{argmin}}\;\;#2 }}
+\newcommand{\Argmind}[2]{\ensuremath{\underset{\substack{{#1}}}%
+{\mathrm{Argmin}}\;\;#2 }}
+
+\def\proof{\vspace{-2.5ex}\noindent{\it Proof}. \ignorespaces}
+\def\endproof{\vbox{\hrule height0.6pt\hbox{\vrule height1.3ex%
+width0.6pt\hskip0.8ex\vrule width0.6pt}\hrule height0.6pt}}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{notation}[theorem]{Notation}}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{assumption}[theorem]{Assumption}}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{problem}[theorem]{Problem}}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{example}[theorem]{Example}}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{remark}[theorem]{Remark}}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{definition}[theorem]{Definition}}
+\theoremstyle{plain}{\theorembodyfont{\rmfamily}%
+\newtheorem{question}[theorem]{Question}}
+\renewcommand\theenumi{(\roman{enumi})}
+\renewcommand\theenumii{(\alph{enumii})}
+\renewcommand{\labelenumi}{\rm (\roman{enumi})}
+\renewcommand{\labelenumii}{\rm (\alph{enumii})}
+\numberwithin{equation}{section}
+
+\newcommand{\correc}[1]{\textcolor{red}{#1}}
+\newcommand{\TODO}[1]{{\color{cyan}#1}}
+
+
+\begin{document}
+
+%=============================================================
+% TITLE PAGE
+% The two \includegraphics lines are commented out: drop the logo files in
+% images/ (ens_lyon.pdf, heriot_watt.pdf) and uncomment to enable them.
+%=============================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\sffamily
+
+\begin{minipage}[c]{0.48\textwidth}
+  \raggedright
+  % \includegraphics[height=18mm]{images/ens_lyon.pdf}\\[2mm]
+  {\normalsize\bfseries École normale supérieure de Lyon}\\[1mm]
+  {\small Computer Science Department\\ Lyon, France}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.48\textwidth}
+  \raggedleft
+  % \includegraphics[height=18mm]{images/heriot_watt.pdf}\\[2mm]
+  {\normalsize\bfseries Heriot--Watt University}\\[1mm]
+  {\small School of Engineering\\ and Physical Sciences\\ Edinburgh, UK}
+\end{minipage}
+
+\vfill
+
+{\large Research internship report --- \TODO{[M1 Computer Science, 2025--2026]}}
+
+\vspace{6mm}
+{\color{labelkey}\rule{\textwidth}{1.2pt}}
+\vspace{7mm}
+
+{\LARGE\bfseries
+Study of optimization-inspired network architectures\\[2mm]
+for image generation with normalising flows\par}
+
+\vspace{5mm}
+{\large\itshape Unfolded proximal networks as Flow Matching velocity fields\par}
+
+\vspace{7mm}
+{\color{labelkey}\rule{\textwidth}{1.2pt}}
+
+\vspace{12mm}
+
+{\large\bfseries Estéban Collas\par}
+\vspace{2mm}
+{\normalsize École normale supérieure de Lyon\par}
+
+\vspace{10mm}
+
+{\normalsize Supervised by\par}
+\vspace{2mm}
+{\large\bfseries Audrey Repetti\par}
+\vspace{2mm}
+{\normalsize School of Engineering and Physical Sciences,\\
+Heriot--Watt University, Edinburgh\par}
+
+\vfill
+
+{\normalsize \TODO{[Internship carried out from XX month 2026 to XX month 2026]}\par}
+\vspace{2mm}
+{\normalsize \TODO{[Defended on XX month 2026]}\par}
+
+\vspace{6mm}
+{\small \today\par}
+
+\end{titlepage}
+\setcounter{page}{1}
+
+\title{\sffamily Internship report: Study of optimization-inspired network architectures for image generation with normalising flows}
+\author{
+Estéban Collas$^{\star}$, Audrey Repetti$^{\dagger}$
+\\[5mm]
+\small
+\small $^\star$ Computer Science Department, ENS de Lyon, Lyon, France\\
+\small $^\dagger$ School of Engineering and Physical Sciences, Heriot-Watt University, Edinburgh, UK
+}
+\date{}
+
+% The title block is now carried by the title page above; uncomment \maketitle
+% to get the article-style header back (e.g. for a paper version).
+% \maketitle
+\thispagestyle{empty}
+
+\vskip 8mm
+
+\begin{abstract}
+Flow Matching (FM) achieves state-of-the-art performance in image generation, and
+its links with diffusion and denoising are now well described in the literature.
+Exploiting this equivalence, we study unfolded (or unrolled) neural networks (UNN)
+--- light and robust architectures obtained by unrolling proximal algorithms
+designed for Gaussian denoising --- as velocity estimators for FM. We show that an
+unfolded strongly-convex Chambolle--Pock network, once conditioned on the noise
+level, generates samples on 2-moons, MNIST and \TODO{[CIFAR-10]}. Beyond sample
+quality, we argue that such architectures bring an interpretability that is out of
+reach of the usual backbones: because they alternate between a primal variable that
+remains a full-resolution image and a dual variable, every internal state of the
+network can be displayed, and the denoising performed at each layer of each
+integration step can be monitored directly. We finally discuss the limitations of
+unfolded architectures for generation, in particular the expressivity cost of
+keeping the primal iterate in image space.
+\end{abstract}
+
+{\bfseries Keywords.}
+Flow Matching, unrolled neural networks, proximal algorithms, primal--dual
+splitting, Chambolle--Pock, generative modelling, interpretability.
+
+{\bfseries MSC.}
+68T07, 49M29, 90C25, 94A08.
+
+\tableofcontents
+
+%=============================================================
+\section{Introduction}
+\label{sec:intro}
+
+Generative modelling of images is increasingly dominated by two closely related
+families of methods: diffusion models and Flow Matching (FM). Both build a
+transport between a simple reference distribution (typically a standard Gaussian)
+and the data distribution, and both reduce, at the level of a single time step,
+to a denoising problem: predicting a clean signal from a noisy observation. This
+denoising equivalence, made precise for FM by \cite{gagneux2025avisualdive,
+gagneux2025generation}, is the starting point of this internship.
+
+Almost all FM and diffusion backbones used in practice are large convolutional or
+attention-based black boxes (UNets, DiTs), chosen for their raw sample quality
+rather than for any structural relationship to the underlying denoising problem.
+In parallel, the signal-processing community has developed \emph{unrolled} (or
+\emph{unfolded}) neural networks: architectures obtained by truncating a
+convergent proximal algorithm for a variational denoising problem and letting its
+parameters be learned end to end \cite{monga2021algorithm, gregor2010learning}.
+These networks are considerably lighter than standard CNNs at comparable
+denoising performance, and inherit Lipschitz robustness certificates from the
+optimisation literature \cite{le2024unfolded, pesquet2021learning}.
+
+The question addressed by this internship is whether this second family --
+interpretable, certifiable, but so far confined to inverse problems such as
+Gaussian denoising -- can be used as the velocity estimator of an FM generative
+model, and at what cost in generation quality. This is, to our knowledge, an
+unexplored combination at the start of the internship (\Cref{sec:related}): UNNs
+had been studied extensively for denoising, and FM extensively with black-box
+backbones, but not together.
+
+Our contribution (\Cref{sec:contribution}) is threefold. First, we make the
+denoising/FM equivalence operational: given any proximal denoiser, we describe
+exactly how to turn it into an FM velocity field, and how to condition it on the
+noise level. Second, we instantiate this with an unrolled strongly-convex
+Chambolle--Pock network (ConvScCP) and study it on 2-moons, MNIST and CIFAR-10,
+comparing it to UNet baselines under matched Flow Matching training. Third, we
+show that the architecture is genuinely interpretable -- every internal state is
+a displayable image -- and use this to observe how the network denoises
+internally, while also identifying and correcting a structural limitation (an
+odd-symmetry constraint) and reporting the negative results that shaped the
+final design (\Cref{subsec:whatdidnotwork}). We close
+(\Cref{sec:advantages_limits,sec:conclusion}) with a discussion of the
+expressivity trade-off this interpretability comes with, and directions for
+future work.
+
+%=============================================================
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+This section collects the background material -- convex analysis, proximal
+algorithms, unrolled networks and Conditional Flow Matching -- needed to state
+our contribution. None of the results in this section are original; each is
+attributed to its source.
+
+\subsection{Convex Analysis}
+
+In this section, we summarize the fundamental mathematical tools and definitions from convex analysis and vector calculus required to formalize unrolled architectures and flow matching objectives. Throughout this document, $\Hc$ denotes a real Hilbert space.
+
+\begin{definition}[The class $\Gamma_0$]
+We denote by $\Gamma_0(\Hc)$ the set of all proper, lower-semicontinuous, convex functions mapping $\Hc$ to $\RX$. A function $g$ is \textit{proper} if its domain $\dom (g) = \menge{x \in \Hc}{g(x) < \pinf}$ is non-empty.
+\end{definition}
+
+\begin{definition}[Fenchel-Legendre Conjugate]
+Let $g \in \Gamma_0(\Hc)$. The Fenchel-Legendre conjugate of $g$ is the function $g^* \in \Gamma_0(\Hc)$ defined by:
+\begin{equation}
+    g^*(u) = \sup_{x \in \Hc} \left( \scal{x}{u} - g(x) \right).
+\end{equation}
+\end{definition}
+
+\begin{example}[Quadratic Function]
+Let $g(x) = \frac{1}{2}\|x\|^2$. Its conjugate is:
+\begin{equation}
+    g^*(u) = \frac{1}{2}\|u\|^2.
+\end{equation}
+More generally, if $g(x) = \frac{1}{2}\scal{Ax}{x}$ where $A$ is a continuous symmetric positive definite operator, then $g^*(u) = \frac{1}{2}\scal{u}{A^{-1}u}$.
+\end{example}
+
+\begin{example}[Norms and Dual Norms]
+More generally, let $g(x) = \|x\|$ be a norm on $\Hc$. Its conjugate is the indicator function of the unit ball of the dual norm $\|\cdot\|_*$:
+\begin{equation}
+    g^*(u) = \delta_{\mathcal{B}_*}(u) =
+    \begin{cases}
+    0 & \text{if } \|u\|_* \leq 1, \\
+    +\infty & \text{otherwise,}
+    \end{cases}
+\end{equation}
+where $\|u\|_* = \sup \{ \scal{u}{x} : \|x\| \leq 1 \}$.
+\end{example}
+
+\begin{example}[Indicator and Support Functions]
+Let $C \subseteq \Hc$ be a non-empty closed convex set. Let $g = \delta_C$ be the indicator function of $C$ (i.e., $g(x)=0$ if $x \in C$ and $+\infty$ otherwise). Its conjugate is the support function of $C$:
+\begin{equation}
+    g^*(u) = \sigma_C(u) = \sup_{x \in C} \scal{u}{x}.
+\end{equation}
+\end{example}
+
+\begin{definition}[Proximity Operator]
+Let $g \in \Gamma_0(\Hc)$. For any $\gamma \in \RPP$, the proximity operator of $\gamma g$ is the unique mapping $\prox_{\gamma g}: \Hc \to \Hc$ defined as:
+\begin{equation}
+    \prox_{\gamma g}(x) = \argmind{y \in \Hc}{\left( g(y) + \frac{1}{2\gamma} \| y - x \|^2 \right)}.
+\end{equation}
+\end{definition}
+
+\begin{proposition}[Moreau Decomposition]
+Let $g \in \Gamma_0(\Hc)$ and $\gamma \in \RPP$. For any $x \in \Hc$, the following identity holds:
+\begin{equation}
+    \prox_{\gamma g}(x) = x - \gamma \prox_{\gamma^{-1} g^*}(\gamma^{-1} x).
+\end{equation}
+This formula is central to unrolling algorithms in the dual domain, as it allows expressing a proximal step as a residual connection (see later).
+\end{proposition}
+
+\subsection{Vector Calculus and Dynamical Systems}
+
+The study of Continuous Normalizing Flows and Flow Matching requires defining operators on vector fields $v: \RR^d \times [0, 1] \to \RR^d$ and probability densities $p_t: \RR^d \to \RR$.
+
+\begin{definition}[Divergence]
+The divergence of a differentiable vector field $v(x) = (v_1(x), \dots, v_d(x))$ is the scalar function defined by:
+\begin{equation}
+    \text{div}(v) = \nabla \cdot v = \sum_{i=1}^d \frac{\partial v_i}{\partial x_i}.
+\end{equation}
+\end{definition}
+
+\begin{definition}[Continuity Equation]
+A probability path $p_t(x)$ is generated by a time-dependent vector field $v_t(x)$ if it satisfies the continuity equation (also known as the transport equation):
+\begin{equation}
+    \frac{\partial p_t(x)}{\partial t} + \nabla \cdot(p_t(x) v_t(x)) = 0.
+\end{equation}
+\end{definition}
+
+\subsection{Linear Algebra and Stability}
+
+\begin{definition}[Spectral Norm]
+For a linear operator $L: \RR^{N} \to \RR^{M}$, the spectral norm (or induced $L_2$ norm) is defined as:
+\begin{equation}
+    \| L \|_S = \sup_{x \neq 0} \frac{\| Lx \|_2}{\| x \|_2} = \sqrt{\lambda_{\max}(L^\top L)},
+\end{equation}
+where $\lambda_{\max}$ denotes the largest eigenvalue. This norm is used to provide certificates of robustness and to ensure the stability of unrolled layers through Lipschitz constant control.
+\end{definition}
+
+\subsection{Feedforward Networks}
+
+Feedforward Neural Networks (FNNs), or Multi-Layer Perceptrons (MLPs), represent the most fundamental architecture in deep learning. Their primary characteristic is that information flows in a single direction: from the input layer, through one or more hidden layers, to the output layer, without any cycles or loops.
+
+\paragraph{Mathematical Formulation.}
+An FNN can be viewed as a function $\mathcal{F}_\Theta$ that maps an input $x_0 \in \mathbb{R}^{d_{in}}$ to an output $x_K \in \mathbb{R}^{d_{out}}$ through a sequence of $K$ layer transformations. Each layer $k \in \{1, \dots, K\}$ performs an affine transformation followed by a non-linear activation function $\sigma_k$:
+
+\begin{equation}
+    x_k = \sigma_k(W_k x_{k-1} + b_k)
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $W_k \in \mathbb{R}^{N_k \times N_{k-1}}$ is the \textbf{weight matrix} of the $k$-th layer.
+    \item $b_k \in \mathbb{R}^{N_k}$ is the \textbf{bias vector} (or shift parameter).
+    \item $\sigma_k$ is the \textbf{activation function} (not necessarily applied element-wise), which introduces the non-linearity necessary for the network to approximate complex, non-convex functions. Common choices include ReLU ($\max(0,x)$), Sigmoid, or GELU, applied element-wise.
+\end{itemize}
+
+The complete network is thus a composition of operators:
+\begin{equation}
+    \mathcal{F}_\Theta(x_0) = (L_K \circ L_{K-1} \circ \dots \circ L_1)(x_0)
+\end{equation}
+where $L_k(x) = \sigma_k(W_k x + b_k)$, and the set of all learnable parameters is $\Theta = \{W_k, b_k\}_{k=1}^K$.
+
+\subsection{Proximal Algorithms}
+
+The starting point of the variational approach is typically an inverse problem, where one seeks to recover an underlying signal $\Bar{x}$ from a degraded measurement $z$. We will consider the case where:
+\begin{equation}\label{eq:inv-pb}
+    z = A\Bar{x} + \epsilon,
+\end{equation}
+with $A$ a linear operator, and $\epsilon \sim \Nc(0, \sigma^2I)$.
+
+Without using training data, but knowing $A$, a natural way to recover $\Bar{x}$ would be to solve:
+
+\begin{equation}
+    \min_{x} \underbrace{\frac{1}{2} \| z - Ax \|_2^2}_{f_z(x)}
+\end{equation}
+However, this kind of problem is almost always ill-posed ($A$ is not injective). Hence, to get a better solution (e.g. a realistic image for in-painting), we add a prior $g$ on $x$ (this is called using the variational approach). A common form for the prior leads to:
+\begin{equation}\label{f_and_g}
+    \min_{x} \underbrace{\frac{1}{2} \| z - Ax \|_2^2}_{f_z(x)} + \underbrace{\mu \varphi( W x)}_{g(x)}
+\end{equation}
+with $\varphi \in \Gamma_0(\Hc)$, $W$ a linear operator (ie. $W \in \Lc(\Hc)$), $\mu \geq 0$. Here, $f_z$ is the data fidelity term and $g \in \Gamma_0(\Hc)$ is a regularization term (prior) promoting specific properties (like sparsity via the $\ell_1$ norm). The operator $W$ is often a sparsifying transform (e.g., wavelets or finite differences). $\mu$ indicates how much regularization we want.
+
+Problems such as (\ref{f_and_g}) are solved using iterative algorithms of the form:
+\begin{equation}\label{algo_prox}
+    x_{k+1} = \mathcal{T}_k(x_k, z; \Theta)
+\end{equation}
+where $\mathcal{T}_k$ are transition operators and $\Theta$ is a set of fixed parameters (e.g., step sizes, regularization weights). Given appropriate assumptions, those algorithms are designed to converge to a solution of (\ref{f_and_g}) as $k \xrightarrow{} \infty$.
+
+When $g$ is non-differentiable (eg. if $\varphi$ is the $\ell_1$ norm), standard gradient descent cannot be applied. We choose algorithms using the proximal operators to solve (\ref{f_and_g}). Hence, they are called "proximal algorithms".
+
+\subsubsection{Some Proximal Algorithms}
+
+Let $f, f_1, f_2, \varphi, g \in \Gamma_0(\Hc)$ and $W \in \Lc(\Hc)$.
+
+\paragraph{Forward-Backward (FB) Algorithm.}
+The FB algorithm \cite{combettes2005signal} is the standard method for solving $\min_x f(x) + g(x)$ (see (\ref{f_and_g})) when $f$ is convex and $L$-smooth (i.e., $\nabla f$ is $L$-Lipschitz). The update rule is:
+\begin{equation}
+    x_{k+1} = \prox_{\gamma g} (x_k - \gamma \nabla f(x_k))
+\end{equation}
+where $\gamma$ is the step size. If $\gamma \in (0, 2/L)$, $x_k$ converges weakly to a minimizer, and the objective value converges at a rate of $O(1/k)$.
+
+\paragraph{Dual Forward-Backward (Dual FB).}
+When the prior is complex (e.g., $ g = \mu \cdot \varphi \circ W$ where $W$ is not easily invertible), it is often more efficient to solve the dual problem. The classical form of Dual FB iterations \cite{le2024unfolded}, for $\min_x f(x) + \frac{1}{2}\|x-z\|^2 + \varphi(Wx)$, leads to:
+\begin{equation}
+    \begin{cases}
+    x_{k+1} = \prox_{f} (z - W^*u_{k}) \\
+    u_{k+1} = \prox_{\tau \varphi^*} (u_k + \tau W x_{k+1}) \\
+    \end{cases}
+\end{equation}
+where $\varphi^*$ is the Fenchel conjugate of $\varphi$, and $\tau > 0$. Convergence is guaranteed if $\tau \in (0, 2/ \|W\|^2)$.
+
+\paragraph{Dual inertial Forward-Backward (DiFB).}
+The DiFB algorithm applies the Forward-Backward splitting method to the dual formulation of the variational problem, accelerated by a Nesterov-type momentum \cite{beck2009fast, chambolle2015convergence}. Adapting the iterations from \cite{le2024unfolded} to our notation, the scheme reads, for $k = 0, 1, \ldots$:
+\begin{equation}
+\label{eq:difb}
+    \begin{cases}
+        \displaystyle
+        x_{k+1} = z - W^{*} v_k, \\[6pt]
+        \displaystyle
+        \tilde{u}_{k+1} = \prox_{\tau_k g^*}\!\left(
+            v_k + \tau_k W x_{k+1}
+        \right), \\[8pt]
+        \displaystyle
+        v_{k+1} = (1 + \rho_k)\,\tilde{u}_{k+1} - \rho_k\, \tilde{u}_k,
+    \end{cases}
+\end{equation}
+where $v_0 = \tilde{u}_0 = 0$, $\tau_k$ is the dual stepsize, $v_k$ acts as the extrapolated dual variable, and $\rho_k$ is the inertial parameter. Note that setting $\rho_k = 0$ removes the inertia and reduces the scheme to the standard Dual Forward--Backward (DFB) algorithm. The concrete instantiation of $\rho_k$ and $\tau_k$ under our two learning strategies is deferred to
+\Cref{subsubsec:lno_lfo}.
+
+Under standard optimization theory, convergence to the exact primal solution $\hat{x} = \lim_{k\to\infty} x_k$ is guaranteed if the stepsize satisfies $\tau_k < 2/\|W\|_2^2$ and the momentum follows the FISTA schedule $\rho_k = t_{k-1} / t_{k+1}$ with $t_{k+1} = (k+a)/a$ for $a > 2$.
+
+\paragraph{Chambolle-Pock (CP) Algorithm.}
+The Chambolle-Pock algorithm \cite{chambolle2011first} is designed for problems of the form $\min_x f(x) + \varphi(Wx)$, where both $f$ and $\varphi$ are potentially non-smooth but have simple proximal operators. The iterations are:
+\begin{equation}
+    \begin{cases}
+    u_{k+1} = \prox_{\sigma \varphi^*} (u_k + \sigma W \tilde{x}_k) \\
+    x_{k+1} = \prox_{\tau f} (x_k - \tau W^* u_{k+1}) \\
+    \tilde{x}_{k+1} = 2x_{k+1} - x_k
+    \end{cases}
+\end{equation}
+The algorithm converges to a saddle point of the primal-dual problem provided that the step sizes satisfy $\tau \sigma \|W\|^2 < 1$. Unlike FB, CP does not require any function to be differentiable.
+
+\paragraph{Condat-Vu Algorithm.}
+The Condat-Vu algorithm \cite{condat2013primal, vu2013splitting} generalizes both FB and Chambolle-Pock. It solves problems of the form $\min_x f_1(x) + f_2(x) + \varphi(Wx)$, where $f_2$ is $L$-smooth. The iterations alternate between primal and dual steps:
+\begin{equation}
+    \begin{cases}
+    x_{k+1} = \prox_{\tau f_1} (x_k - \tau (\nabla f_2(x_k) + W^* u_k)) \\
+    u_{k+1} = \prox_{\sigma \varphi^*} (u_k + \sigma W (2x_{k+1} - x_k))
+    \end{cases}
+\end{equation}
+The convergence is ensured if the step sizes $\sigma, \tau > 0$ satisfy $\frac{1}{\tau} - \sigma \|W\|^2 > \frac{L}{2}$.
+
+\paragraph{Strongly-Convex Chambolle--Pock (ScCP).}
+The ScCP algorithm \cite{chambolle2011first} is the accelerated variant of CP, exploiting the strong convexity of the data-fidelity term $f_z(x) = \frac{1}{2}\|z - x\|^2$.
+Adapting the formulation from \cite{le2024unfolded} to our unconstrained setting and denoting the primal and dual stepsizes as $\tau_k$ and $\sigma_k$ respectively, the associated iterations read, for $k = 0, 1, \ldots$:
+\begin{equation}
+\label{eq:sccp}
+    \begin{cases}
+        \displaystyle
+        x_{k+1} = \frac{1}{1+\tau_k}\bigl(x_k - \tau_k W^\top u_k\bigr) + \frac{\tau_k}{1+\tau_k}\, z, \\[10pt]
+        \displaystyle
+        u_{k+1} = \prox_{\sigma_k g^*}\!\left(
+            u_k + \sigma_k W\bigl[(1+\alpha_k)\,x_{k+1} - \alpha_k\, x_k\bigr]
+        \right),
+    \end{cases}
+\end{equation}
+where $x_0 = z$, $u_0 = 0$, and $\alpha_k$ is a momentum parameter. Note that when $\alpha_k = 1$, \eqref{eq:sccp} reduces to standard CP; and when $\alpha_k = 0$, it recovers the Arrow--Hurwicz algorithm \cite{arrow1958}.
+
+In the accelerated ScCP scheme, the momentum schedule is driven by the strong convexity constant of $f_z$, which is exactly $1$; we therefore fix $\rho = 1$ throughout, so that $\alpha_k = (1 + 2\tau_k)^{-1/2}$. If $(\tau_k)_{k\in\mathbb{N}}$ and $(\sigma_k)_{k\in\mathbb{N}}$ are positive sequences satisfying $\tau_0\sigma_0\|W\|_2^2 \leq 1$, with $\tau_{k+1} = \alpha_k\tau_k$ and $\sigma_{k+1} = \sigma_k/\alpha_k$, the sequence converges to the exact solution $\hat{x} = \lim_{k\to\infty} x_k$ \cite{chambolle2011first}.
+
+\subsubsection{A simple case: ISTA}\label{ISTA}
+
+To illustrate this, consider the sparse coding problem, which aims to find a sparse vector $x$ such that $z \approx Ax$ for a given dictionary $A$. This is formulated as the LASSO problem:
+\begin{equation}\label{ISTA_eq}
+    \min_{x} \underbrace{\frac{1}{2} \| z - Ax \|_2^2}_{f_z(x)} + \underbrace{\mu \| x \|_1}_{g(x)}
+\end{equation}
+
+\paragraph{ISTA.}
+The Iterative Soft-Thresholding Algorithm (ISTA) \cite{beck2009fast} solves (\ref{ISTA_eq}) by alternating between a gradient descent step on the data fidelity term and a proximal mapping (soft-thresholding) for the $L_1$ penalty:
+\begin{equation}
+    x_{k+1} = \text{prox}_{\frac{\mu}{L}||.||} \left( x_k - \frac{1}{L} A^T (Ax_k - z) \right)
+\end{equation}
+where $L$ is a Lipschitz constant of $\nabla f_z$, and the soft-thresholding operator $\text{prox}_{\lambda||.||} = \text{sign}(s) \max(|s| - \lambda, 0) =: \eta_{\lambda}$ is applied element-wise.
+
+\begin{remark}
+    In this case, the smallest Lipschitz constant of $\nabla f_z$ is $\lambda_{max}(A^TA)$.
+\end{remark}
+
+\begin{remark}
+    It is FB with $W=I$ and $\varphi = \mu \|\cdot\|_1$.
+\end{remark}
+
+\begin{remark}
+We can rewrite this update as:
+\begin{equation}\label{ISTA_as_NN}
+    x_{k+1} = \eta_{\lambda} \left(W_1 x_k + W_2 z\right)
+\end{equation}
+with $W_1 = I - \frac{1}{L}A^T A$, $W_2 = \frac{1}{L}A^T$ and $\lambda = \frac{\mu}{L}$.
+
+In this form, ISTA has the form of a feed-forward neural network. This remark is the basis of Unrolled Neural Networks.
+\end{remark}
+
+\subsection{Unrolled Neural Networks (UNN)}
+Unrolled Neural Networks, also known as algorithm unrolling or deep unrolling, defines a class of machine learning models obtained by interpreting the iterations of an optimization algorithm as the layers of a neural network \cite{monga2021algorithm}. This makes them more interpretable and often more efficient than "black-box" architectures such as standard CNNs or Transformers.
+
+Starting from an algorithm of the form of (\ref{algo_prox}), a UNN is constructed by:
+\begin{enumerate}
+    \item \textbf{Truncation:} Fixing the algorithm to a finite number of iterations $K$.
+    \item \textbf{Parametrization:} Replacing the fixed parameters $\Theta$ with learnable weights $\theta_k$ for each layer $k$.
+    \item \textbf{End-to-End Training:} Optimizing $\Theta = \{\theta_k\}_{k=1}^K$ using backpropagation on a dataset of $(z, x_{true})$ pairs, using some loss appropriate to our optimization problem.
+\end{enumerate}
+
+This results in a network where each layer corresponds to a single iteration of the original algorithm, but the parameters of the "solver" are optimized to work with $K$ iterations, and to solve a different optimization problem, defined using the specific distribution of the training data (see \cite{gregor2010learning}, \cite{le2024unfolded}, \cite{repetti_eusipco}, \cite{monga2021algorithm} for more details). For Gaussian denoising, such networks reach performances comparable to established denoising networks with orders of magnitude fewer parameters, while admitting Lipschitz certificates of robustness \cite{le2024unfolded, pesquet2021learning}.
+
+\subsubsection{Example: LISTA}
+
+For example, if one wants to recover $\Bar{x}$ from (\ref{eq:inv-pb}) using training data $(x_i, z_i)_i$, a natural loss is the MSE loss:
+
+\begin{equation}\label{MSE_loss}
+    \mathcal{L}_{MSE}(\hat{x}) = \frac{1}{N}\sum_{i=1}^{N}\left( \frac{1}{2}||x_i - \hat{x}(z_i)||_2^2\right)
+\end{equation}
+
+\begin{remark}
+An optimal estimator for (\ref{MSE_loss}) is a maximum likelihood estimator, in the case $\epsilon \sim \Nc(0,\sigma^2I)$.
+\end{remark}
+
+From here, one could use any architecture to model $\Hat{x}(.)$. An appropriate (see remark \ref{appropriate_meaning}) UNN would be LISTA:
+
+\paragraph{LISTA.}
+The \textit{Learned Iterative Soft-Thresholding Algorithm} (LISTA) \cite{gregor2010learning} transforms each ISTA iteration into a neural network layer. Starting from ISTA seen as in (\ref{ISTA_as_NN}), instead of fixing $W_1$ and $W_2$ based on the matrix $A$, LISTA treats them as learnable weight matrices. LISTA also learns $\lambda$:
+\begin{equation}
+    x_{k+1} = \eta_{\lambda_k} \left(W_{1,k} x_k +  W_{2,k} z \right)
+\end{equation}
+Using this architecture, the network can now learn the optimal operators to reconstruct $x$ from $z$, by solving \ref{MSE_loss} \cite{le2024unfolded}.
+
+In other words, for the learning process, we use the MSE loss:
+
+\begin{equation}
+    \mathcal{L}(\Theta) = \frac{1}{N}\sum_{i=1}^{N}\left( \frac{1}{2}||x_i - \text{LISTA}_{\Theta}(z_i)||_2^2\right)
+\end{equation}
+
+with $(x_i,z_i)$ our data points and $\Theta = \{\lambda_k, W_{1,k}, W_{2,k}\}$.
+
+In general, unrolled algorithms do not return the convergence point of the iterative algorithm they are based on, because they are trained to solve a loss different than \ref{f_and_g}. However, when using ISTA's convergence points as "true" data points $x_i$, LISTA is roughly 20 times faster than FISTA for approximate solutions \cite{gregor2010learning}. Also, because the architecture is constrained by the physics of the problem, it generalizes better than pure black-box models, especially when the amount of training data is limited.
+
+There are many possible implementations of UNN, for example if $A = BC$, we could choose to keep $B$ and to learn only $C$, or even learning $C^{T}$ independently from $C$, so introducing a mismatched adjoint (we already had a mismatched adjoint in the above example). We could also replace $\eta_{\lambda}$ by a more general neural network $\mathfrak{D}_{\lambda}$ (see \cite{repetti_eusipco} for more details).
+
+\begin{remark}\label{appropriate_meaning}
+    LISTA is "appropriate" for this optimization problem because ISTA solves a similar problem (see \ref{ISTA}). We can view LISTA as a way to learn the prior $g$ in ISTA.
+\end{remark}
+
+\subsection{Conditional Flow Matching (CFM)}
+
+\textit{this section was heavily inspired by \cite{gagneux2025avisualdive}.}
+
+Conditional Flow Matching (CFM) \cite{lipman2023flowmatching} is a simulation-free method for training Continuous Normalizing Flows (CNFs). It overcomes the primary bottleneck of standard CNFs, which is the need to solve an Ordinary Differential Equation (ODE) during each training iteration, by regressing a vector field against analytically defined conditional vector fields.
+
+\subsubsection{Background: Continuous Normalizing Flows}
+Let's say we want to sample from an unknown distribution $p_1$, using data points generated following $p_1$ (e.g., images of cats). CNFs allow us to do this sampling by following a probability path between a known distribution $p_0$ (e.g., a standard Gaussian) and $p_1$ \cite{NEURIPS2018_69386f6b}.
+
+More precisely, a CNF learns a vector field $v_t(x): \mathbb{R}^d \times [0, 1] \to \mathbb{R}^d$ that generates a probability path $p_t$ between $p_0$ and $p_1$ via the continuity equation:
+\begin{equation}
+\frac{\partial p_t(x)}{\partial t} = -\nabla \cdot (p_t(x) v_t(x))
+\end{equation}
+
+There are many paths between $p_0$ and $p_1$. When we use CFM for training a CNF, we start by choosing one of them (see \Cref{gaussian_paths}). For now, we consider $p_0$, $v_t$ fixed. In theory, given $p_0$ and $v_t$, one can use integration schemes, such as the Euler scheme, to sample from $p_1$. However, $v_t$ is often intractable.
+
+The goal of flow matching is to find a neural network $v_\theta(x, t)$ that approximates the chosen vector field $v_t(x)$ (hence allowing us to use integration schemes).
+
+\subsubsection{The Flow Matching Objective}
+The ideal objective would be to minimize the Flow Matching (FM) loss:
+\begin{equation}
+\mathcal{L}_{\text{FM}}(\theta) := \mathbb{E}_{t \sim \mathcal{U}[0, 1], x \sim p_t(x)} \left[ \| v_\theta(x, t) - v_t(x) \|^2 \right]
+\end{equation}
+However, this objective is intractable because we typically do not have access to the marginal density $p_t(x)$ nor the marginal vector field $v_t(x)$ in closed form.
+
+\subsubsection{The Conditional Approach}
+CFM circumvents this by introducing a conditioning variable $z \sim q(z)$ independent of $t$ (most commonly a data sample $z = x_1 \sim p_{1} \text{\, or \,} z = (x_0,x_1) \sim p_0 \times p_{1}$, where we approximate $p_1$ with $p_{data}$ in practice). We define a \textit{conditional probability path} $p_t(x|z)$ and a corresponding \textit{conditional vector field} $v_t(x|z)$ that satisfy the following equations:
+\begin{equation}\label{init_0}
+\forall x, \mathbb{E}_z[p(x|z,t=0)] = p_0(x)
+\end{equation}
+\begin{equation}\label{init_1}
+\forall x, \mathbb{E}_z[p(x|z,t=1)] = p_1(x)
+\end{equation}
+\begin{equation}
+\frac{\partial p_t(x|z)}{\partial t} = -\nabla \cdot (p_t(x|z) v_t(x|z))
+\end{equation}
+By aggregating these conditional paths, we recover the marginal distribution:
+
+\begin{equation}
+    p_t(x) := \int p_t(x|z) q(z) dz
+\end{equation}
+
+Crucially, it has been proven \cite{gagneux2025avisualdive} that under the hypotheses above, the marginal vector field $v_t(x)$ can be expressed as:
+\begin{equation}
+v_t(x) = \mathbb{E}_{z|(x,t)}[v_t(x|z)]
+\end{equation}
+
+Hence, choosing $q(z)$ and $p_t(x|z)$ amounts to choosing the vector field $v_t(x)$.
+
+Furthermore, this leads to the \textbf{Conditional Flow Matching} objective:
+\begin{equation}
+\mathcal{L}_{\text{CFM}}(\theta) := \mathbb{E}_{t\sim \mathcal{U}[0, 1], z \sim q(z), x \sim p_t(x|z)} \left[ \| v_\theta(x, t) - v_t(x|z) \|^2 \right]
+\end{equation}
+
+One can show \cite{gagneux2025avisualdive} that
+\begin{equation}\label{FM_CFM}
+    \mathcal{L}_{\text{FM}}(\theta) = \mathcal{L}_{\text{CFM}}(\theta) + \text{const.}
+\end{equation}
+Hence, we can minimize the intractable FM loss by minimizing the CFM loss, provided we can define $p_t(x|z)$ and $v_t(x|z)$ analytically. Now, all that remains is to choose the right conditional path.
+
+\subsubsection{Gaussian Paths}\label{gaussian_paths}
+A simple choice for the conditional path is to use dirac distributions \cite{gagneux2025avisualdive}. Given a noise sample $x_0 \sim \mathcal{N}(0, I)$ and an independent data sample $x_1 \sim p_{1}(x_1)$, we define $z = (x_0, x_1)$. We choose the following path:
+\begin{equation}
+p_t(x|x_0, x_1) = \delta_{a_t}(x)
+\end{equation}
+where $a_t = (1-t)x_0 + tx_1$. It is easy to derive the corresponding vector field:
+\begin{equation}
+v_t(x|x_0, x_1) = x_1 - x_0
+\end{equation}
+
+With this conditional path, we get the following (still intractable) objective:
+\begin{equation}
+\mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t\sim \mathcal{U}[0, 1], (x_0,x_1) \sim \mathcal{N}(0, I) \times p_{1}(x_1), x \sim p_t(x|z)} \left[ \| v_\theta(x, t) - (x_1 - x_0) \|^2 \right]
+\end{equation}
+
+Approximating $p_1$ with $p_{data}$, we get the following tractable objective (equation (\ref{FM_CFM}) becomes an approximation):
+\begin{equation}
+\mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t\sim \mathcal{U}[0, 1], (x_0,x_1) \sim \mathcal{N}(0, I) \times p_{data}(x_1), x \sim p_t(x|z)} \left[ \| v_\theta(x, t) - (x_1 - x_0) \|^2 \right]
+\end{equation}
+
+In this setting, the lines connecting noise to data learned by the model tend to be straight (see the visuals on \cite{gagneux2025avisualdive}). This "straightness" is a key advantage of CFM over Diffusion Models, as it allows for much more efficient inference using numerical ODE solvers with large step sizes.
+
+In real settings, people tend to use $p_t(x|x_0, x_1) = \mathcal{N}(x|\mu_t, \sigma_t^2I)$, where $\sigma_t$ is small (can be constant) instead of $\sigma_t = 0$, as it leads to better empirical results \cite{tong2024improving}.
+
+\subsubsection{Choice of the coupling}\label{subsec:coupling}
+
+The pairs $(x_0, x_1)$ need not be drawn from the independent product
+$p_0 \otimes p_1$. Minibatch optimal-transport couplings (OT-CFM)
+\cite{tong2024improving} instead pair each noise sample with the data sample
+assigned to it by the discrete OT plan computed within the minibatch. This
+straightens the conditional paths and, as we report in \Cref{subsec:whatdidnotwork},
+led to faster training on all three datasets \emph{once an implementation bug in
+our own coupling code was corrected}.
+
+This choice is not only empirical. Under an OT coupling with a deterministic Monge
+map, the OT-CFM velocity field has recently been shown to be exactly a proximal
+operator, namely the Brenier map \cite{fukumizu2026proximal}. The proximal
+structure of the architectures studied here is therefore structurally aligned with
+the target they are asked to regress, which is not the case under independent
+coupling. \correc{This is an alignment of structure, not a proof that the unrolled
+network recovers the Brenier map; we have not tested this claim.}
+
+\subsubsection{Summary}
+
+Flow Matching in practice:
+\begin{enumerate}
+    \item Choose a variable $z$ with some known distribution $q(z)$
+        \begin{itemize}
+            \item \textit{e.g., $z = (x_0, x_1)$, $q((x_0,x_1)) = p_0(x_0) \times p_1(x_1))$}
+        \end{itemize}
+    \item Choose a simple conditional distribution $p_t(x |z)$
+        \begin{itemize}
+            \item \textit{e.g., $\delta_{(1-t)x_0 + tx_1}(x)$}
+        \end{itemize}
+    \item Compute an associated velocity field $v_{t}(x|z)$
+        \begin{itemize}
+            \item \textit{e.g., $x_1 - x_0$}
+        \end{itemize}
+    \item Train model using conditional loss $\mathcal{L}_{\text{CFM}}$
+        \begin{itemize}
+            \item \textit{sample $t, z, x$ using the data points}
+        \end{itemize}
+    \item Sample from (a distribution close to) $p_1 \approx p_{data}$
+        \begin{itemize}
+            \item \textit{sample $x_0 \sim p_0$, then use an integration scheme, e.g., Euler Scheme}
+        \end{itemize}
+\end{enumerate}
+A minimal reference implementation of this loop is given in \Cref{app:code}.
+
+%=============================================================
+\section{Related Work}
+\label{sec:related}
+
+At the start of the internship, the two ingredients of our approach were well
+developed separately but, to our knowledge, not combined.
+
+On the unrolling side, Le, Repetti and Pustelnik \cite{le2024unfolded} study
+unfolded proximal networks for robust image Gaussian denoising, establishing the
+LNO/LFO learning strategies and the associated Lipschitz robustness certificates
+that we adapt in \Cref{subsubsec:lno_lfo}. This line of work, together with the
+original LISTA construction \cite{gregor2010learning} and the general algorithm-unrolling
+survey \cite{monga2021algorithm}, treats UNNs purely as denoisers or
+inverse-problem solvers: the noise level is either fixed or a nuisance parameter,
+never a continuously varying conditioning signal driving a generative process.
+
+On the Flow Matching side, the denoising reformulation of Gagneux et al.
+\cite{gagneux2025avisualdive, gagneux2025generation} and the proximal-operator
+viewpoint of Fukumizu et al. \cite{fukumizu2026proximal} establish, respectively,
+that the optimal FM velocity is the MMSE denoiser at every noise level
+(\Cref{eq:fm-denoise} below) and that under optimal-transport coupling the FM
+velocity is itself a proximal operator (the Brenier map). Both results are stated
+at the level of the \emph{optimal} velocity field; neither proposes a concrete
+architecture that is itself proximal. Standard FM implementations, including the
+\texttt{torchcfm} library and its UNet backbones \cite{tong2024improving} that we
+use as baselines, instantiate $v_\theta$ with generic convolutional networks.
+
+The gap we identified, and that motivates \Cref{sec:contribution}, is therefore:
+no existing work instantiates the FM velocity field with a proximal unrolled
+network, exploits the resulting proximal reading for interpretability, or
+studies the trade-off against black-box UNet backbones under matched training. We
+also note the structural relationship between our convolutional ScCP block and
+multi-layer convolutional sparse coding (ML-CSC) \cite{papyan2017convolutional}:
+our architecture corresponds to a single layer of the ML-CSC hierarchy, without
+its nested outer loop over dictionary levels, a comparison we return to in
+\Cref{subsubsec:vs_unet}.
+
+%=============================================================
+\section{Our Contribution}
+\label{sec:contribution}
+
+We now present our contribution: turning a proximal denoiser into an FM velocity
+field (\Cref{subsec:denoising}), the resulting variational objective and its
+integration into the sampling ODE (\Cref{subsec:variational,subsec:ode_integration}),
+the learning strategies and architectural choices we compare
+(\Cref{subsec:strategies,subsec:algo_params,subsec:models}), the resulting
+numerical experiments (\Cref{sec:experiments}), the negative results that shaped
+the final design (\Cref{subsec:whatdidnotwork}), and a discussion of the
+advantages and limitations of the approach (\Cref{sec:advantages_limits}).
+
+\subsection{A Denoising Perspective on Flow Matching}\label{subsec:denoising}
+
+In the context of generative models such as Flow Matching, the corrupted observation at time $t$ can be expressed as $x_t = t x_1 + (1-t) x_0$, where $x_0 \sim \mathcal{N}(0, I)$ represents noise. From a denoising perspective, the objective of the model is to estimate the clean signal $x_1$ from the noisy measurement $x_t$.
+
+\begin{remark}
+We have $x_1 - x_0 = (x_1 - x_t)/(1 - t)$.
+\end{remark}
+
+By rescaling the problem to a standard additive noise model, we can write:
+\begin{equation}
+z = \frac{x_t}{t} = x_1 + \frac{1-t}{t} x_0 \implies z = x_1 + \epsilon_t, \quad \text{with } \epsilon_t \sim \mathcal{N}(0, \sigma_t^2 I)
+\end{equation}
+where the effective noise variance is $\sigma_t^2 = \left( \frac{1-t}{t} \right)^2$. It is an inverse problem, with $A = Id$ (see \cite{gagneux2025generation}).
+
+Following the Maximum A Posteriori (MAP) framework, the estimate $\hat{x}$ is obtained by maximizing the posterior distribution $p(x_1 | z) \propto p(z | x_1) p(x_1)$. Assuming a fixed prior $\alpha g$, the MAP estimator is the minimizer of the negative log-likelihood:
+\begin{equation}
+\hat{x} = \arg\min_{x} \left( \frac{\|z - x\|^2}{2\sigma_t^2} + \alpha g(x) \right)
+\end{equation}
+By multiplying the objective function by $\sigma_t^2$, we recover the standard variational form:
+\begin{equation}
+\hat{x} = \arg\min_{x} \left( \frac{1}{2} \|z - x\|^2 + \mu_t g(x) \right), \quad \text{with } \mu_t = \alpha \cdot \sigma_t^2
+\end{equation}
+
+This derivation proves that the optimal regularization parameter $\mu_t$ must be proportional to the variance of the noise present at time $t$.
+
+Equivalently, and in the notation used in the rest of this report, combining
+$x_t = (1-t)x_0 + t x_1$ with the optimal velocity
+$v^\star(x_t,t) = \mathbb{E}[x_1 - x_0 \mid x_t, t]$ gives the identity
+\cite[Formula (5)]{gagneux2025generation}
+\begin{equation}
+  D^\star_t(x_t) := \mathbb{E}[\,x_1 \mid x_t, t\,] = x_t + (1-t)\, v^\star(x_t, t),
+  \label{eq:fm-denoise}
+\end{equation}
+i.e.\ the MMSE estimator of the clean image $x_1$ given the noisy observation $x_t$
+and the noise level $t$. Thus the optimal FM velocity gives the optimal denoiser at
+every noise level, and conversely any denoiser $D_t$ induces a velocity
+$v(x,t) = (D_t(x) - x)/(1-t)$. This duality is what motivates the use of
+denoising-oriented unfolded architectures for FM, and is the central idea of this
+report.
+
+Given a proximal algorithm $\Ac(\alpha,z)$ solving $\min_{x} \frac{1}{2} \| z - x \|_2^2 + \alpha g(x)$ (eg. FB, Condat-Vu, ...), we can define the following process to get a proximal algorithm converging to the value of the vector field at any point $(x(t),t)$:
+
+\begin{algorithm}
+\caption{Prox\_for\_vector\_field($\Ac, x_t, t, \alpha$)}\label{Prox_for_vector_field}
+\begin{algorithmic}[1]
+\State $\mathrm{var} \gets ((1-t)/t)^2$ \Comment{noise \emph{variance} $\sigma_t^2$}
+
+\State $\mu \gets \alpha \cdot \mathrm{var}$
+
+\State $z \gets x_t/t$
+
+\State $\Hat{x}_1 \gets \Ac(\mu,z)$
+
+\Return $(\Hat{x}_1 - x_t)/(1-t)$
+
+\end{algorithmic}
+\end{algorithm}
+
+This justifies the usage of an UNN to learn the entire vector field, by treating $\sigma$ as a learnable parameter.
+
+\subsection{Variational Formulation and Integration into the Sampling ODE}
+\label{subsec:variational}
+
+As derived above, the vector field estimation at time $t \in \left]0,1\right]$
+reduces to solving the following variational problem:
+\begin{equation}
+    \hat{x} = \underset{x \in \mathcal{H}}{\operatorname{argmin}} \;
+    \frac{1}{2} \| z - x \|^2
+    + \mu_t \, g(Wx),
+    \label{eq:variational_prob}
+\end{equation}
+where $z = x_t / t$ is the rescaled noisy observation and $\mu_t = \alpha (1-t)^2/t^2$
+is the time-dependent regularisation parameter, with $\alpha > 0$ a learnable global scalar.
+The velocity field is then recovered via
+\begin{equation}
+    v_\theta(x_t, t) = \frac{\hat{x} - x_t}{1-t}.
+\end{equation}
+Two numerical subtleties arise from this denoising reduction. First, the
+rescaling $z = x_t/t$ of Algorithm~\ref{Prox_for_vector_field} blows up as
+$t \to 0$. In practice we therefore warm-start every unrolled network directly
+from $z = x_t$ (i.e.\ we fold the $1/t$ factor into the learnable operators
+rather than applying it explicitly), which is well defined on all of
+$[0,1]$. Second, the final division by $1-t$ blows up as $t \to 1$; at
+inference we clamp the denominator, $v_\theta(x_t,t) = (\hat{x}-x_t)/\max(1-t,\varepsilon)$
+with $\varepsilon = 0.05$ \cite[Section 3.3]{gagneux2025generation}, \cite{li2026back}. At training time the same $t\to 1$
+ill-conditioning is handled analytically by the loss described in
+\Cref{subsubsec:xpred}.
+
+\subsubsection{Integration within the generation ODE}
+\label{subsec:ode_integration}
+
+Two natural options are available to use a UNN for FM. \emph{(i)} Each layer of the
+UNN is interpreted as one Euler step of the generation ODE, so that an image is
+generated from Gaussian noise in a single forward pass. \emph{(ii)} The UNN is
+called at every time step of the integrator, and denoises the current noisy image
+to give the direction in which to move next. We experimented with both and retained
+option \emph{(ii)}, notably because one of the strengths of velocity modelling comes
+from using the \emph{same} model to denoise at different noise levels
+\cite{gagneux2025generation}.
+
+Concretely, we draw $x \sim \mathcal{N}(0,I)$ and integrate
+$\dot{x}(t) = v_\theta(x(t),t)$ with an explicit Euler scheme over $N$ steps. At
+each step, the current iterate plays the role of the noisy observation of
+\eqref{eq:variational_prob}, i.e.\ we set $z = x_t$, which is both the
+initialisation $x_0 = z$ of the unrolled recursion and the quantity re-injected at
+every primal step. The noise level is passed separately through $t$, on which the
+proximal module $\mathcal{N}_{\theta_{\text{prox}}}$ is conditioned. The network
+returns $\hat{x}_1 = D_\theta(x_t,t)$ after $K$ unrolled iterations, and the
+velocity is recovered through \eqref{eq:fm-denoise}, with the denominator clipped
+below by $\varepsilon = 0.05$.
+
+\subsection{Learning Strategies}
+\label{subsec:strategies}
+
+\subsubsection{LNO vs.\ LFO}
+\label{subsubsec:lno_lfo}
+
+Following \cite{le2024unfolded}, every UNN is trained under two learning strategies for
+its parameter set $\Theta = \{W_k, V_k, \tau_k, \sigma_k, \alpha, \ldots\}$, where $V_k$
+is the learned counterpart of $W_k^\top$:
+
+\begin{enumerate}
+    \item \textbf{Learned Normalised Operators (LNO).}  Theoretical convergence conditions
+          are enforced at each layer: the adjoint is exact ($V_k = W_k^\top$) and stepsizes
+          are bounded by the spectral norm of $W_k$, computed via power iterations.
+
+    \item \textbf{Learned Flexible Operators (LFO).}  The adjoint constraint is relaxed
+          ($V_k \neq W_k^\top$), and stepsizes are learned freely, without spectral
+          constraints.
+\end{enumerate}
+
+\correc{This generic description is misleading in the ScCP case, and the distinction
+matters for the interpretation of \Cref{subsec:interp}.} For ScCP, the flexibility
+of LFO lies in the \emph{operators} rather than in the step-sizes. It is \emph{LNO}
+that learns each primal step-size $\tau_k$ independently, compensating through the
+per-layer normalisation $\sigma_k = 0.99\,(\tau_k\|W_k\|_S^2)^{-1}$, whereas LFO ties
+the entire schedule $(\tau_k, \sigma_k, \alpha_k)$ to the single scalar $\tau_0$
+through the acceleration recursion \eqref{eq:sccp-sched}.
+
+\subsubsection{Shared vs.\ Per-Layer Weights}
+In the \textbf{per-layer} setting, every iteration $k$ owns an independent copy of
+$(W_k, V_k, \tau_k, \sigma_k, \theta_{\text{prox},k})$, which allows maximum
+expressiveness at the cost of a parameter count that grows linearly with $K$.
+In the \textbf{shared} setting, a single set of parameters $(W, V, \tau, \sigma,
+\theta_{\text{prox}})$ is reused at every iteration; the network then defines a recurrent
+dynamical system and can be run for a \emph{variable} number of steps at inference time
+via \texttt{model(x\_t, t, n\_iter=N)}, without retraining.
+
+\subsubsection{Choice of Proximal Operator}
+\label{subsubsec:prox_choice}
+
+In a first set of experiments, the dual proximal operator is fixed to the analytical form
+induced by the $\ell_1$-norm prior. Since $(\mu\|\cdot\|_1)^* = \delta_{\mathcal{B}_\infty(\mu)}$,
+the dual proximal step reduces to a clipping operation:
+\begin{equation}
+    \mathrm{prox}_{\tau (\mu\|\cdot\|_1)^*}(u)
+    = \operatorname{clip}\bigl(u,\,-r(t),\,r(t)\bigr),
+\end{equation}
+where $r(t) = \mathrm{softplus}(\mathrm{MLP}(t))$ is a learned, time-dependent radius
+(module \texttt{L1ProxFlat} for flat models, \texttt{L1ProxConv} for convolutional ones).
+In subsequent experiments, the analytical operator is replaced by a learned neural module
+$\mathcal{N}_{\theta_{\text{prox}}}(\cdot, t)$, whose architecture varies with the model
+family (small MLP, \texttt{DoubleConvTime}, \texttt{SmallUNet}, or \texttt{CFMUNet}).
+
+Keeping the analytical operator is a deliberate choice in our final setup: the
+expressivity of the model is then carried by the operators $W_k$ and $V_k$ rather
+than by the nonlinearity, which is what preserves the proximal reading of the layer.
+Together with the bias of \Cref{subsubsec:oddsym}, the implemented operator is
+\verb|clamp(| $\cdot$ \verb| + b, MLP(t))|.
+
+\subsubsection{Output parameterisation: $x$-prediction with a velocity-space loss}
+\label{subsubsec:xpred}
+
+A model estimating the vector field can be parameterised in three equivalent ways:
+predicting the velocity $v$ itself, the denoised image $x_1$, or the source noise
+$x_0$. It is unclear in the literature which is best in general. Since the
+architecture used here has its roots in image denoising, and following
+\cite{gagneux2025generation} and \cite{li2026back}, we predict $x_1$.
+
+In \emph{velocity prediction} ($v$-pred) the network outputs the velocity
+directly, $v_\theta(x_t,t)$, and is trained with the standard CFM loss
+$\|v_\theta - (x_1-x_0)\|^2$. In \emph{clean-signal prediction} ($x$-pred) the
+network instead outputs an estimate $D_\theta(x_t,t) \approx x_1$ of the clean
+image, and the velocity is reconstructed \emph{a posteriori} via
+$v_\theta(x_t,t) = (D_\theta(x_t,t) - x_t)/(1-t)$. This is the natural output of
+our unrolled solvers, whose primal iterate $\hat{x}$ is by construction an
+estimate of $x_1$ (the MAP denoiser of \Cref{subsec:denoising}); we flag such
+models with the attribute \texttt{predicts\_x1}.
+
+The two parameterisations are made \emph{exactly} equivalent by the choice of
+loss. Using $x_1 - x_t = (1-t)(x_1 - x_0)$, the velocity error factorises as
+\begin{equation}
+    \bigl\| v_\theta(x_t,t) - (x_1-x_0) \bigr\|^2
+    = \frac{1}{(1-t)^2}\,\bigl\| D_\theta(x_t,t) - x_1 \bigr\|^2 .
+    \label{eq:vloss_equiv}
+\end{equation}
+Hence, rather than regressing $D_\theta$ onto $x_1$ with a plain
+$\|D_\theta - x_1\|^2$ objective, we train it with the \emph{velocity-space
+weighted} loss
+\begin{equation}
+    \mathcal{L}_{\text{x-pred}}(\theta)
+    = \mathbb{E}_{t, x_0, x_1}\!\left[
+        w(t)\,\bigl\| D_\theta(x_t,t) - x_1 \bigr\|^2
+    \right],
+    \qquad
+    w(t) = \frac{1}{\max\!\bigl((1-t)^2,\ \varepsilon^2\bigr)},
+    \label{eq:xpred_loss}
+\end{equation}
+with $\varepsilon = 0.05$. By \eqref{eq:vloss_equiv}, up to the clamp this is
+\emph{identical} to the CFM objective $\mathbb{E}\|v_\theta-(x_1-x_0)\|^2$: the
+network is optimised for the correct velocity-matching goal, while regressing a
+target ($x_1$) that is bounded, well scaled and image-like at all times. The
+clamp merely caps the weight in the immediate neighbourhood of $t=1$, where the
+raw $1/(1-t)^2$ factor would otherwise diverge, trading a negligible bias for
+stability.
+
+This parameterisation is not cosmetic. A plain $x$-prediction loss
+($w \equiv 1$) makes the regression target $x_1$ nearly independent of $t$ and,
+for a low-variance data distribution (e.g.\ a single MNIST class), produces a
+weak, poorly-conditioned gradient: the network minimises the loss by collapsing
+onto the \emph{data mean} and ignoring its input $x_t$, yielding a constant
+generator. The $1/(1-t)^2$ weighting (equivalently, matching in velocity space)
+restores the informative high-$t$ regime and removes this collapse. This is the
+$x$-prediction / $v$-loss formulation advocated in the ``back-to-basics'' line of
+work on diffusion and flow parameterisations \cite{li2026back}, and it is the
+setting used for all MNIST and CIFAR-10 experiments below.
+
+\subsection{Algorithm Parameterisations}
+\label{subsec:algo_params}
+
+We now detail the three algorithm families used as the backbone of our UNNs, together
+with the exact parameterisations adopted in the LNO and LFO regimes.
+
+\subsubsection{Dual Forward-Backward (DFB)}
+
+The DFB unrolled iterations read, for $k = 0, 1, \ldots, K-1$:
+\begin{equation}
+\label{eq:dfb_iter}
+    \begin{cases}
+        x_{k+1} = z - V_k\, u_k, \\[4pt]
+        u_{k+1} = \mathcal{N}_{\theta_{\text{prox}}}
+            \!\left(u_k + \tau_k W_k x_{k+1},\; t\right),
+    \end{cases}
+\end{equation}
+initialised with $x_0 = z$ and $u_0 = 0$.
+
+\paragraph{DFB-LFO.} The learnable parameters per layer are
+$\Theta_k = \{W_k, V_k, \tau_k, \theta_{\text{prox},k}\}$,
+where $W_k$ and $V_k$ are independent (mismatched adjoint), and $\tau_k =
+\mathrm{softplus}(\hat\tau_k)$ with $\hat\tau_k$ initialised at $0.5$.
+
+\paragraph{DFB-LNO.} The adjoint is matched: $V_k = W_k^\top$. The stepsize is fixed
+to $\tau_k = 1.99\,\|W_k\|_S^{-2}$, where $\|W_k\|_S$ is estimated by power
+iteration at each forward pass ($n_{\text{iter}}=3$).
+
+\subsubsection{Dual Inertial Forward-Backward (DiFB)}
+
+The DiFB scheme augments DFB with a Nesterov-type momentum on the dual variable.
+Denoting $\tilde{u}_{k+1}$ the output of the proximal step, the full iteration reads:
+\begin{equation}
+\label{eq:difb_iter}
+    \begin{cases}
+        x_{k+1} = z - V_k\, u_k, \\[4pt]
+        \tilde{u}_{k+1} = \mathcal{N}_{\theta_{\text{prox}}}
+            \!\left(u_k + \tau_k W_k x_{k+1},\; t\right), \\[4pt]
+        u_{k+1} = (1 + \rho_k)\,\tilde{u}_{k+1} - \rho_k\,\tilde{u}_k,
+    \end{cases}
+\end{equation}
+initialised with $x_0 = z$, $u_0 = \tilde{u}_0 = 0$.
+
+\paragraph{DiFB-LFO.} In addition to $\{W_k, V_k, \tau_k, \theta_{\text{prox},k}\}$, the
+inertial parameters $\rho_k \in \mathbb{R}^K$ are treated as free learnable scalars,
+initialised at $0.5$.
+
+\paragraph{DiFB-LNO.} The adjoint is matched ($V_k = W_k^\top$), $\tau_k =
+0.99\,\|W_k\|_S^{-2}$, and the momentum follows the FISTA schedule
+\cite{beck2009fast, chambolle2015convergence}:
+\begin{equation}
+    \rho_k = \frac{t_{k-1}}{t_{k+1}}, \qquad
+    t_{k+1} = \frac{k + a}{a}, \quad a > 2,
+\end{equation}
+with $a = 3$ in our implementation.
+
+\subsubsection{Strongly-Convex Chambolle--Pock (ScCP)}
+
+The ScCP scheme exploits the strong convexity of the data-fidelity term
+$f_z(x)=\frac{1}{2}\|z-x\|^2$ to derive an accelerated primal-dual algorithm.
+Its iterations read:
+\begin{equation}
+\label{eq:sccp_iter}
+    \begin{cases}
+        \displaystyle
+        x_{k+1} = \frac{x_k - \tau_k V_k u_k + \tau_k z}{1 + \tau_k}, \\[8pt]
+        \displaystyle
+        y_{k+1} = x_{k+1} + \alpha_k (x_{k+1} - x_k), \\[6pt]
+        \displaystyle
+        u_{k+1} = \mathcal{N}_{\theta_{\text{prox}}}
+            \!\left(u_k + \sigma_k W_k y_{k+1},\; t\right),
+    \end{cases}
+\end{equation}
+initialised with $x_0 = z$, $u_0 = 0$. The momentum $\alpha_k$ and the schedule of
+$(\tau_k, \sigma_k)$ follow the accelerated recursion, with the strong-convexity
+constant of $f_z$ fixed to $1$:
+\begin{equation}
+    \alpha_k = \left(1 + 2\,\tau_k\right)^{-1/2},
+    \qquad
+    \tau_{k+1} = \alpha_k \tau_k,
+    \qquad
+    \sigma_{k+1} = \frac{\sigma_k}{\alpha_k}.
+    \label{eq:sccp-sched}
+\end{equation}
+
+\paragraph{ScCP-LFO.} Only $\tau_0$ is learned (initialised via
+$\tau_0 = \mathrm{softplus}(\hat\tau_0)$, $\hat\tau_0 = -0.5$); the full
+$(\tau_k, \sigma_k, \alpha_k)$ sequence is then derived recursively from
+\eqref{eq:sccp-sched}. $W_k$ and $V_k$ are learned independently; $\sigma_0 = 1$
+(absorbed into $W_k$).
+
+\paragraph{ScCP-LNO.} Each $\tau_k$ is learned independently,
+$\tau_k = \mathrm{softplus}(\hat\tau_k)$; $V_k = W_k^\top$; and
+$\sigma_k = 0.99\,(\tau_k\,\|W_k\|_S^2)^{-1}$, ensuring the product
+$\tau_k\sigma_k\|W_k\|_S^2 = 0.99 < 1$ at every layer, so that each layer is a
+valid ScCP step in isolation. The momentum $\alpha_k$ is derived from $\tau_k$ as
+above.
+
+\subsection{Model Variants}
+\label{subsec:models}
+
+All UNN architectures share the following design conventions:
+\begin{itemize}
+    \item \textbf{Time conditioning.} If the proximal operator is an MLP, $t$ is
+          concatenated directly to the input of the MLP. For convolutional or $\ell_1$ proximal operator, a small MLP maps $t \mapsto$ a channel-wise bias.
+    \item \textbf{Truncation depth.} $K \in \{3, 5, 10, 15\}$ for per-layer models;
+          $K = 5$ (fixed) or $K \sim \mathcal{U}(5, 15)$ (random) for shared models.
+\end{itemize}
+
+\subsubsection{Baselines}
+
+Four reference deep-learning models are included:
+\begin{itemize}
+    \item \texttt{MLP\_baseline}: time-conditioned MLP, hidden width $w = 1024$.
+    \item \texttt{UNet\_torchCFM\_baseline}: built-in UNet from the \texttt{torchcfm} library.
+    \item \texttt{UNet\_baseline}: custom UNet, base channel count $\texttt{base\_ch} = 32$.
+    \item \texttt{SmallUNet\_baseline}: lighter UNet, $\texttt{base\_ch} = 32$.
+\end{itemize}
+
+\subsubsection{Standard UNNs (flat, per-layer weights)}
+
+Each iteration $k$ has its own independent parameters
+$\{W_k \in \mathbb{R}^{d_u \times d}, V_k \in \mathbb{R}^{d \times d_u}, \tau_k, \sigma_k,
+\theta_{\text{prox},k}\}$, with $d = \dim(\mathcal{H})$ and $d_u = d$ (same-dimension dual).
+The proximal operator is a small time-conditioned MLP with hidden width $w = 32$.
+Three families are evaluated: \texttt{DFB\_UNN}, \texttt{DiFB\_UNN} and
+\texttt{ScCP\_UNN}, each in LFO and LNO versions.
+
+\subsubsection{Convolutional UNNs (per-layer weights)}
+\label{subsubsec:convolutional}
+
+For image data the dense operator $W_k$ is replaced by a learnable 2D
+convolution and $V_k$ by a transposed convolution of matching shape. Concretely,
+$W_k$ maps the primal image ($1$ channel for MNIST, $3$ for CIFAR-10) to a
+$d_u = \texttt{ic}$-channel dual feature space with a $9\times 9$ kernel and padding $4$ (so that
+$\texttt{conv\_transpose2d}$ is the exact adjoint of $\texttt{conv2d}$ and spatial
+size is preserved), where the number of intermediate channels $\texttt{ic}$ is a
+hyperparameter. The convolution weights are Kaiming-initialised. Unless stated
+otherwise the proximal operator is either the analytical $\ell_1$ dual prox
+(\texttt{L1ProxConv}) or a \texttt{DoubleConvTime} block (two
+convolutional layers with GroupNorm, SiLU and additive time injection). Three
+families are provided: \texttt{ConvDFB\_UNN}, \texttt{ConvDiFB\_UNN} and
+\texttt{ConvScCP\_UNN}, each in LFO and LNO versions. The complete list of the
+$40$ architecture variants we implemented, spanning flat, convolutional and
+weight-shared versions of all three algorithm families, is given in
+\Cref{app:variants} for reference.
+
+\subsubsection{Structural differences with a UNet}
+\label{subsubsec:vs_unet}
+
+Our convolutional ScCP differs from a UNet in three ways, all three of which matter
+for the interpretation of \Cref{subsec:interp}.
+
+\paragraph{No multiscale.} A UNet builds its receptive field by successive
+downsampling, so intermediate activations live on coarser grids and are no longer
+images. ScCP has no pooling: the primal iterate $x_k$ always stays at full
+resolution, and its receptive field grows only \emph{linearly} with the number of
+unrolled iterations $K$. This is what makes the internal states directly
+displayable. \correc{This locality does not appear to limit generation as long as
+the network has enough layers, but we have not tested this systematically.}
+
+\paragraph{Primal--dual alternation with input re-injection.} A UNet propagates a
+single stream of feature maps, with skip connections carrying resolution across the
+encoder--decoder. ScCP instead alternates between a few-channel primal variable in
+image space (one channel for MNIST, three for CIFAR-10) and a multi-channel dual
+variable, and re-injects the observation $z$ at \emph{every} primal step (see
+\eqref{eq:sccp_iter}). The architecture therefore anchors the primal variable to the
+input at each step, rather than progressively constructing an abstracted
+representation of it.
+
+\paragraph{Nonlinearity.} The only nonlinearity in ScCP is a proximal operator ---
+here a clipping with a learned, time-dependent radius --- whereas a UNet stacks
+pointwise activations together with normalisation layers, which aggregate spatial
+statistics over the whole feature map. Every ScCP layer is thus a strictly local,
+translation-equivariant operation. We also note that convolutional ScCP corresponds
+to a single layer of the multi-layer convolutional sparse coding (ML-CSC) hierarchy
+of Papyan, Romano and Elad \cite{papyan2017convolutional}, lacking its nested outer
+loop over dictionary levels.
+
+
+\subsubsection{Breaking the odd symmetry of the proximal velocity field}
+\label{subsubsec:oddsym}
+
+The convolutional ScCP block with the analytical $\ell_1$ dual prox has a
+structural property that is invisible on the (centred, near-symmetric) two-moons
+data but harmful on images: as a function of its input, the induced velocity
+field is \emph{odd}. Indeed, with warm start $z = x_t$, dual initialisation
+$u_0 = 0$, and no convolutional bias, every ScCP update
+(primal step, extrapolation, dual forward step) is \emph{linear} in $(x,u,z)$,
+and the symmetric clipping prox satisfies $\mathrm{prox}(-a) = -\mathrm{prox}(a)$.
+By induction the map $x_t \mapsto \hat{x}$ is odd, hence
+\begin{equation}
+    v_\theta(-x_t, t) = -\,v_\theta(x_t, t) .
+    \label{eq:oddness}
+\end{equation}
+This holds \emph{architecturally}, even at initialisation and before any
+training; we verify it numerically ($\|v_\theta(-x_t)+v_\theta(x_t)\|/\|v_\theta(x_t)\|
+\approx 10^{-6}$).
+
+Property \eqref{eq:oddness} propagates through the generative ODE:
+$\mathrm{gen}(-x_0) = -\mathrm{gen}(x_0)$. On MNIST, a digit has a black
+background ($\approx -1$) and white strokes, so its negation is a
+\emph{colour-inverted} image (white background). Since the noise $x_0$ and $-x_0$
+are equally likely, the generator is forced to produce a distribution that is
+symmetric about $0$: roughly half of the generated samples come out
+colour-inverted, and the model cannot represent the asymmetric MNIST
+distribution. This is a genuine limitation inherited from the odd symmetry of the
+underlying convex/proximal problem.
+
+We break the symmetry with a \textbf{learned convolutional bias (\texttt{w\_bias})}.
+A per-dual-channel bias $b$ is added in the dual forward operator,
+$\sigma_k\,(W_k y_{k+1} + b)$, which amounts to penalising $g(W_k\,\cdot - b)$
+instead of $g(W_k\,\cdot)$. The shift makes the map non-odd in $x_t$. With $b$
+zero-initialised the model starts exactly at the symmetric operator.
+
+This fix preserves the proximal/variational interpretation of the layer (it
+corresponds to a shifted argument) while removing the parity constraint that made
+unmodified ScCP unable to fit image data.
+
+\subsubsection{Shared UNNs (tied weights, variable inference depth)}
+
+All iterations share a single $(W, V, \tau, \sigma, \theta_{\text{prox}})$.
+This weight-tying induces a recurrent dynamical system and allows variable-depth
+inference without retraining (\texttt{model(x\_t, t, n\_iter=N)}). Training
+regimes and proximal-operator choices for the shared models are detailed together
+with the full variant table in \Cref{app:variants}.
+
+\subsection{Hyperparameters}
+\label{subsec:hyperparams}
+
+All models are optimised with Adam (learning rate $10^{-3}$) via the standard
+CFM loss $\mathcal{L}_{\text{CFM}}(\theta)$, using Minibatch Optimal Transport couplings
+\cite{tong2024improving}. Dataset-specific settings are as follows: batch size $256$ and
+$20\,000$ iterations on \textit{two moons}; batch size $128$ on MNIST.
+
+%=============================================================
+\section{Numerical Experiments}
+\label{sec:experiments}
+
+We evaluate the architectures of \Cref{sec:contribution} against standard
+deep-learning baselines (MLP, UNet) on \textit{two moons}, MNIST
+($28\times28$ greyscale) and CIFAR-10 ($32\times32$ RGB).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llccccc}
+\toprule
+Dataset & Model & Config. & \#Params & Iterations & Val. loss & FID \\
+\midrule
+\multirow{3}{*}{2-Moons}
+ & ScCP LNO & $K{=}10$, $m{=}32$ & 1\,940   & 2M & 0.030 & -- \\
+ & ScCP LFO & $K{=}10$, $m{=}32$ & 2\,571   & 2M & 0.028 & -- \\
+ & MLP      & --                 & 4\,546   & 2M & 0.029 & -- \\
+\midrule
+\multirow{4}{*}{MNIST}
+ & ScCP LNO  & $K{=}20$, $m{=}64$ & 105\,480 & 46\,900 & 0.173 & -- \\
+ & ScCP LFO  & $K{=}20$, $m{=}64$ & --       & 46\,900 & --    & -- \\
+ & SmallUNet & --                 & --       & 46\,900 & --    & -- \\
+ & \textit{train vs.\ test reference} & 10k/10k imgs & -- & -- & -- & 1.03 \\
+\midrule
+\multirow{2}{*}{CIFAR-10}
+ & ScCP LFO        & $K{=}20$, $m{=}512$ & -- & 180\,000 & -- & -- \\
+ & UNet (torchcfm) & --                  & -- & 400\,000 & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Quantitative comparison across the three datasets. All runs use OT
+couplings (\Cref{subsec:coupling}) and the $x$-prediction / velocity-loss
+parameterisation of \Cref{subsubsec:xpred}. The MNIST FID is computed in the
+feature space of a small MNIST classifier, not InceptionV3 (see
+\Cref{subsec:mnist_fid}). \TODO{[TODO: complete missing entries; add GFLOPs/fwd and
+training time columns once measured.]}}
+\label{tab:quantitative}
+\end{table}
+
+\correc{Caveat on loss scales: the 2-moons validation losses reported in
+\Cref{tab:quantitative} ($\approx 0.03$) and the training curves of
+\Cref{subsec:results_2moons} ($\approx 1.8$) come from two different reduction
+conventions (per-dimension mean vs.\ per-sample sum, and different
+\texttt{ConditionalFlowMatcher} $\sigma$). They are \emph{not} directly comparable
+and must be harmonised before submission.}
+
+\subsection{Results on \textit{Two Moons}}
+\label{subsec:results_2moons}
+
+\begin{figure}
+    \centering
+    \fig[width=\linewidth]{images/2moons_algo.png}
+    \caption{Training loss on \textit{two moons} grouped by algorithm family
+             (ScCP in green, DFB in orange, DiFB in brown).
+             The MLP baseline ($4.5\text{K}$ parameters) is shown in purple.}
+    \label{fig:2moons_algo}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \fig[width=\linewidth]{images/2moons_shared.png}
+    \caption{Training loss on \textit{two moons}: shared variants (blue) vs.\
+             non-shared variants (green). The MLP baseline is shown in purple.}
+    \label{fig:2moons_shared}
+\end{figure}
+
+Figures~\ref{fig:2moons_algo} and~\ref{fig:2moons_shared} report training loss curves
+over 100 epochs, with all models using the $\ell_1$ proximal operator.
+
+\paragraph{Non-shared variants outperform shared ones by a large margin.}
+Non-shared models converge to losses in the range $[1.75, 1.95]$, several matching or
+slightly outperforming the MLP baseline (${\approx}1.85$). Shared models stagnate above
+$2.1$ regardless of algorithm family or LFO/LNO version. This is consistent with the
+reduced expressive capacity of weight tying: a single operator $W$ must simultaneously
+serve all $K$ unrolling steps and cannot adapt its linear transform to the varying geometry
+of the flow at different depths.
+
+\paragraph{DiFB achieves the lowest loss, below the MLP baseline.}
+Among non-shared architectures, \texttt{DiFB\_UNN\_L1\_LNO} descends to approximately
+$1.75$, below the MLP baseline. This confirms that the Nesterov-type momentum on the dual
+variable, governed in LNO by the FISTA schedule $\rho_k = t_{k-1}/t_{k+1}$, provides a
+tangible optimisation benefit within the unrolled framework.
+
+\paragraph{LFO is similar or better than LNO.}
+Across all families and both shared and non-shared settings, LFO versions achieve similar
+or lower final losses than their LNO counterparts, reflecting the benefit of the relaxed
+adjoint constraint and unconstrained stepsizes.
+
+\paragraph{ScCP does not improve over DFB despite its stronger theoretical guarantees.}
+ScCP's accelerated momentum schedule $\alpha_k = (1+2\tau_k)^{-1/2}$ with decaying
+$\tau_k$ does not outperform plain DFB in this setting, and remains below DiFB.
+
+\paragraph{Generation quality.} Both LNO and LFO generate the two moons correctly at
+a parameter budget roughly half that of the MLP baseline
+(\Cref{fig:LNO_2moons,tab:quantitative}).
+
+\begin{figure}[ht]
+    \centering
+    \incfig[width=0.75\linewidth]{images/LNO_ot_2moons_x_pred_epochs_200.png}
+    \caption{Generation of the two moons by ScCP LNO after 200 epochs, with $K = 10$
+             layers and a dual dimension $m = 32$. \TODO{[TODO: regenerate with
+             larger axis labels --- currently too small to be read.]}}
+    \label{fig:LNO_2moons}
+\end{figure}
+
+\subsection{Results on MNIST}
+\label{subsec:mnist}
+
+\paragraph{From two moons to images.} Moving to the $28\times 28$ image space of
+MNIST requires adapting the architectural inductive biases: dense operators scale
+poorly and ignore spatial locality. As described in
+\Cref{subsubsec:convolutional}, we replace the linear operator $W_k$ by a
+convolution mapping the $1$-channel primal image to an $\texttt{ic}$-channel dual
+feature space ($9\times 9$ kernel, padding $4$). Our MNIST study focuses on a
+\textbf{single} model family: the convolutional strongly-convex Chambolle--Pock
+network \texttt{ConvScCP\_UNN} with the \textbf{analytical $\ell_1$ dual prox},
+trained in the \textbf{$x$-prediction / velocity-loss} setting of
+\Cref{subsubsec:xpred}, operating directly in pixel space. The proximal
+operator is thus fully interpretable (a per-channel $\ell_1$ clipping with learned
+time-dependent radius), and the only black-box component is the linear analysis
+operator $W_k$.
+
+\paragraph{Experimental setting.} We first train \texttt{ConvScCP\_UNN} in the LNO
+regime on the single-class subset of MNIST restricted to the digit $0$ (batch size
+$128$, $50$ epochs, Adam). We sweep the number of unrolled iterations
+$K \in \{5,10,20\}$ and the number of intermediate channels
+$\texttt{ic} \in \{32,64,128\}$, and compare against \texttt{SmallUNet}
+baselines of comparable or larger parameter count trained under the same Flow
+Matching objective. \correc{This sweep predates the coupling fix reported in
+\Cref{subsec:whatdidnotwork} and therefore uses independent coupling; the
+full-MNIST results of \Cref{tab:quantitative} use OT coupling.}
+
+Beyond the training loss we report two generation-quality proxies computed on
+generated samples: \texttt{std\_gen}, the empirical per-pixel standard deviation
+across the generated batch (a diversity proxy), and the anisotropic gradient energy
+\[
+    \mathrm{GE}(x) = \frac1N\sum_{i,j}\lvert x_{i+1,j}-x_{i,j}\rvert
+                   + \frac1N\sum_{i,j}\lvert x_{i,j+1}-x_{i,j}\rvert ,
+\]
+the mean $\ell_1$ total variation of the batch (a sharpness / high-frequency
+proxy), both compared to their reference value on true MNIST zeros,
+$\mathrm{GE}_{\text{reel}} = 0.2998$. Both statistics are computed on a small
+batch ($n_{\text{cell}} = 4$) and should be read as indicative rather than
+conclusive.
+
+%=============================================================
+% NOTE: the AFHQ-cats results subsection is expected here, before the
+% "Explored Directions" section below.
+%=============================================================
+
+%=============================================================
+\section{Explored Directions}
+\label{sec:explored}
+
+The architecture reported in \Cref{sec:experiments} is the end point of a much
+wider exploration. This section documents that exploration: the dead ends that
+shaped the final design, the side investigations that answered a question without
+changing the architecture, and the questions we opened but could not close. We
+consider this material to be part of the contribution of the internship rather
+than an appendix to it: several of the results below are negative results about
+claims that looked plausible \emph{a priori}, including two of our own.
+
+Throughout, each item ends with an explicit verdict, using the following
+convention: \emph{confirmed} means measured and reproduced under a control;
+\emph{refuted} means the hypothesis was ours (or the literature's) and the
+measurement contradicted it; \emph{inconclusive} means the measurement was made
+but does not support a conclusion at the current sample size or budget; and
+\emph{conjecture} marks a reading we have not tested. Unless stated otherwise,
+all numbers below are single runs, which is the main limitation of this section.
+
+\subsection{What did not work}
+\label{subsec:whatdidnotwork}
+
+\paragraph{Odd symmetry of the proximal field.} The plain $\ell_1$ ConvScCP is
+\emph{exactly} an odd operator, so half of the generated MNIST samples came out
+colour-inverted (\Cref{subsubsec:oddsym}). This is architectural, holds at
+initialisation, and is not an optimisation artefact. We tried two zero-initialised
+fixes: a learned convolutional bias in the analysis operator (\texttt{w\_bias}),
+and an asymmetric two-threshold dual prox
+$\operatorname{clamp}(u,-\lambda^-,\lambda^+)$, which is the exact prox of
+$\lambda^+\max(x,0)+\lambda^-\max(-x,0)$ and therefore also preserves the proximal
+reading. Both break the parity, but we kept only \texttt{w\_bias}: it acts on the
+input dependence of the map rather than on a static threshold, and it leaves a
+single mechanism to explain in the paper. \emph{Verdict: confirmed (the symmetry),
+fixed (the model).}
+
+\paragraph{Plain $x$-prediction collapses onto the data mean.} Training
+$D_\theta$ with an unweighted $\|D_\theta - x_1\|^2$ objective produces a constant
+generator: the network ignores $x_t$ and outputs the class mean
+($\texttt{std\_gen}\approx 0.02$ against a true per-dimension standard deviation of
+$0.54$). The velocity-space weighting of \eqref{eq:xpred_loss} removes this in
+pixel space and is what we use throughout. The mechanism, however, is not the one
+we first assumed. We had attributed the collapse to the loss weighting; a control
+in which only the loss space changes (same network, $x$-prediction output, $v$-space
+loss --- the exact recipe advocated in \cite{li2026back}) collapsed
+\emph{identically} to the unweighted version on a degenerate target (a single MNIST
+class in a VAE latent). Diversity is decided at \emph{small} $t$, where the ODE
+starts from noise: if the network predicts the mean there, all trajectories merge
+immediately and never re-separate. At small $t$ the target $x_1$ has low variance
+and the $1/(1-t)^2$ weight is $\approx 1$, so the reweighting arrives too late to
+help. What decides is whether the regression target \emph{contains} $x_0$:
+$v$-prediction, whose target $x_1-x_0$ inherits the full variance of the Gaussian
+source at every $t$, is immune. \emph{Verdict: confirmed; our first explanation
+(``the loss space is the lever'') refuted by the control.} A partial fix through a
+forced skip, $\hat{x}_1 = x_t + (1-t)\,\mathcal{N}_\theta(x_t,t)$, recovers part of
+the diversity ($\texttt{std\_gen}\ 0.018 \to 0.193$) but not all of it ($0.576$ for
+$v$-prediction), and compensating its implicit $(1-t)^2$ reweighting exactly made
+things \emph{worse}: the correcting weight reaches $\times 400$ near $t=1$, a
+handful of samples then dominate the batch gradient, and gradient clipping discards
+precisely the small-$t$ signal that protects against the collapse. Equivalence in
+expectation is not equivalence under SGD.
+
+\paragraph{Naked $x_1$-prediction is a learnability failure, not a loss problem.}
+A control model (\texttt{SmallUNetX1}, strictly identical to the \texttt{SmallUNet}
+baseline except for its output parameterisation) predicts the conditional mean
+\emph{for every digit and every $t$}, including at $t=0.8$ where the conditional
+variance $\mathrm{Var}(x_1\mid x_t)\approx 0.10$ shows the information is present.
+Bounded reweightings (uniform, min-SNR) do not fix it. What distinguishes
+$v$-prediction is that it is $x_1$-prediction \emph{preconditioned}: writing
+$\hat{x}_1 = x_t + (1-t)\mathcal{N}_\theta$ puts a skip \emph{outside} the network,
+so the network only has to produce a residual correlated with its input, instead of
+synthesising a whole image through its bottleneck. This is the EDM-style
+preconditioning argument, and it is also why our unrolled models are well behaved
+in $x$-prediction: the ScCP recursion re-injects $z=x_t$ at every primal step, so
+the skip is built into the algorithm. \emph{Verdict: confirmed, with a caveat} ---
+part of this diagnosis was run under the buggy OT coupling of
+\Cref{subsec:otbug}, and although the mechanism (missing skip) is coupling-independent,
+the strength of the effect should be re-measured before being quoted as a general
+claim about $x_1$-prediction.
+
+\paragraph{Latent-space Flow Matching.} We tried running the unrolled flow in the
+latent space of a light convolutional (mildly variational) autoencoder: each
+$28\times28$ image is encoded to a $(c_{\text{lat}},7,7)$ code, the flow is matched
+on the codes, and the decoder is used only for display. This was motivated by the
+multiscale structure a UNet gets for free and the ScCP does not
+(\Cref{subsubsec:vs_unet}). It consistently produced blurrier digits than the
+pixel-space model, and the ScCP iterations converged markedly worse. Our reading,
+offered as a \emph{likely cause} rather than a measured fact, is that the
+analytical $\ell_1$ dual prox is no longer an appropriate prior in that domain:
+sparsity is a meaningful regulariser on a pixel or wavelet representation, but
+autoencoder codes are dense entangled features for which an $\ell_1$ clipping is
+not a meaningful proximal step, so the unrolled solver loses the variational
+structure it relies on. A second, more decisive objection is that this design moves
+the credit for sample quality from the proximal architecture to the decoder, which
+defeats the purpose of the study. \emph{Verdict: abandoned; all reported results are
+in pixel space.} \emph{Conjecture:} a structured latent (wavelet or sparse-coding
+compatible) rather than a learned dense one would be the way to retry this.
+
+\paragraph{Weight sharing and the choice of algorithm family.} Tying
+$(W,V,\tau,\sigma,\theta_{\text{prox}})$ across the $K$ unrolled iterations, which
+would allow a variable inference depth, costs a large and consistent amount of
+final loss on two moons (shared models stagnate above $2.1$ where per-layer models
+reach $[1.75,1.95]$) and does not recover on MNIST. Similarly, ScCP never
+outperformed plain DFB on two moons despite its stronger convergence guarantees,
+and DiFB was the best of the three. We nevertheless carried ScCP forward to images,
+because what motivates it there is not its convergence rate but its structure: a
+strongly convex data-fidelity term whose primal step re-injects $z$ and keeps the
+iterate in image space, which is what makes \Cref{subsec:interp} possible.
+\emph{Verdict: confirmed (both gaps); design decision taken against the loss
+ranking, and stated as such.}
+
+\subsection{Post-mortem: a silent bug in the optimal-transport coupling}
+\label{subsec:otbug}
+
+For a long period of the internship, our conclusion was that minibatch OT coupling
+\emph{destroyed} the ConvScCP field (which degenerated to a blurry, near-constant
+velocity) while leaving the UNet baseline unaffected --- and we had a theory for it,
+namely that an odd, capacity-constrained proximal operator cannot represent the
+asymmetric noise-to-data routing that OT imposes within each minibatch.
+
+Both the observation and the theory were artefacts of an implementation bug. After
+computing the OT plan, our code built $x_t$ from one $(x_0,x_1)$ pair and the
+regression target $u_t = x_1-x_0$ from \emph{another}. The resulting conditional
+target is essentially random, and its minimiser is \emph{exactly} the conditional
+mean --- so the collapse we observed was the optimal solution of the corrupted
+problem, not a failure of capacity or of the proximal structure. The failure mode
+is worth recording precisely because it is indistinguishable, by inspection of
+losses and samples, from a genuine expressivity limit: a silently mispaired
+coupling degenerates into an adversarial coupling. Once the pairing was fixed, no
+collapse was ever observed again, and OT coupling trains \emph{better} than
+independent coupling for both architectures (ScCP on MNIST, all digits: final loss
+$0.177$ under OT against $0.208$ under independent coupling).
+
+The audit rule we adopted afterwards was blunt: a run is contaminated if and only
+if it touched the OT path, whatever else it did. This invalidated the claim ``OT
+breaks ScCP but not the UNet'' and everything derived from it, including the
+theoretical conjecture of \Cref{subsec:lipschitz}, which had to be restated without
+OT. Purely independent-coupling and score-matching experiments were unaffected.
+\emph{Verdict: refuted (our own claim); the corrected setting is the one used in
+\Cref{tab:quantitative}.}
+
+\subsection{Warm-starting the dual variable across ODE steps}
+\label{subsec:warmstart}
+
+At sampling time, each velocity evaluation restarts the unrolled recursion from
+$u^{(0)}=0$, so the dual state built at the previous Euler step is discarded. Since
+consecutive ODE steps solve nearly identical denoising problems, carrying $u$
+forward is the natural warm start, and it is a diagnostic a UNet cannot even
+express. We implemented it both post hoc (a $\gamma$-scaled carry at sampling time)
+and at training time, through the latent self-conditioning trick of RIN
+\cite{jabri2023rin}: with probability $0.9$, a no-grad cold pass on the previous
+state supplies $u_{\text{prev}}$.
+
+The result depends entirely on $K$, and the mechanism is a property of the
+\emph{learned} weights rather than of the algorithm. On MNIST (digit $0$, $200$
+epochs, OT coupling, mini-FID of \Cref{subsec:mnist_fid}, whose floor is
+$\approx 4$):
+
+\begin{center}
+\small
+\begin{tabular}{cccc}
+\toprule
+$K$ & baseline / cold & self-conditioned / warm & effect \\
+\midrule
+$20$ & $23.8$  & $57.3$   & $-141\%$ \\
+$6$  & $86.2$  & $64.0$   & $+26\%$ \\
+$3$  & $301.5$ & $1059.1$ & $-251\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At $K=20$ the channel is structurally closed: the unrolled recursion contracts the
+dual initialisation whatever we do (the cold/warm divergence of $u$ after $20$
+iterations is $8.5\times10^{-3}$, and $6.1\times10^{-4}$ for the self-conditioned
+model, which learned to be \emph{more} forgetful). We first read this as exposure
+bias --- the model sees a cold $u_{\text{prev}}$ during training and a warm one at
+inference --- and refuted it with a third sampler that recomputes $u_{\text{prev}}$
+by a cold pass on the previous state, reproducing the training condition exactly:
+it gives $54.98$ against $55.0$ for the recursive sampler, i.e.\ the recursion adds
+nothing. At $K=6$, where the truncated recursion retains $50\%$ of its dual
+initialisation instead of $0.85\%$, the transfer does pay ($-26\%$ FID) --- but the
+same control shows the gain comes from \emph{conditioning} on a dual computed at
+the previous state, not from chaining along the trajectory. And even at its best,
+warm starting never beats the cheaper option of unrolling further: $64.0$ at $K=6$
+against $23.8$ for the plain $K=20$ baseline. On AFHQ ($K=10$, an open channel by
+the same criterion) the paired run is blurrier and less diverse in both regimes.
+\emph{Verdict: refuted as a useful lever} (one success in four trained pairs, in a
+narrow window around $K=6$, always dominated by simply taking more iterations);
+\emph{confirmed} that a per-layer dual-state diagnostic is available in this
+architecture and not in a UNet.
+
+\subsection{Is the unrolled network a local-score (ELS) machine?}
+\label{subsec:els}
+
+Kamb and Ganguli \cite{kamb2025analytic} show that the creativity of convolutional
+diffusion models is largely explained by an analytic \emph{equivariant local score}
+(ELS) machine: a denoiser that selects, independently at each position, the best
+matching patch of the training set and stitches the result back by overlapping
+aggregation. Their claim is quantitative --- the ELS machine predicts the trained
+network's denoiser with $r^2\approx 0.94$, against $r^2\approx 0.61$ for the
+memorising (ideal-score, IS) machine. Our ConvScCP is local and translation
+equivariant by construction, which makes the question direct: is it an ELS machine,
+and does that survive the FM framework and the OT coupling?
+
+Answering it required reproducing their pipeline, porting our architecture into
+their score-matching codebase, and porting their ResNet into ours, giving a $2\times2$
+design (architecture $\times$ framework). Our first answer was that
+ELS-predictability is a property of \emph{score matching}: both architectures were
+ELS machines under score matching and neither was under Flow Matching. That answer
+was wrong, and was corrected in two steps. First, NIFTY \cite{chatillon2025nifty}
+derives the closed-form FM velocity on patches and shows it is the same object as
+Kamb's Eq.~(5) up to a time reparameterisation, i.e.\ theory predicts that FM does
+\emph{not} break the mechanism. Second, rebuilding the ELS machine faithfully (whole
+patch with Gaussian fold, FM kernel) and --- the decisive point --- comparing
+\emph{denoisers along the model's own trajectory} instead of \emph{integrated end
+points} flipped every null result: ScCP-FM reaches $r^2 = 0.83$ against $0.66$ for
+IS, ResNet-FM $0.85$ against $0.69$, with the calibrated patch size going
+coarse-to-fine ($P=11$ at high noise to $P=3$ at low noise), exactly Kamb's
+signature. The earlier null was a measurement artefact: at a denoiser fidelity of
+$0.85$, integrating the ELS machine independently from the same $x_0$ diverges from
+the model by ODE sensitivity and produces a different digit, even though the two
+denoisers agree pixel-for-pixel on the model's path ($\cos = 1.00$ at $t=0.84$).
+We also cross-checked our ELS implementation against the authors' own function
+($\cos = 0.96$--$0.99$). \emph{Verdict: refuted (our ``FM breaks ELS'' claim);
+confirmed that locality plus equivariance yields an ELS machine irrespective of the
+framework.}
+
+The comparison that survives is a different one. Across three architectures under
+matched training, the ELS $r^2$ saturates near $1$ for all of them and therefore
+does not discriminate; the discriminant is the \emph{gap} $r^2_{\text{ELS}} -
+r^2_{\text{IS}}$, i.e.\ the distance to memorisation, and it orders the
+architectures monotonically by locality: ScCP $0.72 \gg$ ResNet $0.17 \gg$ UNet
+$0.02$, with the ELS-favouring gap emerging only for $t > 0.3$, where local mosaic
+assembly and global memorisation start to differ. Kamb's UNet, with three pooling
+stages and a global receptive field, is essentially indistinguishable from the
+memorising machine on this scale. We also checked, since the closed form is derived
+under independent coupling, that ELS-predictability survives OT coupling: it does.
+Whether OT \emph{sharpens} it is \emph{inconclusive} --- an early single run
+suggested it did ($0.83\to0.90$), the controlled three-architecture comparison did
+not reproduce the effect, and we removed the claim. All of this rests on one run per
+cell and eight seeds. \emph{Verdict: confirmed (locality orders the
+creativity--memorisation position); inconclusive (any effect of the coupling).}
+
+\subsection{Non-expansivity, convexity, and what actually drives recombination}
+\label{subsec:lipschitz}
+
+A tempting story about our architecture is that its convex-proximal structure is
+what limits it: at convergence, an $\ell_1$ ScCP layer is the proximity operator of
+a convex function, hence firmly non-expansive, whereas the exact target
+$D^\star_t = \mathbb{E}[x_1\mid x_t]$ has Jacobian $\sigma_t^{-2}\mathrm{Cov}(x_1\mid
+x_t)$, whose eigenvalues \emph{exceed} $1$ between modes of a multimodal
+distribution. The target would then be structurally outside the model class. This
+is testable, and we tested it. Measuring the local Lipschitz constant by exact power
+iteration on the target and by finite differences on trained models, under
+independent coupling and on held-out data: the trained ScCP ($K=6$, \texttt{w\_bias},
+LNO) reaches $L\approx 3.9$, far from the value $1$ the idealised argument predicts.
+Truncation at finite $K$, the analysis bias, and the velocity parameterisation each
+take the model out of the firmly non-expansive class. Worse for the story, the
+Lipschitz profiles of ScCP, ResNet and UNet are nearly identical (at the peak
+$t\approx0.32$, $3.5$ against $5.3$): a $25$--$35\%$ imprint, correct in direction
+but far too small to explain any quality gap. \emph{Verdict: refuted.} The only
+regime where the argument could still bite is a near-proximal ScCP at large $K$,
+which we did not test --- and which a further objection weakens: with independent
+per-layer weights, large $K$ does not produce a contractive fixed-point iteration,
+so ``$K\to\infty$ recovers an exact prox'' does not hold for our parameterisation.
+
+Two clean results came out of the same series. First, \emph{locality controls
+expansivity}: on the analytic target, the Lipschitz constant is monotone in the
+patch size $P$ at fixed $t$ ($1.5$, $2.4$, $2.8$, $8.5$, $18.5$ for
+$P = 3, 7, 11, 27$ and global, at $t=0.275$, on the same points $x_t$), and trained
+ScCP models reproduce the hierarchy through their receptive field ($k{=}9,K{=}20$
+against $k{=}3,K{=}6$: $3.44$ against $1.93$ at $t=0.16$). \emph{Verdict:
+confirmed.} Second, and against our own expectation, \emph{expansivity does not
+drive memorisation}: sweeping $P$, the Lipschitz constant grows by a factor of six
+while the distance from generated samples to the training set does not move
+(ratio $1.2$--$1.4$ times the distance of genuine held-out digits, i.e.\ all patch
+denoisers generalise, including $P=27$ whose patch is nearly the whole image), and
+memorisation appears as a \emph{cliff} at the global denoiser ($0.03$), not as a
+slope. \emph{Verdict: refuted.}
+
+What then is the lever? A deconfounding control with five denoisers isolates it.
+Translation equivariance alone is not it: a global denoiser trained with translated
+copies of the data looks novel by nearest-neighbour distance to the training set
+(ratio $1.12$) but sits at distance $0.42$ from the \emph{augmented} set --- it
+memorises translated digits. Receptive-field size is not it either: $P=27$ with
+overlapping aggregation remains novel. What separates the two is the \emph{fold}:
+$P=27$ with overlapping windows generates images far from both sets, and $P=27$
+without it (central pixel only) memorises. The creative lever is therefore the
+overlapping local aggregation, which lets patches from \emph{different} training
+images be recombined into a mosaic that matches no training image, translated or
+not. \emph{Verdict: confirmed, with a methodological warning} --- distance to the
+training set alone is not a valid novelty measure in the presence of an equivariance;
+it must be measured against the orbit. This connects directly to the proximal
+reading of the report: through the Gribonval--Nikolova result \cite{gribonval2011should}
+that any Gaussian MMSE denoiser is a proximity operator (of a generally
+\emph{non-convex} penalty), the ELS
+machine is a non-parametric patch prox and ScCP a learned parametric compression of
+one. We give this bridge as an \emph{interpretation}, not as a proof about our
+trained network.
+
+\subsection{A prototyping bench: denoising at fixed noise levels}
+\label{subsec:denoiseprobe}
+
+Full generative training is too slow to explore an architecture space (see
+\Cref{subsec:cost}), so we built a cheap surrogate: the same FM objective restricted
+to a finite set of noise levels $t$, which is exactly a denoising benchmark, plus an
+optimal \emph{linear} (Wiener) denoiser measured on the same split as a reference
+($\mathrm{nmse}=0.2213$; we quote the measured value, not the analytic one, which is
+optimistic by plug-in bias). Two lessons came out of it.
+
+First, \emph{capacity is inert and the block family decides}. Multiplying the
+parameters of a torchcfm UNet by four buys $2.4\%$; the same flatness had already
+been observed on ScCP, where the number of dual channels \texttt{ic} is essentially
+inert and doubling $K$ buys $5\%$. At matched capacity, ScCP ($1.25$M, $2$h$09$)
+scores $0.2086$ against $0.2093$ for Kamb's minimal UNet ($2.11$M, $12.7$ min) ---
+within the bootstrap error bar --- while a modern residual UNet that is
+\emph{smaller} ($1.11$M) reaches $0.1929$ in $21$ min. \emph{Verdict: confirmed} ---
+at this budget the unrolled network buys the quality of a minimal UNet for roughly
+ten times the GPU time, and is about $10\%$ behind a modern one. This is, to date,
+our most direct architectural comparison, and it does not favour unrolling on
+quality per unit of compute.
+
+Second, and this is a warning about the bench itself, \emph{an aggregated denoising
+error is blind to the regime that decides sharpness}. The MSE-optimal denoiser is
+$\mathbb{E}[x_1\mid x_t]$, which is blurry by construction, and the average over
+$t\in\{0.2,\dots,0.8\}$ is dominated by $t=0.2$ (nmse $0.48$ against $0.068$ at
+$t=0.8$), i.e.\ by coarse structure. Sharpness is decided as $t\to1$, and this is
+exactly where ScCP stalls: $\mathrm{nmse}(0.95) = 0.046$ against $0.0066$ for the
+residual UNet, a factor of seven, on models that are tied on the aggregate. This
+yields a falsifiable prediction we did not have time to test: Kamb's minimal UNet,
+which stalls too ($0.036$), should also produce the blurry ``blobs'' we observe on
+AFHQ, whereas the residual UNet should not. \emph{Verdict: confirmed (the blind
+spot); prediction untested.} Two protocol requirements follow: never rank runs of
+different step budgets together (at $3000$ steps every model is still above the
+linear baseline and the bench ranks optimisation speed only), and never select a
+generative architecture on an aggregated denoising error.
+
+\subsection{The computational cost of unrolling}
+\label{subsec:cost}
+
+Our tutors asked why ConvScCP training runs take roughly seven times longer than a
+comparable UNet. The answer is neither the parameter count nor the arithmetic:
+ScCP at $K=20$ costs $21$ GFLOPs per velocity evaluation, $1.5$ times the
+\texttt{SmallUNet} and $6.5$ times \emph{less} than the torchcfm UNet that trains at
+the same speed. It is GPU efficiency, about five times worse: the unrolled recursion
+decomposes the computation into $\approx 2000$ tiny CUDA kernels (against $213$ for
+\texttt{SmallUNet}), all at full $28\times28$ resolution since there is no
+downsampling, with low-arithmetic-intensity $9\times9$ convolutions between $1$ and
+$\texttt{ic}$ channels and memory-bound elementwise primal--dual algebra on the dual
+variable at every iteration. The signature is that dividing the kernel size from
+$9$ to $3$ divides the FLOPs by eight but the runtime by only $1.5$. A corollary
+worth stating, since it misled us: \texttt{nvidia-smi} reported $99\%$ utilisation
+throughout, but that field measures the fraction of time during which at least one
+kernel is resident and is blind to throughput --- ScCP and \texttt{SmallUNet} show
+the same SM occupancy ($80\%$ against $82\%$) at $129$ against $620$ GFLOP/s.
+\texttt{torch.compile} did not help (it was slower). \emph{Verdict: confirmed; this
+is a structural property of unrolled architectures on current hardware, and it
+bounds what an internship-scale compute budget can explore.}
+
+\subsection{Scaling up: CIFAR-10, and what a step budget buys}
+\label{subsec:scaling}
+
+The natural next dataset after MNIST was CIFAR-10, with the OT-CFM UNet
+\cite{tong2024improving} as the reference backbone --- a clean comparison, since
+that paper contributes the coupling and not the architecture. Three findings, none
+of which is about the architecture, decided how we spent the remaining compute.
+
+\paragraph{The transport is learned long before the sharpness.} Comparing our
+$50$-epoch UNet with the official $400$k-step OT-CFM weights from the \emph{same}
+$x_0$, both produce the \emph{same scene} --- the same car, the same dog, the same
+composition --- and differ only in sharpness. The gap is convergence, not capacity
+or architecture. \emph{Verdict: confirmed, single comparison.}
+
+\paragraph{Neither the loss nor early EMA samples measure quality.} Our ConvScCP
+reaches an FM loss of $0.146$ against $0.138$ for the reference under OT --- a $6\%$
+gap that carries the entire distance between an FID of about $4.8$ and one above
+$50$. The loss is dominated by the irreducible conditional variance and cannot
+resolve it. Independently, sampling from EMA weights (decay $0.9999$, time constant
+$\approx10$k steps) at $10$k steps shows blurry red-black images while the raw
+weights already generate structured scenes: roughly $37\%$ of the EMA average is
+still random initialisation at that point. Judging a run at $10$k steps from its EMA
+samples --- which we did --- concludes failure on a model that works.
+\emph{Verdict: confirmed (both traps).}
+
+\paragraph{Below a threshold in steps, a run is not evaluable.} A ConvScCP sized for
+CIFAR ($36.5$M parameters) ran at $0.22$ it/s, i.e.\ an ETA of $514$ hours, and was
+killed by preemption on a shared GPU. We therefore pivoted to AFHQ-cats at
+$32\times32$, a single-mode aligned distribution of $5\,653$ images that is $20$
+times cheaper per step. There, incomplete runs ($45$--$55$k steps) produce blobs
+while the one run taken to $165$k steps produces genuine cats, at \emph{lower}
+capacity than two of the failing runs. A delayed-start diagnostic --- integrating
+from a real $x_{t_0}$ and locating the $t_0^\star$ below which samples stop being
+sharp --- localises the failure: the field is learned from $t=1$ backwards, and the
+interval $[0,0.5]$, which decides global structure, converges last. The two
+\emph{largest} models ($9.6$M and $10.4$M) are the worst at a fixed step budget:
+capacity is counter-productive when it is not paid for in steps. A
+train/validation denoising comparison confirms the reading, with a generalisation
+gap statistically indistinguishable from zero on four checkpoints (including one at
+$2500$ equivalent epochs): these models \emph{underfit}, so adding data would change
+nothing. \emph{Verdict: confirmed} --- with the practical rule that no AFHQ run below
+$\approx150$k steps should be used to conclude anything about an architecture, and
+the acknowledgement that this rule invalidates most of the scaling comparisons we ran.
+
+\paragraph{Prepared but not run.} The RGB extension to ImageNet-32 required changing
+only the analysis kernel from $(\texttt{ic},1,9,9)$ to $(\texttt{ic},3,9,9)$ --- the
+dual variable, the prox, the schedule and the LNO bound are colour-agnostic, and the
+colour mixing is absorbed by $W$, which is a small illustration of the fact that
+Chambolle--Pock is defined on any Hilbert space. The code is smoke-tested; the
+dataset was never available on the machine, so no result is reported.
+
+\subsection{Methodological lessons}
+\label{subsec:methodo}
+
+Three measurement pitfalls cost us enough time to be worth recording, beyond the
+coupling bug of \Cref{subsec:otbug}.
+
+\paragraph{Know the floor of your metric.} The MNIST ``FID'' used in this report is
+a mini-FID computed in the $128$-dimensional feature space of a small MNIST
+classifier, not InceptionV3, and its floor depends strongly on the sample size:
+train against test gives $4.1\pm0.6$ at $N=2000$ (the protocol value), $1.24$ at
+$N=10000$ and $1.03$ on the full sets, while a train-against-train control gives
+$2.99$ at $N=2000$ --- so most of the floor is finite-size bias rather than a
+distributional gap. The cause is visible in the features: $67$ of the $128$ units
+are dead and the effective rank is $61$, which makes the covariance square root
+ill-conditioned. Consequently a mini-FID must be read as an excess above $\approx4$,
+and values obtained at different $N$ must never be compared.
+
+\paragraph{A distance to the training set is not a novelty measure.} As shown in
+\Cref{subsec:lipschitz}, a model that memorises translated training images scores as
+novel under nearest-neighbour distance to the training set. Any invariance of the
+model must be quotiented out of the distance before the number means anything.
+
+\paragraph{Two diagnostics we would keep.} The delayed-start test of
+\Cref{subsec:scaling} (which interval of $t$ is still badly learned) and the
+solver ablation that precedes it (Euler $10/50/200/1000$ and \texttt{dopri5} giving
+pixel-identical outputs, which rules the integrator out and puts the error in the
+field) are cheap, architecture-agnostic, and answered questions that sample
+inspection could not.
+
+% New bibliography keys used in this section (to be added to the .bib):
+%   kamb2025analytic   -- Kamb & Ganguli, arXiv:2412.20292
+%   chatillon2025nifty -- Chatillon, Rabin & Tschumperle (NIFTY), arXiv:2509.22318
+%   jabri2023rin       -- Jabri, Fleet & Chen (RIN), ICML 2023, arXiv:2212.11972
+%   gribonval2011should -- Gribonval, "Should penalized least squares regression
+%                          be interpreted as maximum a posteriori estimation?",
+%                          IEEE TSP 2011 (with Nikolova for the later version)
+
+\end{document}

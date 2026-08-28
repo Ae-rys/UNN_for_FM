@@ -1,0 +1,6 @@
+checkpoint: results/temp-5/ConvScCP_k3_K6_ic128_L1_LNO/model.pt  (K=6, ic=128)   N_seed=16
+median r2(model, IS-FM)          = 0.541   (haut => memorise)
+median r2(model, nearest train)  = 0.590
+median L2(model sample -> train) = 13.04
+median L2(TEST image  -> train)  = 8.57   (reference d'un vrai voisin non-memorise)
+ratio sample/test nearest-dist   = 1.52   (<<1 => samples collent au train => overfit)

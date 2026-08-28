@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+"""
+run_afhq32.py
+Flow Matching sur AFHQ-chats 32x32 (RGB), sous la recette torchcfm.
+
+Pourquoi ce dataset : ~5 150 visages de chats alignes et centres -> une
+distribution a UN mode, beaucoup plus homogene que CIFAR-10 (10 classes, fonds
+encombres). Meme cout de calcul que CIFAR a resolution egale, mais bien plus
+apprenable. Avec 5k images, les verifs de memorisation / plus-proche-voisin
+(serie ELS / Kamb) sont quasi gratuites.
+
+Tout l'entrainement (EMA, warmup, checkpoints latest.pt + archives, REPRISE
+AUTOMATIQUE apres crash) est reutilise tel quel depuis
+run_cifar10_torchcfm_recipe.train_one. Seuls changent : les donnees, et des
+defauts allonges pour un petit dataset facile (50k steps, config MNIST k9/K10/
+ic256 au lieu du mastodonte k25/K19/ic512 du run CIFAR a 514 h d'ETA).
+
+Prerequis
+---------
+    python prepare_afhq_cats.py        # construit ./data/afhq_cat32_train.pt
+
+Usage
+-----
+    # smoke-test / ETA (a faire d'abord ; ~2 min)
+    python run_afhq32.py --only ConvScCP --steps 200 --results-dir /tmp/smoke_afhq
+
+    # le vrai run (GPU 1 par defaut), suivable dans claude.log
+    nohup python run_afhq32.py --only ConvScCP >> claude.log 2>&1 &
+
+    # crash / preemption -> MEME commande, reprise automatique via latest.pt
+    # prolonger ensuite : --steps 100000 sur le meme results-dir
+
+Sorties -> results_afhq32/<nom>/   (step_N.png = samples EMA, loss.png, ckpts)
+"""
+
+import argparse
+import gc
+import os
+
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+
+from run_cifar10_torchcfm_recipe import RECIPE, build_experiments, train_one
+
+
+def get_afhq_loader(cache="./data/afhq_cat32_train.pt", batch_size=128):
+    if not os.path.exists(cache):
+        raise FileNotFoundError(
+            f"{cache} absent — lance d'abord : python prepare_afhq_cats.py")
+    d = torch.load(cache)
+    x = d["data"].float().div_(127.5).sub_(1.0)        # uint8 [0,255] -> [-1,1]
+    ds = TensorDataset(x, d["labels"])
+    print(f"AFHQ chats (cache {cache}) : {len(ds)} images.", flush=True)
+    return DataLoader(ds, batch_size=batch_size, shuffle=True,
+                      num_workers=4, pin_memory=True, drop_last=True)
+
+
+def main():
+    p = argparse.ArgumentParser(
+        description="AFHQ-chats 32x32 Flow Matching, recette torchcfm.")
+    p.add_argument("--cache", type=str, default="./data/afhq_cat32_train.pt")
+    p.add_argument("--steps", type=int, default=50000,
+                   help="Budget steps (prolongeable ensuite via la reprise).")
+    p.add_argument("--results-dir", type=str, default="results_afhq32")
+    p.add_argument("--batch-size", type=int, default=RECIPE["batch_size"])
+    p.add_argument("--coupling", type=str, default="ot", choices=["indep", "ot"])
+    p.add_argument("--prox", type=str, default="l1", choices=["l1", "l1c"],
+                   help="l1c = rayon du prox appris par canal dual "
+                        "(2560 scalaires de conditionnement au lieu de K).")
+    p.add_argument("--no-flip", action="store_true")
+    p.add_argument("--only", type=str, default="")
+    p.add_argument("--skip", type=str, default="")
+    p.add_argument("--kernel", type=int, default=9, help="Recette MNIST gagnante : 9.")
+    p.add_argument("--K", type=int, default=10)
+    p.add_argument("--ic", type=int, default=256)
+    p.add_argument("--sample-every", type=int, default=2500)
+    p.add_argument("--save-every", type=int, default=2500)
+    p.add_argument("--keep-every", type=int, default=10000)
+    p.add_argument("--no-resume", action="store_true")
+    p.add_argument("--euler-steps", type=int, default=20,
+                   help="Pas d'Euler de l'inference. Fixe t_max = 1 - 1/N = borne du "
+                        "tirage de t a l'entrainement (Euler-20 -> 0.95). C'est ce qui "
+                        "permet de retirer le clamp de la loss x-pred, cf. train_one.")
+    p.add_argument("--t-max", type=float, default=None,
+                   help="Force t_max au lieu de 1 - 1/euler-steps.")
+    p.add_argument("--allow-tmax-change", action="store_true",
+                   help="Autorise la reprise d'un run entraine avec un autre t_max.")
+    p.add_argument("--device", type=str, default="cuda:1",
+                   help="GPU 1 par defaut (le 0 est occupe par un autre user).")
+    args = p.parse_args()
+
+    device = torch.device(args.device)
+    # Si CUDA_VISIBLE_DEVICES restreint deja la visibilite (p.ex. =1), le GPU
+    # choisi est renumerote cuda:0 dans le process et le defaut cuda:1 pointe
+    # hors limites -> on retombe sur cuda:0 au lieu de crasher.
+    if device.type == "cuda" and (device.index or 0) >= torch.cuda.device_count():
+        vis = os.environ.get("CUDA_VISIBLE_DEVICES", "")
+        print(f"[warn] {device} invalide ({torch.cuda.device_count()} GPU visible(s), "
+              f"CUDA_VISIBLE_DEVICES='{vis}') -> repli sur cuda:0", flush=True)
+        device = torch.device("cuda:0")
+    print(f"Device: {device}  |  dataset: afhq_cat32  |  coupling: {args.coupling}  "
+          f"|  steps: {args.steps:,}", flush=True)
+
+    os.makedirs(args.results_dir, exist_ok=True)
+    train_loader = get_afhq_loader(args.cache, batch_size=args.batch_size)
+
+    experiments = build_experiments(device, K=args.K, ic=args.ic, kernel=args.kernel,
+                                    prox=args.prox)
+    if args.only:
+        experiments = [e for e in experiments if args.only in e["name"]]
+    if args.skip:
+        experiments = [e for e in experiments if args.skip not in e["name"]]
+    print(f"\n{len(experiments)} experiment(s) a lancer.\n", flush=True)
+
+    summary = []
+    for i, exp in enumerate(experiments, 1):
+        name = exp["name"]
+        print(f"\n[{i}/{len(experiments)}] {name}", flush=True)
+        model = None
+        try:
+            model = exp["build"]()
+            final_loss, n_params, dt = train_one(
+                model, name, train_loader, device,
+                run_dir=os.path.join(args.results_dir, name),
+                total_steps=args.steps, coupling=args.coupling,
+                n_steps=args.euler_steps, t_max=args.t_max,
+                allow_tmax_change=args.allow_tmax_change,
+                flip=not args.no_flip,
+                sample_every=args.sample_every, save_every=args.save_every,
+                keep_every=args.keep_every, resume=not args.no_resume,
+            )
+            summary.append((name, final_loss, n_params, dt, "OK"))
+        except Exception as exc:
+            import traceback; traceback.print_exc()
+            summary.append((name, float("nan"), 0, 0.0, str(exc)))
+        finally:
+            model = None
+            gc.collect()
+            torch.cuda.empty_cache()
+
+    print("\n" + "=" * 66 + "\nSummary\n" + "=" * 66, flush=True)
+    for name, fl, n, dt, st in summary:
+        print(f"  {name:<40} params={n:>11,}  final_loss={fl:.4f}  "
+              f"time={dt/3600:5.1f}h  [{st}]", flush=True)
+    with open(os.path.join(args.results_dir, "summary.txt"), "w") as f:
+        f.write("model_name\tn_params\tfinal_loss\ttrain_time_s\tstatus\n")
+        for name, fl, n, dt, st in summary:
+            f.write(f"{name}\t{n}\t{fl:.6f}\t{dt:.1f}\t{st}\n")
+
+
+if __name__ == "__main__":
+    main()

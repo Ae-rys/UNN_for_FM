@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	train_time_s	status
+MinimalResNetFM_L6_ic256	4009473	0.184356	2857.3	OK

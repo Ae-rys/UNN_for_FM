@@ -1,0 +1,14 @@
+# ConvScCP_UNN_rgb_k9_K10_ic256_L1_LFO step=55000 weights=raw kernel=9
+# R_unif(32x32) = 12.2521 px
+t	R_eff_px	pct_of_R_unif	mass_outside_kernel
+0.05	8.7892	71.74	0.7511
+0.15	8.5812	70.04	0.7290
+0.3	7.7941	63.61	0.6596
+0.5	6.8722	56.09	0.5838
+0.7	5.7929	47.28	0.5054
+0.85	5.4524	44.50	0.4819
+0.95	5.4008	44.08	0.4816
+
+mean_R_eff	6.9547
+pct_of_R_unif	56.76
+verdict	RF effectif nettement PLUS PETIT que l'image -> la portee est bien la contrainte ; le kernel plus large est l'intervention pertinente.

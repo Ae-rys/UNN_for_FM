@@ -1,0 +1,9 @@
+# localité->expansivité->mémorisation nsub=300 nseed=24 nsteps=30 | baseline test->train = 12.217
+P(99=global)	L(t=0.275)	dist_sample_train	ratio_over_baseline
+3	1.516	17.199	1.408
+5	2.142	17.209	1.409
+7	2.358	16.274	1.332
+11	2.560	14.379	1.177
+19	4.134	15.553	1.273
+27	8.492	16.728	1.369
+99	12.986	0.425	0.035

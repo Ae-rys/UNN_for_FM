@@ -1,0 +1,4 @@
+ckpt=results/temp-5/MinimalResNetFM_L6_ic256/model.pt  P=calib nsub=4000 nseed=8
+median r2(model, IS-FM)  = 0.462
+median r2(model, ELS-FM) = 0.425
+ELS>IS on 4/8 seeds

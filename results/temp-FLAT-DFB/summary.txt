@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	final_w2_error	train_time_s	status
+FLAT_DFB_UNN_v2	3850	7.971205	0.289400	172.2	OK

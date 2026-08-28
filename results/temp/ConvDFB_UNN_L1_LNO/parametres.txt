@@ -1,0 +1,4 @@
+model_class=ConvDFB_UNN
+K=38
+dual_dim=512
+version=LNO

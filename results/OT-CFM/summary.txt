@@ -1,0 +1,2 @@
+model_name	n_params	final_loss	train_time_s	status
+SmallUNetX1_baseline	176705	0.112808	2376.5	OK

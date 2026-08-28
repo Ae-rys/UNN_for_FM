@@ -1,0 +1,15 @@
+nohup: ignoring input
+[ws-afhq] device=cuda runs=['warmstart'] K=10 ic=256 kernel=13 LFO | steps=50,000 coupling=ot N_STEPS=100
+AFHQ chats (cache ./data/afhq_cat32_train.pt) : 5653 images.
+
+==================================================================
+[warmstart] self_cond_rate=0.9  -> results_warmstart_afhq32_k13/ConvScCP_UNN_rgb_k13_K10_ic256_L1_LFO_warmstart
+==================================================================
+
+==================================================================
+Model : ConvScCP_UNN_rgb_k13_K10_ic256_L1_LFO_warmstart
+Params: 2,599,371 (2.60M)
+Recette torchcfm : lr=0.0002 warmup=5000 ema=0.9999 flip=True
+Steps : 50,000  |  coupling: ot
+==================================================================
+  step     100/50,000  loss 38.0222  lr 4.04e-06  1.86 it/s  ETA 7.4h

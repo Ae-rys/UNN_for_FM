@@ -1,0 +1,4 @@
+model_class=ConvScCP_UNN
+K=6
+dual_dim=128
+version=LNO

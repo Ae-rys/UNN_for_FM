@@ -1,0 +1,72 @@
+============================================================================
+A. La forme fermee est-elle exacte ?
+============================================================================
+On evalue le gradient de  tau.f(x) + 1/2||x - v||^2  au point donne par la
+forme fermee : il doit etre nul.
+
+      t         tau=0.1         tau=0.6         tau=3.0
+   0.01        6.35e-16        7.06e-16        6.59e-16
+   0.02        6.10e-16        6.63e-16        5.41e-16
+   0.05        5.54e-16        7.56e-16        6.94e-16
+   0.10        6.50e-16        6.11e-16        7.63e-16
+   0.20        5.24e-16        6.38e-16        8.88e-16
+   0.30        5.97e-16        6.66e-16        2.22e-15
+   0.50        6.66e-16        9.71e-16        3.55e-15
+   0.70        8.33e-16        4.00e-15        2.13e-14
+   0.80        1.33e-15        1.18e-14        3.55e-14
+   0.90        7.11e-15        4.53e-14        2.74e-13
+   0.95        2.49e-14        2.18e-13        1.16e-12
+   0.99        8.63e-13        5.24e-12        2.10e-11
+
+residu max : 2.10e-11  -> forme fermee exacte
+
+============================================================================
+B. Conditionnement de la nouvelle mise a jour primale (tau = 0.6)
+============================================================================
+x_next = [ (1-t)^2 . v + tau.t.x_t ] / [ (1-t)^2 + tau.t^2 ]
+
+      t   poids sur v   poids sur x_t        mu(t)    poids/mu
+   0.01        0.9999          0.0061       0.0001      0.0001
+   0.02        0.9998          0.0125       0.0004      0.0002
+   0.05        0.9983          0.0332       0.0028      0.0017
+   0.10        0.9926          0.0735       0.0123      0.0074
+   0.20        0.9639          0.1807       0.0625      0.0361
+   0.30        0.9007          0.3309       0.1837      0.0993
+   0.50        0.6250          0.7500       1.0000      0.3750
+   0.70        0.2344          1.0938       5.4444      0.7656
+   0.80        0.0943          1.1321      16.0000      0.9057
+   0.90        0.0202          1.0887      81.0000      0.9798
+   0.95        0.0046          1.0478     361.0000      0.9954
+   0.99        0.0002          1.0099    9801.0000      0.9998
+
+La derniere colonne est le poids porte par x_t/t (observation a gain unite).
+Il tend vers 0 quand t -> 0 : la divergence de x_t/t est annulee par mu(t).
+Aucun coefficient ne diverge sur ]0,1[.
+
+============================================================================
+C. Le momentum : mu(t) contre l'hypothese mu = 1 du code
+============================================================================
+alpha_k = (1 + 2 mu tau_k)^(-1/2), ici a tau_k = 0.6
+
+      t        mu(t)   alpha correct   alpha code   erreur sur mu
+   0.01       0.0001          0.9999       0.6742            0.0x
+   0.02       0.0004          0.9998       0.6742            0.0x
+   0.05       0.0028          0.9983       0.6742            0.0x
+   0.10       0.0123          0.9927       0.6742            0.0x
+   0.20       0.0625          0.9645       0.6742            0.1x
+   0.30       0.1837          0.9052       0.6742            0.2x
+   0.50       1.0000          0.6742       0.6742            1.0x
+   0.70       5.4444          0.3643       0.6742            5.4x
+   0.80      16.0000          0.2225       0.6742           16.0x
+   0.90      81.0000          0.1009       0.6742           81.0x
+   0.95     361.0000          0.0480       0.6742          361.0x
+   0.99    9801.0000          0.0092       0.6742         9801.0x
+
+mu = 1 exactement a t = 0.5, et nulle part ailleurs. Le deroule actuel est
+donc la methode acceleree du bon probleme en UN SEUL point de l'axe des temps.
+
+tau_k est appris (log_tau0) mais INDEPENDANT de t : alpha_k est le meme pour
+tous les t. Il n'existe aucun mecanisme, appris ou non, pour retrouver la
+variation de mu(t) — a la difference d'une erreur d'echelle sur l'objectif,
+que g(t) absorbe (cf. analyse_input_scaling.py).
+

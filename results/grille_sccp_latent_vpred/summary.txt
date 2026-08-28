@@ -1,0 +1,10 @@
+# variant=vpred coupling=indep epochs=30 batch=256 digit=0 GE_reel=0.2998
+K=5	ic=32	params=24565	final_loss=1.419090	std_gen=1.0803	grad_energy=0.5179
+K=5	ic=64	params=49045	final_loss=1.350464	std_gen=1.0017	grad_energy=0.5384
+K=5	ic=128	params=98005	final_loss=1.376709	std_gen=1.0186	grad_energy=0.5036
+K=10	ic=32	params=49130	final_loss=1.156178	std_gen=0.8904	grad_energy=0.4104
+K=10	ic=64	params=98090	final_loss=1.198370	std_gen=0.9359	grad_energy=0.4233
+K=10	ic=128	params=196010	final_loss=1.170505	std_gen=0.8732	grad_energy=0.4383
+K=20	ic=32	params=98260	final_loss=0.951967	std_gen=0.8087	grad_energy=0.2647
+K=20	ic=64	params=196180	final_loss=0.946556	std_gen=0.7993	grad_energy=0.2921
+K=20	ic=128	params=392020	final_loss=0.970386	std_gen=0.8302	grad_energy=0.2744

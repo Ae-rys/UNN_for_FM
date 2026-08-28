@@ -1,0 +1,5 @@
+# variant=vpred coupling=ot epochs=1 batch=128 digit=0 GE_reel=0.2998
+K=10	ic=64	params=11690	final_loss=2.122913	std_gen=1.4746	grad_energy=3.2563
+K=10	ic=128	params=23210	final_loss=2.173749	std_gen=1.4566	grad_energy=3.3181
+K=20	ic=64	params=23380	final_loss=1.841306	std_gen=1.0315	grad_energy=2.0875
+K=20	ic=128	params=46420	final_loss=1.977940	std_gen=1.0973	grad_energy=2.1371

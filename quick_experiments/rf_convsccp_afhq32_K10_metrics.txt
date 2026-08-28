@@ -1,0 +1,27 @@
+# ConvScCP K=10 couches, AFHQ-chats 32x32, poids raw
+# R_unif(32x32) = 12.2521 px  (RF parfaitement uniforme)
+
+## ConvScCP_UNN_rgb_k9_K10_ic256_L1_LFO  step=55000  kernel=9
+RF_nominal_radius_px	80	(= K*(k-1), prox L1 ponctuel)
+t	R_eff_px	pct_of_R_unif	mass_outside_kernel
+0.05	8.7650	71.54	0.7421
+0.15	8.4496	68.96	0.7131
+0.3	7.8182	63.81	0.6624
+0.5	6.7566	55.15	0.5776
+0.7	5.8569	47.80	0.5115
+0.85	5.4435	44.43	0.4812
+0.95	5.3714	43.84	0.4834
+mean_R_eff	6.9230	pct_of_R_unif	56.50
+
+## ConvScCP_UNN_rgb_k25_K10_ic256_L1_LFO  step=50000  kernel=25
+RF_nominal_radius_px	240	(= K*(k-1), prox L1 ponctuel)
+t	R_eff_px	pct_of_R_unif	mass_outside_kernel
+0.05	10.6931	87.28	0.2709
+0.15	8.9221	72.82	0.1990
+0.3	9.2016	75.10	0.2188
+0.5	8.5862	70.08	0.2041
+0.7	8.8564	72.28	0.2177
+0.85	8.7958	71.79	0.2146
+0.95	8.8746	72.43	0.2181
+mean_R_eff	9.1328	pct_of_R_unif	74.54
+

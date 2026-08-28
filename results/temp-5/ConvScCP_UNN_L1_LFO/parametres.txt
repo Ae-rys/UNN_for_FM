@@ -1,0 +1,4 @@
+model_class=ConvScCP_UNN
+K=30
+dual_dim=64
+version=LFO

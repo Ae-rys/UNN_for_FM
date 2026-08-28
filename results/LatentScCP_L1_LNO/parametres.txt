@@ -1,0 +1,3 @@
+model_class=LatentScCP_UNN
+K=38
+version=LNO

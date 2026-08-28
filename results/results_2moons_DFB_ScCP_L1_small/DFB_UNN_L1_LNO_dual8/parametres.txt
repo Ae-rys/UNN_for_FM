@@ -1,0 +1,4 @@
+model_class=DFB_UNN
+K=3
+dual_dim=8
+version=LNO

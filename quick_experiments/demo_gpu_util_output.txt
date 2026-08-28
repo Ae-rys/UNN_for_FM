@@ -1,0 +1,12 @@
+GPU : NVIDIA GeForce RTX 2080 Ti (~13400 GFLOP/s fp32 en pointe)
+sm% mesure par process (nvidia-smi pmon) -> insensible aux autres jobs.
+
+A. petits kernels dos a dos (~ScCP)        sm% (notre PID) =  51.0%   debit =        0.1 GFLOP/s
+B. gros matmul 4096^3 (~gros UNet)         sm% (notre PID) =  77.4%   debit =     3800.2 GFLOP/s
+C. ScCP L1 LFO K=20 (fwd+bwd, B=128)       sm% (notre PID) =  80.2%   debit =      129.1 GFLOP/s
+D. SmallUNet base_ch=32 (fwd+bwd, B=128)   sm% (notre PID) =  81.6%   debit =      619.7 GFLOP/s
+
+# Lecture agregee `nvidia-smi --query-gpu=utilization.gpu` pendant ces memes phases : 99-100% POUR TOUTES.
+# C'est la definition de la metrique : % du temps ou AU MOINS UN kernel etait resident,
+# aveugle au nombre de SMs actifs et au debit atteint.
+# C vs D : occupation identique (80 vs 82%), debit 4.8x plus faible pour ScCP.

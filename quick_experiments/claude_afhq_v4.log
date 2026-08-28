@@ -1,0 +1,150 @@
+Donnees ./data/afhq_cat32_train.pt : 5141 train / 512 val, (3, 32, 32)
+Device cuda:0 | loss=v coupling=ot | train t=[0.2, 0.4, 0.6, 0.8] | eval sur 19 niveaux [0.05 .. 0.95] | var(donnees)=0.2339
+
+4 config(s) : ScCP_k9_K10_ic128_l1_LFO, ScCPv4_k9_K10_ic128_l1_LFO_x0xt, ScCP_k9_K10_ic128_l1_LNO, ScCPv4_k9_K10_ic128_l1_LNO_x0xt
+
+
+[1/4] ScCP_k9_K10_ic128_l1_LFO
+
+======================================================================
+ScCP_k9_K10_ic128_l1_LFO
+Params : 624,331 (0.62M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 11.7608  5.56 it/s  ETA 59.8 min
+  step    500/20,000  train_mse 0.6937  5.54 it/s  ETA 58.7 min
+  step  1,000/20,000  train_mse 0.2707  5.46 it/s  ETA 58.0 min
+  step  1,500/20,000  train_mse 0.2208  5.44 it/s  ETA 56.6 min
+  step  2,000/20,000  train_mse 0.2034  5.46 it/s  ETA 55.0 min
+  step  2,500/20,000  train_mse 0.1945  5.43 it/s  ETA 53.7 min
+  step  3,000/20,000  train_mse 0.1885  5.46 it/s  ETA 51.9 min
+  step  3,500/20,000  train_mse 0.1829  5.43 it/s  ETA 50.6 min
+  step  4,000/20,000  train_mse 0.1793  5.43 it/s  ETA 49.2 min
+  step  4,500/20,000  train_mse 0.1767  5.42 it/s  ETA 47.6 min
+  step  5,000/20,000  train_mse 0.1734  5.44 it/s  ETA 46.0 min
+  step  5,500/20,000  train_mse 0.1713  5.42 it/s  ETA 44.6 min
+  step  6,000/20,000  train_mse 0.1689  5.42 it/s  ETA 43.0 min
+  step  6,500/20,000  train_mse 0.1672  5.41 it/s  ETA 41.6 min
+  step  7,000/20,000  train_mse 0.1655  5.40 it/s  ETA 40.1 min
+  step  7,500/20,000  train_mse 0.1646  5.41 it/s  ETA 38.5 min
+  step  8,000/20,000  train_mse 0.1631  5.42 it/s  ETA 36.9 min
+  step  8,500/20,000  train_mse 0.1617  5.40 it/s  ETA 35.5 min
+  step  9,000/20,000  train_mse 0.1607  5.40 it/s  ETA 34.0 min
+  step  9,500/20,000  train_mse 0.1598  5.41 it/s  ETA 32.4 min
+  step 10,000/20,000  train_mse 0.1593  5.41 it/s  ETA 30.8 min
+  step 10,500/20,000  train_mse 0.1582  5.40 it/s  ETA 29.3 min
+  step 11,000/20,000  train_mse 0.1582  5.42 it/s  ETA 27.7 min
+  step 11,500/20,000  train_mse 0.1574  5.40 it/s  ETA 26.2 min
+  step 12,000/20,000  train_mse 0.1568  5.43 it/s  ETA 24.6 min
+  step 12,500/20,000  train_mse 0.1560  5.40 it/s  ETA 23.2 min
+  step 13,000/20,000  train_mse 0.1557  5.41 it/s  ETA 21.6 min
+  step 13,500/20,000  train_mse 0.1549  5.41 it/s  ETA 20.0 min
+  step 14,000/20,000  train_mse 0.1549  5.40 it/s  ETA 18.5 min
+  step 14,500/20,000  train_mse 0.1547  5.42 it/s  ETA 16.9 min
+  step 15,000/20,000  train_mse 0.1535  5.43 it/s  ETA 15.4 min
+  step 15,500/20,000  train_mse 0.1537  5.42 it/s  ETA 13.8 min
+  step 16,000/20,000  train_mse 0.1531  5.42 it/s  ETA 12.3 min
+  step 16,500/20,000  train_mse 0.1532  5.44 it/s  ETA 10.7 min
+  step 17,000/20,000  train_mse 0.1535  5.40 it/s  ETA 9.3 min
+  step 17,500/20,000  train_mse 0.1525  5.54 it/s  ETA 7.5 min
+  step 18,000/20,000  train_mse 0.1517  5.59 it/s  ETA 6.0 min
+  step 18,500/20,000  train_mse 0.1519  5.59 it/s  ETA 4.5 min
+  step 19,000/20,000  train_mse 0.1514  5.58 it/s  ETA 3.0 min
+  step 19,500/20,000  train_mse 0.1508  5.53 it/s  ETA 1.5 min
+  step 20,000/20,000  train_mse 0.1508  5.54 it/s  ETA 0.0 min
+  -> nmse moyenne 0.2165 | t=0.2:0.473 t=0.4:0.237 t=0.6:0.116 t=0.8:0.040 | 61.2 min | reste ~184 min
+
+[2/4] ScCPv4_k9_K10_ic128_l1_LFO_x0xt
+
+======================================================================
+ScCPv4_k9_K10_ic128_l1_LFO_x0xt
+Params : 623,381 (0.62M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 5.4773  5.34 it/s  ETA 62.3 min
+  step    500/20,000  train_mse 0.2948  5.28 it/s  ETA 61.5 min
+
+
+===== RELANCE 2026-08-20 04:49:12 : --compile + ckpt=0 (reprise sur checkpoints) =====
+Donnees ./data/afhq_cat32_train.pt : 5141 train / 512 val, (3, 32, 32)
+Device cuda:0 | loss=v coupling=ot | train t=[0.2, 0.4, 0.6, 0.8] | eval sur 19 niveaux [0.05 .. 0.95] | var(donnees)=0.2339
+
+4 config(s) : ScCP_k9_K10_ic128_l1_LFO, ScCPv4_k9_K10_ic128_l1_LFO_x0xt, ScCP_k9_K10_ic128_l1_LNO, ScCPv4_k9_K10_ic128_l1_LNO_x0xt
+
+
+[1/4] ScCP_k9_K10_ic128_l1_LFO
+  torch.compile actif (premier pas ~60-90 s de compilation)
+
+======================================================================
+ScCP_k9_K10_ic128_l1_LFO
+Params : 624,331 (0.62M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+    reprise depuis results_denoise_afhq_v4/ScCP_k9_K10_ic128_l1_LFO/ckpt.pt au step 20,000 (61.2 min deja cumulees)
+    deja au budget (20,000 >= 20,000).
+  -> nmse moyenne 0.2165 | t=0.2:0.473 t=0.4:0.237 t=0.6:0.116 t=0.8:0.040 | 0.0 min | reste ~0 min
+
+[2/4] ScCPv4_k9_K10_ic128_l1_LFO_x0xt
+  torch.compile actif (premier pas ~60-90 s de compilation)
+
+======================================================================
+ScCPv4_k9_K10_ic128_l1_LFO_x0xt
+Params : 623,381 (0.62M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 5.4863  4.09 it/s  ETA 81.3 min
+  step    500/20,000  train_mse 0.2945  7.88 it/s  ETA 41.2 min
+  step  1,000/20,000  train_mse 0.1986  7.83 it/s  ETA 40.4 min
+  step  1,500/20,000  train_mse 0.1881  7.84 it/s  ETA 39.3 min
+
+===== REPRISE COMMANDE D ORIGINE 2026-08-20 04:56:12 (sans --compile, ckpt=1) sur cuda:1 =====
+Donnees ./data/afhq_cat32_train.pt : 5141 train / 512 val, (3, 32, 32)
+Device cuda:1 | loss=v coupling=ot | train t=[0.2, 0.4, 0.6, 0.8] | eval sur 19 niveaux [0.05 .. 0.95] | var(donnees)=0.2339
+
+4 config(s) : ScCP_k9_K10_ic128_l1_LFO, ScCPv4_k9_K10_ic128_l1_LFO_x0xt, ScCP_k9_K10_ic128_l1_LNO, ScCPv4_k9_K10_ic128_l1_LNO_x0xt
+
+
+[1/4] ScCP_k9_K10_ic128_l1_LFO
+
+======================================================================
+ScCP_k9_K10_ic128_l1_LFO
+Params : 624,331 (0.62M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+    reprise depuis results_denoise_afhq_v4/ScCP_k9_K10_ic128_l1_LFO/ckpt.pt au step 20,000 (61.2 min deja cumulees)
+    deja au budget (20,000 >= 20,000).
+  -> nmse moyenne 0.2165 | t=0.2:0.473 t=0.4:0.237 t=0.6:0.116 t=0.8:0.040 | 0.0 min | reste ~0 min
+
+[2/4] ScCPv4_k9_K10_ic128_l1_LFO_x0xt
+
+======================================================================
+ScCPv4_k9_K10_ic128_l1_LFO_x0xt
+Params : 623,381 (0.62M)  |  steps 20,000  lr 0.0005  t [0.2, 0.4, 0.6, 0.8]
+======================================================================
+  step     50/20,000  train_mse 5.5103  5.47 it/s  ETA 60.8 min
+  step    500/20,000  train_mse 0.2940  5.45 it/s  ETA 59.7 min
+  step  1,000/20,000  train_mse 0.1982  5.27 it/s  ETA 60.1 min
+  step  1,500/20,000  train_mse 0.1881  5.22 it/s  ETA 59.0 min
+  step  2,000/20,000  train_mse 0.1814  5.23 it/s  ETA 57.3 min
+  step  2,500/20,000  train_mse 0.1767  5.21 it/s  ETA 55.9 min
+  step  3,000/20,000  train_mse 0.1731  5.13 it/s  ETA 55.3 min
+  step  3,500/20,000  train_mse 0.1701  5.11 it/s  ETA 53.8 min
+  step  4,000/20,000  train_mse 0.1681  5.11 it/s  ETA 52.2 min
+  step  4,500/20,000  train_mse 0.1669  5.11 it/s  ETA 50.6 min
+  step  5,000/20,000  train_mse 0.1651  5.13 it/s  ETA 48.8 min
+  step  5,500/20,000  train_mse 0.1638  5.12 it/s  ETA 47.2 min
+  step  6,000/20,000  train_mse 0.1625  5.11 it/s  ETA 45.7 min
+  step  6,500/20,000  train_mse 0.1614  5.11 it/s  ETA 44.0 min
+  step  7,000/20,000  train_mse 0.1608  5.10 it/s  ETA 42.4 min
+  step  7,500/20,000  train_mse 0.1602  5.11 it/s  ETA 40.8 min
+  step  8,000/20,000  train_mse 0.1595  5.10 it/s  ETA 39.2 min
+  step  8,500/20,000  train_mse 0.1590  5.11 it/s  ETA 37.5 min
+  step  9,000/20,000  train_mse 0.1577  5.10 it/s  ETA 35.9 min
+  step  9,500/20,000  train_mse 0.1571  5.10 it/s  ETA 34.3 min
+  step 10,000/20,000  train_mse 0.1566  5.10 it/s  ETA 32.7 min
+  step 10,500/20,000  train_mse 0.1558  5.11 it/s  ETA 31.0 min
+  step 11,000/20,000  train_mse 0.1557  5.10 it/s  ETA 29.4 min
+  step 11,500/20,000  train_mse 0.1556  5.10 it/s  ETA 27.8 min
+  step 12,000/20,000  train_mse 0.1545  5.10 it/s  ETA 26.2 min
+  step 12,500/20,000  train_mse 0.1541  5.09 it/s  ETA 24.6 min
+  step 13,000/20,000  train_mse 0.1541  5.10 it/s  ETA 22.9 min
+  step 13,500/20,000  train_mse 0.1531  5.08 it/s  ETA 21.3 min
+  step 14,000/20,000  train_mse 0.1531  5.08 it/s  ETA 19.7 min
+  step 14,500/20,000  train_mse 0.1533  5.09 it/s  ETA 18.0 min
+  step 15,000/20,000  train_mse 0.1527  5.09 it/s  ETA 16.4 min
+  step 15,500/20,000  train_mse 0.1522  5.09 it/s  ETA 14.7 min

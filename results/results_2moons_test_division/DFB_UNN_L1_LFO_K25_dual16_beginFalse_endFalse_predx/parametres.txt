@@ -1,0 +1,7 @@
+model_class=DFB_UNN
+K=25
+dual_dim=16
+version=LFO
+begin_div=False
+end_div=False
+pred=x

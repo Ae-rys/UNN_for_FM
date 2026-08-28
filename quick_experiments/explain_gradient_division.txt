@@ -1,0 +1,24 @@
+==========================================================================
+Facteur de gradient introduit par la division  v = (x1p - x_t)/(1-t)
+checkpoint : results_afhq32/ConvScCP_UNN_rgb_k9_K10_ic128_L1_LFO/latest.pt  |  batch 64
+==========================================================================
+      t     1/(1-t)     |dL/dx1p| / |dL/dv|     ecart rel
+--------------------------------------------------------------------------
+   0.05        1.05                  1.0526       4.7e-08
+   0.20        1.25                  1.2500       1.3e-08
+   0.40        1.67                  1.6667       4.1e-08
+   0.60        2.50                  2.5000       5.2e-08
+   0.80        5.00                  5.0000       8.8e-08
+   0.90       10.00                 10.0000       2.4e-07
+   0.95       20.00                 20.0000       2.8e-07
+--------------------------------------------------------------------------
+ecart relatif max a 1/(1-t) : 2.8e-07
+
+Meme loss (meme scalaire, meme residu en vitesse), mais le gradient qui
+ARRIVE sur la sortie du reseau est 1/(1-t) fois plus grand cote x-pred.
+Le UNet, qui sort la vitesse directement, n'a pas cette division : son
+facteur vaut 1 a tous les t.
+
+Ce n'est donc pas un artefact du clamp ni du tirage de t : c'est la
+parametrisation elle-meme. La retirer demanderait de faire sortir la
+vitesse au ScCP (predicts_x1=False), pas de retoucher la loss.

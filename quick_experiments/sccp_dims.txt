@@ -1,0 +1,55 @@
+==============================================================================
+ConvScCP  in_channels=3  img=32x32  ic=128  kernel=9  K=20  prox=l1
+==============================================================================
+
+LES DEUX ESPACES
+  primal  x, z   (B, 3, 32, 32)   = 3 072 valeurs par image
+  dual    u      (B, 128, 32, 32)   = 131 072 valeurs par image
+  rapport dual/primal : x42.7   (= internal_channel / in_channels)
+  -> le dual est le vrai etat du reseau ; le primal reste une image.
+
+PARAMETRES D'UNE COUCHE
+  W_weight                    (128, 3, 9, 9)          31 104    49.8 %
+  V_weight                    (128, 3, 9, 9)          31 104    49.8 %
+  W_bias                      (128,)                     128     0.2 %
+  prox.time_scaling.0.weight  (32, 1)                     32     0.1 %
+  prox.time_scaling.0.bias    (32,)                       32     0.1 %
+  prox.time_scaling.2.weight  (1, 32)                     32     0.1 %
+  prox.time_scaling.2.bias    (1,)                         1     0.0 %
+  TOTAL par couche                                    62 433
+  x K = 20 couches                                 1 248 661
+
+TRACE D'UNE ITERATION (formes reelles, batch = 8)
+  1. V*u        conv_transpose2d(u(8, 128, 32, 32), V(128, 3, 9, 9), pad=4)
+                  -> (8, 3, 32, 32)    dual -> primal
+  2. x_next     (x - tau*V*u + tau*z) / (1+tau)  -> (8, 3, 32, 32)
+                     tau = 0.4741 : reinjection de z a CHAQUE iteration
+  3. y          x_next + alpha*(x_next - x)      -> (8, 3, 32, 32)
+                     alpha = 0.7165 (inertie, pas de parametre)
+  4. W*y        conv2d(y(8, 3, 32, 32), W(128, 3, 9, 9), pad=4)
+                  -> (8, 128, 32, 32)   primal -> dual
+  5. u_next     prox(u + sigma*W*y, t)           -> (8, 128, 32, 32)
+                     rayon r(t) de forme (8, 1) = UN scalaire par image
+
+CE QUE LE PROX VOIT
+  entree  : u de forme (B, 128, 32, 32) = 131 072 valeurs
+  parametres du prox : 97  (MLP 1 -> 32 -> 1)
+  operation : clamp(u, -r(t), +r(t)), PIXEL PAR PIXEL
+  -> aucune interaction spatiale, aucune interaction entre canaux.
+  -> c'est la SEULE non-linearite du bloc.
+
+CHAMP RECEPTIF (theorique, sans les effets de bord)
+  un conv 9x9 ajoute +/-4 pixels ; une iteration en enchaine deux
+  (W puis V), soit +/-8 pixels par iteration.
+    apres   1 iteration(s) :   17 x 17   pixels
+    apres   2 iteration(s) :   33 x 33   pixels  <- couvre toute l'image
+    apres   5 iteration(s) :   81 x 81   pixels  <- couvre toute l'image
+    apres  10 iteration(s) :  161 x 161  pixels  <- couvre toute l'image
+    apres  20 iteration(s) :  321 x 321  pixels  <- couvre toute l'image
+  l'image fait 32x32 : la localite cesse d'etre une contrainte des 2 iterations.
+
+POURQUOI C'EST LENT
+  etat dual garde par couche : 4.2 Mo (batch 8, float32)
+  sur K = 20 couches : 83.9 Mo d'activations pour le backward
+  chaque iteration = 2 convolutions PLEINE RESOLUTION (32x32) ;
+  un UNet descend a 4x4 des le 3e etage et y fait l'essentiel du calcul.

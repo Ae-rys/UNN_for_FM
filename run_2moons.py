@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 run_2moons.py
-Flow Matching benchmark on 2-moons (dim=2), source = mixture of 8 Gaussians.
+Flow Matching benchmark on 2-moons (dim=2), source = 1 Gaussian.
 
 Usage
 -----
@@ -30,7 +30,10 @@ from torchdyn.core import NeuralODE
 from tqdm import tqdm
 import torch.nn.functional as F
 
-from models import DFB_UNN, DiFB_UNN, SharedDFB_UNN, SharedDiFB_UNN, ScCP_UNN, SharedScCP_UNN, small_MLP, SharedFLAT_DFB_UNN, FLAT_DFB_UNN
+from models import DFB_UNN, DiFB_UNN, SharedDFB_UNN, SharedDiFB_UNN, ScCP_UNN, SharedScCP_UNN, small_MLP, FLAT_DFB_UNN, FLAT_DFB_UNN_v2
+from flops_utils import (
+    count_velocity_flops, flops_vector_model, write_train_time, write_velocity_flops,
+)
 
 DIM        = 2
 N_SAMPLES  = 10_000
@@ -38,7 +41,7 @@ BATCH_SIZE = 256
 
 
 # ---------------------------------------------------------------------------
-# Source distribution: 8 Gaussians on a circle
+# Source distribution: 1 Gaussian
 # ---------------------------------------------------------------------------
 
 def sample_8gaussians(n, radius=2.0, std=0.3, device="cpu"):
@@ -57,7 +60,6 @@ def get_moons_loader(n_samples=N_SAMPLES, batch_size=BATCH_SIZE, noise=0.05):
     X     = torch.tensor(X, dtype=torch.float32)
     X     = (X - X.mean(0)) / X.std(0)
     return DataLoader(TensorDataset(X), batch_size=batch_size, shuffle=True, drop_last=True)
-
 
 # ---------------------------------------------------------------------------
 # Visualization
@@ -83,7 +85,7 @@ def save_overview(x0, x1_ref, generated, title, path):
     for ax, pts, lbl, col in zip(
         axes,
         [x0, x1_ref, generated],
-        ["source (8 Gaussians)", "target (2-moons)", "generated"],
+        ["source (1 Gaussian)", "target (2-moons)", "generated"],
         ["darkorange", "gray", "steelblue"],
     ):
         ax.scatter(pts[:, 0], pts[:, 1], s=4, alpha=0.4, c=col)
@@ -114,7 +116,7 @@ def save_unn_paths(model, train_loader, device, title, path, n_samples=8, t_valu
     perm   = torch.randperm(x1_all.shape[0])[:n_samples]
     x1     = x1_all[perm].to(device)
     B      = x1.shape[0]
-    x0     = sample_8gaussians(B, device=device)
+    x0     = torch.randn(B, DIM, device=device)
 
     n_t = len(t_values)
     fig, axes = plt.subplots(1, n_t, figsize=(4 * n_t, 4), constrained_layout=True)
@@ -331,7 +333,7 @@ def save_vector_field(model, train_loader, device, title, path,
     grid of x, one panel per t value, overlaid on the 2-moons target.
 
     Arrows are colored by their norm ||v_t(x)||. Useful to check whether the
-    field points consistently from the source (8 Gaussians) towards the
+    field points consistently from the source (Gaussian) towards the
     target (2-moons) as t goes from 0 to 1.
     """
     model.eval()
@@ -376,6 +378,141 @@ def save_vector_field(model, train_loader, device, title, path,
 
 
 # ---------------------------------------------------------------------------
+# Checkpoint inference: explicit Euler / Heun integration of the ODE
+# ---------------------------------------------------------------------------
+
+CHECKPOINT_MODEL_BUILDERS = {
+    "DFB":  lambda K, dual_dim, version: DFB_UNN(
+        dim=DIM, K=K, dual_dim=dual_dim, version=version, learned_prox=False,
+    ),
+    "ScCP": lambda K, dual_dim, version: ScCP_UNN(
+        dim=DIM, K=K, dual_dim=dual_dim, version=version, prox_type="l1",
+    ),
+}
+
+
+def integrate_ode(model, x0, n_steps, device, method="euler"):
+    """Integrate dx/dt = v_t(x) from t=0 to t=1 with `n_steps` explicit steps
+    of size dt = 1/n_steps (i.e. "diviser le temps en n_steps").
+
+    method="euler" : x_{k+1} = x_k + dt * v(x_k, t_k)                     (1st order)
+    method="heun"   : predictor-corrector / explicit RK2                  (2nd order)
+                      x_pred = x_k + dt * v(x_k, t_k)
+                      x_{k+1} = x_k + dt/2 * (v(x_k, t_k) + v(x_pred, t_{k+1}))
+
+    Both methods are explicit single-step schemes, so they naturally expose
+    every intermediate state x_k (unlike adaptive solvers such as dopri5,
+    which only report the states at the requested t_span). Heun is a strict
+    improvement over Euler at the same cost (one extra model call per step)
+    and is the standard "a bit better than Euler" choice here; higher-order
+    Runge-Kutta would also expose intermediate states but needs 3-4 calls/step.
+
+    Returns a list of length n_steps+1: traj[k] = x at t = k/n_steps.
+    """
+    dt = 1.0 / n_steps
+    x  = x0
+    t  = torch.zeros(x.shape[0], 1, device=device)
+    traj = [x.clone()]
+
+    model.eval()
+    with torch.no_grad():
+        for _ in range(n_steps):
+            xt_t = torch.cat([x, t], dim=-1)
+            v1   = model(xt_t)
+
+            if method == "euler":
+                x_next = x + dt * v1
+            elif method == "heun":
+                x_pred      = x + dt * v1
+                t_next      = t + dt
+                xt_t_pred   = torch.cat([x_pred, t_next], dim=-1)
+                v2          = model(xt_t_pred)
+                x_next      = x + 0.5 * dt * (v1 + v2)
+            else:
+                raise ValueError(f"Unknown method: {method!r} (use 'euler' or 'heun')")
+
+            x = x_next
+            t = t + dt
+            traj.append(x.clone())
+
+    return traj
+
+
+def plot_checkpoint_trajectory(
+    model_pt_path,
+    model_type,
+    K,
+    dual_dim,
+    version,
+    device,
+    n_steps=1000,
+    method="euler",
+    n_snapshots=8,
+    n_samples=2000,
+    train_loader=None,
+    out_path=None,
+):
+    """Load a trained DFB_UNN/ScCP_UNN from a `model.pt` checkpoint (as saved
+    by train_2moons) and plot the generated distribution at several points
+    along the t in [0, 1] trajectory, obtained by explicit Euler/Heun
+    integration with `n_steps` steps (dt = 1/n_steps).
+
+    model_type : "DFB" or "ScCP".
+    K, dual_dim, version : architecture hyperparameters used when the
+        checkpoint was trained (must match exactly — they are not stored in
+        model.pt, only the weights are).
+    n_snapshots : number of panels to draw (evenly spaced in step index,
+        always including step 0 and step n_steps).
+    out_path : if given, save the figure there instead of showing it.
+    """
+    if model_type not in CHECKPOINT_MODEL_BUILDERS:
+        raise ValueError(f"Unknown model_type: {model_type!r} (use 'DFB' or 'ScCP')")
+
+    model = CHECKPOINT_MODEL_BUILDERS[model_type](K, dual_dim, version).to(device)
+    state = torch.load(model_pt_path, map_location=device)
+    model.load_state_dict(state)
+    model.eval()
+
+    if train_loader is None:
+        train_loader = get_moons_loader()
+    ref_data = torch.cat([x for (x,) in train_loader])[:2000].numpy()
+
+    x0 = torch.randn(n_samples, DIM, device=device)
+
+    traj = integrate_ode(model, x0, n_steps, device, method=method)
+
+    snap_idx = sorted(set(np.linspace(0, n_steps, n_snapshots).round().astype(int)))
+    fig, axes = plt.subplots(1, len(snap_idx), figsize=(3.5 * len(snap_idx), 3.5), constrained_layout=True)
+    if len(snap_idx) == 1:
+        axes = [axes]
+
+    for ax, idx in zip(axes, snap_idx):
+        pts   = traj[idx].cpu().numpy()
+        t_val = idx / n_steps
+        ax.scatter(ref_data[:, 0], ref_data[:, 1], s=4, alpha=0.15, c="gray", label="target (2-moons)")
+        ax.scatter(pts[:, 0], pts[:, 1], s=4, alpha=0.5, c="steelblue", label="generated")
+        ax.set_title(f"t={t_val:.3f}  (step {idx}/{n_steps})", fontsize=9)
+        ax.set_xlim(-3.5, 3.5)
+        ax.set_ylim(-3.5, 3.5)
+        ax.set_aspect("equal")
+
+    axes[0].legend(markerscale=3, fontsize=7, loc="upper left")
+    fig.suptitle(
+        f"{model_type} {version} K={K} dual_dim={dual_dim} — "
+        f"{method} integration, n_steps={n_steps}",
+        fontsize=10,
+    )
+
+    if out_path:
+        plt.savefig(out_path, dpi=100)
+        plt.close(fig)
+    else:
+        plt.show()
+
+    return traj
+
+
+# ---------------------------------------------------------------------------
 # Quantitative error metric
 # ---------------------------------------------------------------------------
 
@@ -389,6 +526,28 @@ def compute_w2(generated, target, max_n=500):
     w = np.full(n, 1.0 / n)
     w2_sq = ot.emd2(w, w, M)
     return float(np.sqrt(max(w2_sq, 0.0)))
+
+
+def write_param_file(model, run_dir):
+    """Write "parametres.txt" in run_dir with the architecture hyperparameters
+    of `model` (number of layers K, dual_dim, version, model class), read
+    directly off the model's attributes. Used by make_grille.py to build the
+    K x dual_dim grid without having to guess these values from the run name.
+    """
+    fields = {
+        "model_class": type(model).__name__,
+        "K":           getattr(model, "K", None),
+        "N":           getattr(model, "N", None),  # FLAT_DFB_UNN uses N instead of K
+        "dual_dim":    getattr(model, "dual_dim", None),
+        "version":     getattr(model, "version", None),
+        "begin_div":   getattr(model, "begin_div", None),
+        "end_div":     getattr(model, "end_div", None),
+        "pred":        getattr(model, "pred", None),
+    }
+    with open(os.path.join(run_dir, "parametres.txt"), "w") as f:
+        for key, value in fields.items():
+            if value is not None:
+                f.write(f"{key}={value}\n")
 
 
 # ---------------------------------------------------------------------------
@@ -411,7 +570,7 @@ def train_2moons(
 
     ref_data = torch.cat([x for (x,) in train_loader])[:2000].numpy()
 
-    FM        = ExactOptimalTransportConditionalFlowMatcher(sigma=0.01)
+    FM        = ExactOptimalTransportConditionalFlowMatcher(sigma=0)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     total_params = sum(p.numel() for p in model.parameters())
@@ -419,6 +578,8 @@ def train_2moons(
 
     with open(os.path.join(run_dir, "params.txt"), "w") as f:
         f.write(f"{total_params}\n")
+    write_param_file(model, run_dir)
+    write_velocity_flops(run_dir, flops_vector_model(model, DIM, device))
 
     loss_history  = []
     error_history = []  # (epoch, W2 distance to target)
@@ -435,15 +596,28 @@ def train_2moons(
             B  = x1.shape[0]
             x0 = torch.randn(B, DIM, device=device)
 
-            t, xt, ut = FM.sample_location_and_conditional_flow(x0, x1)
+            t = torch.rand(B, 1, device=device) * 0.9 + 0.05  # avoid t=0 and t=1
+
+            t, xt, ut = FM.sample_location_and_conditional_flow(x0, x1, t=t)
             xt_t = torch.cat([xt, t.view(B, 1)], dim=-1)
 
-            if randomized_layer_nb:
-                vt = model(xt_t, n_iter=random.randint(5, 15))
-            else:
-                vt = model(xt_t)
+            # on réordonne x0, x1
+            x1 = xt + (ut * (1 - t.view(-1, 1)))
+            x0 = xt - (ut * t.view(-1, 1))
 
-            loss = torch.mean((vt - ut) ** 2)
+            if randomized_layer_nb:
+                out = model(xt_t, n_iter=random.randint(5, 15))
+            else:
+                out = model(xt_t)
+
+            # Models flagged `predicts_x1` output D_theta(x_t, t) ≈ x1 directly
+            # during training (the velocity division by (1-t) only happens at
+            # eval/generation time), so the loss target is x1, not the FM
+            # velocity ut.
+            if getattr(model, "predicts_x1", False):
+                loss = torch.mean(((out - x1)/(1 - t.view(-1, 1))) ** 2)
+            else:
+                loss = torch.mean((out - ut) ** 2)
             optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -454,12 +628,13 @@ def train_2moons(
         elapsed  = time.perf_counter() - t0
         loss_history.append(avg_loss)
         print(f"  Epoch {epoch+1}/{nb_epochs} — loss: {avg_loss:.4f}  ({elapsed:.1f}s)")
+        write_train_time(run_dir, time.perf_counter() - train_start, epochs=epoch + 1)
 
         if (epoch + 1) % eval_every == 0 or epoch == nb_epochs - 1:
             model.eval()
             with torch.no_grad():
                 x0_test = torch.randn(2000, DIM, device=device)
-                t_span  = torch.linspace(0, 1, 2, device=device)
+                t_span  = torch.linspace(0, 1, 101, device=device)
 
                 if multi_iter:
                     for n_it in [5, 10, 20, 30]:
@@ -467,7 +642,7 @@ def train_2moons(
                             torch.cat([x, t.expand(x.shape[0], 1)], dim=-1), n_iter=ni,
                         )
                         node = NeuralODE(
-                            ode_fn, solver="dopri5", atol=1e-4, rtol=1e-4,
+                            ode_fn, solver="euler",
                             optimizable_params=model.parameters(),
                         )
                         traj = node.trajectory(x0_test, t_span=t_span)
@@ -481,7 +656,7 @@ def train_2moons(
                     ode_fn10 = lambda t, x, **kw: model(
                         torch.cat([x, t.expand(x.shape[0], 1)], dim=-1), n_iter=10,
                     )
-                    node10 = NeuralODE(ode_fn10, solver="dopri5", atol=1e-4, rtol=1e-4,
+                    node10 = NeuralODE(ode_fn10, solver="euler",
                                        optimizable_params=model.parameters())
                     gen = node10.trajectory(x0_test, t_span=t_span)[-1].cpu().numpy()
                     save_overview(
@@ -490,7 +665,7 @@ def train_2moons(
                         path=os.path.join(run_dir, f"overview_epoch_{epoch+1}.png"),
                     )
                 else:
-                    node = NeuralODE(torch_wrapper(model), solver="dopri5", atol=1e-4, rtol=1e-4)
+                    node = NeuralODE(torch_wrapper(model), solver="euler")
                     traj = node.trajectory(x0_test, t_span=t_span)
                     gen  = traj[-1].cpu().numpy()
                     save_scatter(
@@ -547,7 +722,10 @@ def train_2moons(
         for ep, w2 in error_history:
             f.write(f"{ep}\t{w2:.6f}\n")
 
+    torch.save(model.state_dict(), os.path.join(run_dir, "model.pt"))
+
     total_time = time.perf_counter() - train_start
+    write_train_time(run_dir, total_time, epochs=nb_epochs)
     print(f"  Results saved to: {run_dir}")
     return loss_history, total_params, total_time, error_history
 
@@ -578,6 +756,10 @@ def train_flat_2moons(
     optimizer    = torch.optim.Adam(model.parameters(), lr=lr)
     total_params = sum(p.numel() for p in model.parameters())
     print(f"\n{'='*60}\nModel : {model_name} (FLAT, alpha={model.alpha})\nParams: {total_params:,}\n{'='*60}")
+    write_param_file(model, run_dir)
+    # FLAT : "une estimation de vitesse" = une cascade complete x0 -> x1_hat
+    write_velocity_flops(run_dir, count_velocity_flops(
+        model, lambda m: m(torch.zeros(1, DIM, device=device), mode="direct")))
 
     K            = model.N
     loss_history = []
@@ -723,9 +905,170 @@ def train_flat_2moons(
         for ep, (l, lr_, lv) in enumerate(zip(loss_history, loss_recon_h, loss_vel_h), 1):
             f.write(f"{ep}\t{l:.6f}\t{lr_:.6f}\t{lv:.6f}\n")
 
+    torch.save(model.state_dict(), os.path.join(run_dir, "model.pt"))
+
     total_time = time.perf_counter() - train_start
+    write_train_time(run_dir, total_time, epochs=nb_epochs)
     print(f"  Results saved to: {run_dir}")
     return loss_history, total_params, total_time
+
+
+def train_flat_2moons_v2(
+    model,
+    train_loader,
+    device,
+    results_dir,
+    model_name,
+    nb_epochs=100,
+    lr=1e-3,
+    randomized_layer_nb=False,
+    multi_iter=False,
+    w_velocity=2.0,
+):
+    run_dir = os.path.join(results_dir, model_name)
+    os.makedirs(run_dir, exist_ok=True)
+
+    ref_data = torch.cat([x for (x,) in train_loader])[:2000].numpy()
+
+    FM        = ExactOptimalTransportConditionalFlowMatcher(sigma=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"\n{'='*60}\nModel : {model_name}\nParams: {total_params:,}\n{'='*60}")
+
+    with open(os.path.join(run_dir, "params.txt"), "w") as f:
+        f.write(f"{total_params}\n")
+    write_param_file(model, run_dir)
+    write_velocity_flops(run_dir, flops_vector_model(model, DIM, device))
+
+    loss_history  = []
+    loss_recon_h  = []
+    loss_vel_h    = []
+    error_history = []  # (epoch, W2 distance to target)
+    train_start   = time.perf_counter()
+    eval_every    = max(1, nb_epochs // 5)
+
+    for epoch in range(nb_epochs):
+        model.train()
+        total_loss = 0.0
+        total_recon = 0.0
+        total_vel = 0.0
+        t0 = time.perf_counter()
+
+        for (x1_batch,) in tqdm(train_loader, desc=f"Epoch {epoch+1}/{nb_epochs}", leave=False):
+            x1 = x1_batch.to(device)
+            B  = x1.shape[0]
+            x0 = torch.randn(B, DIM, device=device)
+
+            t, xt, ut = FM.sample_location_and_conditional_flow(x0, x1)
+            xt_t = torch.cat([xt, t.view(B, 1)], dim=-1)
+
+            vt, x, x_traj = model(xt_t)
+
+            loss_rec = torch.mean((vt - ut) ** 2)
+            loss_vel = 0
+            for k in range(len(x_traj) - 1):
+                t_kp1  = model.get_schedule(device=device)[k + 1]
+                x_star = (1.0 - t_kp1) * x0 + t_kp1 * x1
+                loss_vel = loss_vel + F.l1_loss(x_traj[k + 1], x_star)
+            loss_vel = loss_vel / (len(x_traj) - 1)
+            
+            loss = loss_rec + w_velocity * loss_vel
+
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            optimizer.step()
+            total_loss += loss.item()
+            total_recon += loss_rec.item()
+            total_vel += loss_vel.item()
+
+        n_batches = len(train_loader)
+        avg_loss  = total_loss  / n_batches
+        avg_recon = total_recon / n_batches
+        avg_vel   = total_vel   / n_batches
+        elapsed   = time.perf_counter() - t0
+        loss_history.append(avg_loss)
+        loss_recon_h.append(avg_recon)
+        loss_vel_h.append(avg_vel)
+        print(f"  Epoch {epoch+1}/{nb_epochs} — loss: {avg_loss:.4f} "
+              f"(recon: {avg_recon:.4f}, vel: {avg_vel:.4f})  ({elapsed:.1f}s)")
+
+        if (epoch + 1) % eval_every == 0 or epoch == nb_epochs - 1:
+            model.eval()
+            with torch.no_grad():
+                x0_test = torch.randn(2000, DIM, device=device)
+                t_span  = torch.linspace(0, 1, 2, device=device)
+
+                node = NeuralODE(torch_wrapper(model), solver="dopri5", atol=1e-4, rtol=1e-4)
+                traj = node.trajectory(x0_test, t_span=t_span)
+                gen  = traj[-1].cpu().numpy()
+                save_scatter(
+                    gen,
+                    title=f"{model_name} — epoch {epoch+1}",
+                    path=os.path.join(run_dir, f"epoch_{epoch+1}.png"),
+                    ref=ref_data,
+                )
+                save_overview(
+                    x0_test.cpu().numpy(), ref_data, gen,
+                    title=f"{model_name} — epoch {epoch+1}",
+                    path=os.path.join(run_dir, f"overview_epoch_{epoch+1}.png"),
+                )
+                
+                save_unn_paths(
+                    model, train_loader, device,
+                    title=f"{model_name} — epoch {epoch+1}",
+                    path=os.path.join(run_dir, f"unn_paths_epoch_{epoch+1}.png")
+                )
+
+                save_vector_field(
+                    model, train_loader, device,
+                    title=f"{model_name} — epoch {epoch+1}",
+                    path=os.path.join(run_dir, f"vector_field_epoch_{epoch+1}.png"),
+                )
+
+                w2 = compute_w2(gen, ref_data)
+                error_history.append((epoch + 1, w2))
+                print(f"  Epoch {epoch+1}/{nb_epochs} — W2 error: {w2:.4f}")
+            model.train()
+
+    # Loss curve
+    plt.figure()
+    plt.plot(range(1, nb_epochs + 1), loss_history, marker="o", markersize=3)
+    plt.xlabel("Epoch")
+    plt.ylabel("Average FM loss")
+    plt.title(f"Training loss — {model_name}")
+    plt.tight_layout()
+    plt.savefig(os.path.join(run_dir, "loss.png"))
+    plt.close()
+
+    with open(os.path.join(run_dir, "loss.txt"), "w") as f:
+        for ep, l in enumerate(loss_history, 1):
+            f.write(f"{ep}\t{l:.6f}\n")
+
+    # Error (W2 to target) curve
+    err_epochs = [ep for ep, _ in error_history]
+    err_values = [w2 for _, w2 in error_history]
+    plt.figure()
+    plt.plot(err_epochs, err_values, marker="o", markersize=4)
+    plt.xlabel("Epoch")
+    plt.ylabel("W2 distance to target")
+    plt.title(f"Training error — {model_name}")
+    plt.tight_layout()
+    plt.savefig(os.path.join(run_dir, "error.png"))
+    plt.close()
+
+    with open(os.path.join(run_dir, "error.txt"), "w") as f:
+        f.write("epoch\tw2_error\n")
+        for ep, w2 in error_history:
+            f.write(f"{ep}\t{w2:.6f}\n")
+
+    torch.save(model.state_dict(), os.path.join(run_dir, "model.pt"))
+
+    total_time = time.perf_counter() - train_start
+    write_train_time(run_dir, total_time, epochs=nb_epochs)
+    print(f"  Results saved to: {run_dir}")
+    return loss_history, total_params, total_time, error_history
 
 # ---------------------------------------------------------------------------
 # FM-FLAT training  (entraînement "à la Flow Matching")
@@ -758,6 +1101,9 @@ def train_flat_fm_2moons(
     optimizer    = torch.optim.Adam(model.parameters(), lr=lr)
     total_params = sum(p.numel() for p in model.parameters())
     print(f"\n{'='*60}\nModel : {model_name} (FM-FLAT, alpha={model.alpha})\nParams: {total_params:,}\n{'='*60}")
+    write_param_file(model, run_dir)
+    # FM-FLAT : la vitesse utilisee a l'inference est le mode "fm_velocity"
+    write_velocity_flops(run_dir, flops_vector_model(model, DIM, device, mode="fm_velocity"))
 
     K            = model.N
     loss_history = []
@@ -863,7 +1209,10 @@ def train_flat_fm_2moons(
     plt.legend(); plt.tight_layout()
     plt.savefig(os.path.join(run_dir, "loss.png")); plt.close()
 
+    torch.save(model.state_dict(), os.path.join(run_dir, "model.pt"))
+
     total_time = time.perf_counter() - train_start
+    write_train_time(run_dir, total_time, epochs=nb_epochs)
     print(f"  Results saved to: {run_dir}")
     return loss_history, total_params, total_time
 
@@ -876,14 +1225,38 @@ def train_flat_fm_2moons(
 #   - "K study"    : impact of the number of layers K, dual_dim fixed.
 #   - "dual study" : impact of the number of features (dual_dim), K fixed.
 
-K_STUDY_VALUES    = [5, 10, 15]
-K_STUDY_DUAL_DIM  = 32
+K_STUDY_VALUES    = [3, 5, 10, 15, 20, 25]
+K_STUDY_DUAL_DIM  = 16
 
-DUAL_STUDY_VALUES = [16, 32, 64]
+DUAL_STUDY_VALUES = [4, 8, 16, 32, 64]
 DUAL_STUDY_K      = 10
 
 
-def build_experiments(device):
+def build_experiments(device, pairs=None, div_pairs=None):
+    """Build the list of experiments to run.
+
+    If `pairs` is given (a list of (K, dual_dim) tuples), it takes over
+    entirely: one DFB_UNN_L1 + one ScCP_UNN_L1 experiment per (K, dual_dim)
+    pair, for both LFO and LNO, named "*_K{K}_dual{D}". This lets you fill
+    in arbitrary cells of the make_grille.py K x dual_dim grid instead of
+    being restricted to the K-study / dual-study crosses below.
+
+    If `div_pairs` is given (a list of (K, dual_dim) tuples), it takes over
+    instead: for each pair and each version (LFO/LNO), builds the 8 DFB_UNN_L1
+    experiments covering every combination of `begin_div`, `end_div` and `pred`:
+    - begin_div: whether z = x_t is divided by t (clamped away from 0)
+      before the unrolled DFB iterations (a "warm start" rescaling).
+    - end_div: whether the predicted velocity v_t = x - x_t is divided by
+      (1-t) (clamped away from 0) before being returned. Only has an effect
+      when pred="x" (it's skipped entirely when pred="v").
+    - pred: "x" (the unrolled layers predict the state x, v_t = x - x_t) or
+      "v" (the unrolled layers predict v_t directly, returned as-is).
+    Named "DFB_UNN_L1_{version}_K{K}_dual{D}_begin{True|False}_end{True|False}_pred{x|v}".
+    ScCP_UNN has no such flags, so this study only covers DFB.
+
+    Otherwise, falls back to the two ablation studies (K_STUDY_VALUES /
+    DUAL_STUDY_VALUES).
+    """
     experiments = [
         dict(
             name  = "MLP_baseline",
@@ -891,6 +1264,51 @@ def build_experiments(device):
             kwargs= {},
         ),
     ]
+    
+    experiments.append(dict(
+        name = "FLAT_DFB_UNN_v2",
+        build = lambda: FLAT_DFB_UNN_v2(
+            dim=DIM, K=25, dual_dim=16, version="LNO", alpha=2.0
+        ).to(device),
+        kwargs= {"is_flat_v2": True},
+    ))
+
+    if div_pairs:
+        for K, D in div_pairs:
+            for version in ["LFO", "LNO"]:
+                for begin_div in [False, True]:
+                    for end_div in [False, True]:
+                        for pred in ["x", "v"]:
+                            experiments.append(dict(
+                                name  = f"DFB_UNN_L1_{version}_K{K}_dual{D}_begin{begin_div}_end{end_div}_pred{pred}",
+                                build = (lambda K=K, D=D, version=version, bd=begin_div, ed=end_div, pr=pred: DFB_UNN(
+                                    dim=DIM, K=K, dual_dim=D,
+                                    version=version, learned_prox=False, begin_div=bd, end_div=ed, pred=pr,
+                                ).to(device)),
+                                kwargs= {},
+                            ))
+        return experiments
+
+    if pairs:
+        for K, D in pairs:
+            for version in ["LFO", "LNO"]:
+                experiments.append(dict(
+                    name  = f"DFB_UNN_L1_{version}_K{K}_dual{D}",
+                    build = (lambda K=K, D=D, version=version: DFB_UNN(
+                        dim=DIM, K=K, dual_dim=D,
+                        version=version, learned_prox=False,
+                    ).to(device)),
+                    kwargs= {},
+                ))
+                experiments.append(dict(
+                    name  = f"ScCP_UNN_L1_{version}_K{K}_dual{D}",
+                    build = (lambda K=K, D=D, version=version: ScCP_UNN(
+                        dim=DIM, K=K, dual_dim=D,
+                        version=version, prox_type="l1",
+                    ).to(device)),
+                    kwargs= {},
+                ))
+        return experiments
 
     # ---- Study 1: impact of the number of layers K (dual_dim fixed) ----
     for K in K_STUDY_VALUES:
@@ -1008,7 +1426,7 @@ def plot_ablation_studies(summary, results_dir):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Flow Matching: 2-moons from 8 Gaussians.")
+    parser = argparse.ArgumentParser(description="Flow Matching: 2-moons from 1 Gaussian.")
     parser.add_argument("--epochs",      type=int, default=50)
     parser.add_argument("--results-dir", type=str, default="results_2moons")
     parser.add_argument("--skip",        type=str, default="")
@@ -1026,11 +1444,32 @@ def main():
     parser.add_argument("--merge-shards", action="store_true",
                          help="Merge summary_shard*.txt files in --results-dir into summary.txt "
                               "and (re)generate the ablation-study plots, then exit.")
+    parser.add_argument("--pairs", type=str, default="",
+                         help="Comma-separated list of K:dual_dim pairs to test instead of the "
+                              "default K-study/dual-study ablations, e.g. '5:16,10:32,20:64'. "
+                              "Runs DFB_UNN_L1 + ScCP_UNN_L1, LFO + LNO, for each pair.")
+    parser.add_argument("--div-pairs", type=str, default="",
+                         help="Comma-separated list of K:dual_dim pairs to compare DFB_UNN's "
+                              "4 begin_div/end_div combinations on, e.g. '10:32,20:32'. "
+                              "Takes priority over --pairs if both are given.")
     args = parser.parse_args()
 
     if args.merge_shards:
         merge_shard_summaries(args.results_dir, args.num_shards)
         return
+
+    def _parse_pairs(s):
+        result = []
+        for chunk in s.split(","):
+            chunk = chunk.strip()
+            if not chunk:
+                continue
+            k_str, d_str = chunk.split(":")
+            result.append((int(k_str), int(d_str)))
+        return result
+
+    pairs     = _parse_pairs(args.pairs) if args.pairs else None
+    div_pairs = _parse_pairs(args.div_pairs) if args.div_pairs else None
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -1044,7 +1483,7 @@ def main():
     os.makedirs(args.results_dir, exist_ok=True)
     train_loader = get_moons_loader(batch_size=args.batch_size)
 
-    experiments = build_experiments(device)
+    experiments = build_experiments(device, pairs=pairs, div_pairs=div_pairs)
     if args.only:
         experiments = [e for e in experiments if args.only in e["name"]]
     if args.skip:
@@ -1068,6 +1507,7 @@ def main():
 
         kwargs      = exp.get("kwargs", {})
         is_flat     = kwargs.pop("is_flat",    False)
+        is_flat_v2  = kwargs.pop("is_flat_v2", False)
         is_flat_fm  = kwargs.pop("is_flat_fm", False)
 
         try:
@@ -1094,6 +1534,18 @@ def main():
                     **kwargs
                 )
                 final_error = float("nan")
+            elif is_flat_v2:
+                losses, n_params, train_time, errors = train_flat_2moons_v2(
+                    model        = model,
+                    train_loader = train_loader,
+                    device       = device,
+                    results_dir  = args.results_dir,
+                    model_name   = name,
+                    nb_epochs    = args.epochs,
+                    w_velocity    = 10.0,
+                    **kwargs
+                )
+                final_error = errors[-1][1] if errors else float("nan")
             else:
                 model = exp["build"]()
                 losses, n_params, train_time, errors = train_2moons(

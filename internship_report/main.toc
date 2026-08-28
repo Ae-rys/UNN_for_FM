@@ -1,0 +1,78 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}
+\contentsline {section}{\numberline {2}Preliminaries}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}Convex Analysis}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Vector Calculus and Dynamical Systems}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Linear Algebra and Stability}{4}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}Feedforward Networks}{4}{subsection.2.4}
+\contentsline {paragraph}{Mathematical Formulation.}{5}{paragraph*.1}
+\contentsline {subsection}{\numberline {2.5}Proximal Algorithms}{5}{subsection.2.5}
+\contentsline {subsubsection}{\numberline {2.5.1}Some Proximal Algorithms}{6}{subsubsection.2.5.1}
+\contentsline {paragraph}{Forward-Backward (FB) Algorithm.}{6}{paragraph*.2}
+\contentsline {paragraph}{Dual Forward-Backward (Dual FB).}{6}{paragraph*.3}
+\contentsline {paragraph}{Chambolle-Pock (CP) Algorithm.}{6}{paragraph*.4}
+\contentsline {paragraph}{Strongly-Convex Chambolle--Pock (ScCP).}{6}{paragraph*.5}
+\contentsline {subsubsection}{\numberline {2.5.2}A simple case: ISTA}{6}{subsubsection.2.5.2}
+\contentsline {paragraph}{ISTA.}{7}{paragraph*.6}
+\contentsline {subsection}{\numberline {2.6}Unrolled Neural Networks (UNN)}{7}{subsection.2.6}
+\contentsline {subsubsection}{\numberline {2.6.1}Example: LISTA}{7}{subsubsection.2.6.1}
+\contentsline {paragraph}{LISTA.}{8}{paragraph*.7}
+\contentsline {subsection}{\numberline {2.7}Conditional Flow Matching (CFM)}{8}{subsection.2.7}
+\contentsline {subsubsection}{\numberline {2.7.1}Background: Continuous Normalizing Flows}{8}{subsubsection.2.7.1}
+\contentsline {subsubsection}{\numberline {2.7.2}The Flow Matching Objective}{9}{subsubsection.2.7.2}
+\contentsline {subsubsection}{\numberline {2.7.3}The Conditional Approach}{9}{subsubsection.2.7.3}
+\contentsline {subsubsection}{\numberline {2.7.4}Gaussian Paths}{9}{subsubsection.2.7.4}
+\contentsline {subsubsection}{\numberline {2.7.5}Choice of the coupling}{10}{subsubsection.2.7.5}
+\contentsline {subsubsection}{\numberline {2.7.6}Summary}{10}{subsubsection.2.7.6}
+\contentsline {section}{\numberline {3}Related Work}{10}{section.3}
+\contentsline {section}{\numberline {4}Our Contribution}{11}{section.4}
+\contentsline {subsection}{\numberline {4.1}A Denoising Perspective on Flow Matching}{11}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Building the Velocity Field with an Unrolled Network}{12}{subsection.4.2}
+\contentsline {subsubsection}{\numberline {4.2.1}Role of the UNN}{12}{subsubsection.4.2.1}
+\contentsline {subsubsection}{\numberline {4.2.2}Recovering the velocity}{12}{subsubsection.4.2.2}
+\contentsline {subsubsection}{\numberline {4.2.3}Output parameterisation: $x$-prediction with a velocity-based loss}{13}{subsubsection.4.2.3}
+\contentsline {subsubsection}{\numberline {4.2.4}Inference}{14}{subsubsection.4.2.4}
+\contentsline {subsection}{\numberline {4.3}Architectural Design Choices}{14}{subsection.4.3}
+\contentsline {subsubsection}{\numberline {4.3.1}Choice of the Algorithm Family}{14}{subsubsection.4.3.1}
+\contentsline {subsubsection}{\numberline {4.3.2}LNO vs.\ LFO}{14}{subsubsection.4.3.2}
+\contentsline {subsubsection}{\numberline {4.3.3}Choice of Proximal Operator}{15}{subsubsection.4.3.3}
+\contentsline {subsection}{\numberline {4.4}Algorithm Parameterisations}{15}{subsection.4.4}
+\contentsline {subsubsection}{\numberline {4.4.1}Dual Forward-Backward (DFB)}{15}{subsubsection.4.4.1}
+\contentsline {paragraph}{DFB-LFO.}{15}{paragraph*.8}
+\contentsline {paragraph}{DFB-LNO.}{15}{paragraph*.9}
+\contentsline {subsubsection}{\numberline {4.4.2}Strongly-Convex Chambolle--Pock (ScCP)}{15}{subsubsection.4.4.2}
+\contentsline {paragraph}{ScCP-LFO.}{15}{paragraph*.10}
+\contentsline {paragraph}{ScCP-LNO.}{15}{paragraph*.11}
+\contentsline {subsection}{\numberline {4.5}Implemented Models}{16}{subsection.4.5}
+\contentsline {subsubsection}{\numberline {4.5.1}Baselines}{16}{subsubsection.4.5.1}
+\contentsline {subsubsection}{\numberline {4.5.2}Standard UNNs}{16}{subsubsection.4.5.2}
+\contentsline {subsubsection}{\numberline {4.5.3}Convolutional UNNs}{16}{subsubsection.4.5.3}
+\contentsline {subsubsection}{\numberline {4.5.4}Breaking the odd symmetry of the proximal velocity field}{16}{subsubsection.4.5.4}
+\contentsline {subsection}{\numberline {4.6}Structural Differences with a UNet}{17}{subsection.4.6}
+\contentsline {paragraph}{No multiscale.}{17}{paragraph*.12}
+\contentsline {paragraph}{Primal--dual alternation with input re-injection.}{17}{paragraph*.13}
+\contentsline {paragraph}{Nonlinearity.}{17}{paragraph*.14}
+\contentsline {paragraph}{No attention and no batchnorm.}{17}{paragraph*.15}
+\contentsline {subsection}{\numberline {4.7}Hyperparameters}{17}{subsection.4.7}
+\contentsline {section}{\numberline {5}Numerical Experiments}{17}{section.5}
+\contentsline {subsection}{\numberline {5.1}Results on \textit {Two Moons}}{17}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Results on MNIST}{17}{subsection.5.2}
+\contentsline {paragraph}{From two moons to images.}{17}{paragraph*.16}
+\contentsline {paragraph}{Experimental setting.}{18}{paragraph*.17}
+\contentsline {paragraph}{Interpretability of the trajectories}{18}{paragraph*.18}
+\contentsline {subsection}{\numberline {5.3}Results on AFHQ}{18}{subsection.5.3}
+\contentsline {section}{\numberline {6}Conclusion and Future Work}{19}{section.6}
+\contentsline {section}{\numberline {7}Personal Remarks}{19}{section.7}
+\contentsline {section}{\numberline {8}Appendix}{19}{section.8}
+\contentsline {subsection}{\numberline {8.1}Explored Directions}{19}{subsection.8.1}
+\contentsline {subsubsection}{\numberline {8.1.1}What did not work}{19}{subsubsection.8.1.1}
+\contentsline {paragraph}{Odd symmetry of the proximal field.}{19}{paragraph*.19}
+\contentsline {paragraph}{Latent-space Flow Matching.}{20}{paragraph*.20}
+\contentsline {paragraph}{Weight sharing and the choice of algorithm family.}{20}{paragraph*.21}
+\contentsline {subsubsection}{\numberline {8.1.2}Warm-starting the dual variable across ODE steps}{20}{subsubsection.8.1.2}
+\contentsline {subsubsection}{\numberline {8.1.3}Different choices of proximal operators}{23}{subsubsection.8.1.3}
+\contentsline {subsection}{\numberline {8.2}A prototyping bench: denoising at fixed noise levels}{23}{subsection.8.2}
+\contentsline {subsubsection}{\numberline {8.2.1}The computational cost of unrolling}{23}{subsubsection.8.2.1}
+\contentsline {subsubsection}{\numberline {8.2.2}Scaling up: CIFAR-10 and AFHQ-32}{24}{subsubsection.8.2.2}
+\contentsline {paragraph}{The transport is learned long before the sharpness.}{24}{paragraph*.22}
+\contentsline {paragraph}{Below a threshold in steps, a run is not evaluable.}{24}{paragraph*.23}
+\contentsline {section}{References}{24}{paragraph*.23}

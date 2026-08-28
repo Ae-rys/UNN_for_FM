@@ -1,0 +1,20 @@
+GPU : NVIDIA GeForce RTX 2080 Ti  | torch 2.12.0+cu130
+config = sccp_v5 k=9 K=10 ic=128 x0=xt, MNIST 28x28, B=128 (identique au run en cours sur GPU 1)
+NB : GPU partage avec un entrainement -> lire les RAPPORTS, pas les ms absolues.
+
+variante                             ms/iter   ms/128 ech.     gain   VRAM Mo
+  baseline (ckpt=1, fp32)              154.3         154.3    1.00x       803
+  ckpt=0                               122.2         122.2    1.26x      1640
+  ckpt=0 + cudnn.benchmark             122.5         122.5    1.26x      1640
+  ckpt=0 + channels_last               162.9         162.9    0.95x      2115
+  ckpt=0 + AMP fp16                    196.0         196.0    0.79x      1183
+  ckpt=0 + AMP fp16 + NHWC             206.2         206.2    0.75x      1184
+    (compilation + warmup : 8 s)
+  ckpt=0 + compile                      81.2          81.2    1.90x      1367
+  ckpt=0 + compile+cudagraphs        ECHEC : RuntimeError: Error: accessing tensor output of CUDAGraphs that has been overwritten by a subsequent run
+    (compilation + warmup : 82 s)
+  ckpt=0 + compile + AMP fp16          133.9         133.9    1.15x       949
+  ckpt=0, B=256                        238.6         119.3    1.29x      3951
+  ckpt=0, B=512                        454.8         113.7    1.36x      6366
+    (compilation + warmup : 81 s)
+  ckpt=0 + compile, B=512              292.0          73.0    2.11x      5361

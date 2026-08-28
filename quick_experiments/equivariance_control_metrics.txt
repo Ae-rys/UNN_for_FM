@@ -1,0 +1,7 @@
+# contrôle équivariance nsub=300 nseed=24 T=3 | baseline test->train=12.217 | dict_aug=14700
+arm	dist_train	ratio_base	dist_dictaug
+1. ELS P7 (patch+fold)	16.836	1.378	15.699
+2. ELS P27 (patch+fold)	15.548	1.273	11.357
+3. ELS P27 (sans fold)	9.503	0.778	0.449
+4. GLOBAL (image)	0.428	0.035	0.428
+5. GLOBAL + transl.aug	13.728	1.124	0.423

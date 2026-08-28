@@ -13,10 +13,14 @@ from .architectures import (
     SharedConvDFB_UNN,
     ScCP_UNN,
     SharedScCP_UNN,
-    ConvScCP_UNN,
+    # ConvScCP_UNN,
     SharedConvScCP_UNN,
     UNet,
     compute_delta,
-    SharedFLAT_DFB_UNN,
     FLAT_DFB_UNN,
+    FLAT_DFB_UNN_v2,
+    LatentScCP_UNN,
+    MnistAE,
+    pretrain_ae,
+    weights_init_kaiming
 )

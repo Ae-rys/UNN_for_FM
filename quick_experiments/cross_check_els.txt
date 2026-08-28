@@ -1,0 +1,6 @@
+# cross-check ELS : Kamb LocalScoreModule(fix) vs ex1_els_* | K=7 NSUB=2000 NQ=8
+t	cos(kamb,center)	rel(center)	cos(kamb,nifty)	rel(nifty)	cos(center,nifty)
+0.30	0.9675	0.2445	0.9583	0.2910	0.9934
+0.50	0.9911	0.1273	0.9868	0.1643	0.9936
+0.70	0.9818	0.1647	0.9863	0.1574	0.9965
+0.85	nan	nan	nan	nan	0.9963

@@ -1,0 +1,4 @@
+# epochs=20 batch=128  (GE=energie de gradient, proxy nettete ; reel=0.3248)
+pixel_repro	params=69630	dim=784	final_loss=0.909531	grad_energy=0.8004
+pixel_big	params=276990	dim=784	final_loss=0.913402	grad_energy=0.8003
+latent_matched	params=257550	dim=784	final_loss=0.803579	grad_energy=0.1763

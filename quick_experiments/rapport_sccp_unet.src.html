@@ -1,0 +1,475 @@
+<title>ScCP contre UNet</title>
+<style>
+  :root{
+    --ground:#F5F7F6; --panel:#FFFFFF; --sunk:#ECEFEE;
+    --ink:#171C1D; --ink-soft:#4A585B; --ink-faint:#7C8A8D;
+    --rule:#D8DEDC; --rule-soft:#E7ECEA;
+    --petrol:#186269; --petrol-soft:#E2EFEF;
+    --steel:#5C6E75; --steel-soft:#E9EDEF;
+    --moss:#356B45; --moss-soft:#E3EDE5;
+    --brick:#9C3E35; --brick-soft:#F3E4E2;
+    --amber:#7E6522; --amber-soft:#F0EBDC;
+    --serif:Charter,"Bitstream Charter","Iowan Old Style",Georgia,"Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1416; --panel:#161D1F; --sunk:#1B2325;
+      --ink:#E4EAE8; --ink-soft:#A3B1B3; --ink-faint:#78878A;
+      --rule:#2A3437; --rule-soft:#212A2C;
+      --petrol:#5FB8BE; --petrol-soft:#13292B;
+      --steel:#9AAEB5; --steel-soft:#1A2225;
+      --moss:#79B98C; --moss-soft:#152318;
+      --brick:#E08579; --brick-soft:#2A1917;
+      --amber:#CBB06A; --amber-soft:#241F12;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1416; --panel:#161D1F; --sunk:#1B2325;
+    --ink:#E4EAE8; --ink-soft:#A3B1B3; --ink-faint:#78878A;
+    --rule:#2A3437; --rule-soft:#212A2C;
+    --petrol:#5FB8BE; --petrol-soft:#13292B;
+    --steel:#9AAEB5; --steel-soft:#1A2225;
+    --moss:#79B98C; --moss-soft:#152318;
+    --brick:#E08579; --brick-soft:#2A1917;
+    --amber:#CBB06A; --amber-soft:#241F12;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--serif); font-size:17px; line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px 96px}
+  .col{max-width:66ch}
+  p{margin:0 0 1.05em}
+  a{color:var(--petrol)}
+  strong{font-weight:600}
+
+  /* ---------- masthead ---------- */
+  header.top{padding:64px 0 30px; border-bottom:2px solid var(--ink); margin-bottom:38px}
+  .eyebrow{
+    font-family:var(--sans); font-size:11.5px; font-weight:600;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--petrol);
+    margin:0 0 16px;
+  }
+  h1{
+    font-family:var(--serif); font-weight:600; font-size:clamp(34px,5.2vw,52px);
+    line-height:1.08; letter-spacing:-.015em; margin:0 0 18px; text-wrap:balance;
+  }
+  .standfirst{font-size:20px; line-height:1.5; color:var(--ink-soft); max-width:60ch; margin:0}
+  .meta{
+    font-family:var(--sans); font-size:12.5px; color:var(--ink-faint);
+    margin-top:22px; display:flex; flex-wrap:wrap; gap:6px 20px;
+  }
+
+  /* ---------- sections ---------- */
+  section{margin:52px 0 0}
+  h2{
+    font-family:var(--serif); font-weight:600; font-size:27px; letter-spacing:-.01em;
+    margin:0 0 6px; padding-top:12px; border-top:1px solid var(--rule); text-wrap:balance;
+  }
+  .sub{font-family:var(--sans); font-size:13px; color:var(--ink-faint); margin:0 0 22px}
+  h3{font-family:var(--serif); font-weight:600; font-size:19.5px; margin:30px 0 8px}
+
+  /* ---------- verdict chips + cards ---------- */
+  .chip{
+    display:inline-block; font-family:var(--sans); font-size:10.5px; font-weight:700;
+    letter-spacing:.09em; text-transform:uppercase; padding:3px 8px; border-radius:3px;
+    vertical-align:2px; white-space:nowrap;
+  }
+  .chip.ok{background:var(--moss-soft); color:var(--moss)}
+  .chip.no{background:var(--brick-soft); color:var(--brick)}
+  .chip.un{background:var(--amber-soft); color:var(--amber)}
+
+  .verdicts{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; margin:30px 0 0}
+  .vcard{background:var(--panel); border:1px solid var(--rule); border-radius:5px; padding:20px 22px}
+  .vcard h4{
+    font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; margin:0 0 14px; color:var(--ink-faint);
+  }
+  .vcard ul{margin:0; padding-left:18px}
+  .vcard li{margin-bottom:9px; font-size:15.5px; line-height:1.5}
+  .vcard li:last-child{margin-bottom:0}
+  .vcard.ok{border-top:3px solid var(--moss)}
+  .vcard.no{border-top:3px solid var(--brick)}
+  .vcard.un{border-top:3px solid var(--amber)}
+
+  /* ---------- tables ---------- */
+  .tw{overflow-x:auto; margin:24px 0 8px; border:1px solid var(--rule); border-radius:5px; background:var(--panel)}
+  table{border-collapse:collapse; width:100%; font-family:var(--sans); font-size:14px}
+  th,td{padding:9px 14px; text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left; font-variant-numeric:normal}
+  thead th{
+    font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint);
+    font-weight:600; border-bottom:1px solid var(--rule); background:var(--sunk);
+  }
+  tbody tr{border-bottom:1px solid var(--rule-soft)}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{color:var(--ink-soft)}
+  tbody td:first-child{color:var(--ink); font-weight:500}
+  tr.sccp td:first-child{box-shadow:inset 3px 0 0 var(--petrol); padding-left:16px}
+  tr.unet td:first-child{box-shadow:inset 3px 0 0 var(--steel); padding-left:16px}
+  tr.ref{background:var(--sunk)}
+  tr.ref td{font-style:italic; color:var(--ink-faint)}
+  tr.ref td:first-child{color:var(--ink-faint); font-weight:600; font-style:normal}
+  .num-best{color:var(--moss); font-weight:700}
+  .num-bad{color:var(--brick); font-weight:600}
+  caption{
+    caption-side:bottom; text-align:left; font-family:var(--sans); font-size:12.5px;
+    color:var(--ink-faint); padding:11px 14px; border-top:1px solid var(--rule-soft);
+  }
+
+  /* ---------- figures ---------- */
+  figure{margin:34px 0; background:var(--panel); border:1px solid var(--rule); border-radius:5px; overflow:hidden}
+  figure img{display:block; width:100%; height:auto; background:#fff}
+  figcaption{
+    font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+    padding:14px 18px; border-top:1px solid var(--rule); line-height:1.5;
+  }
+  figcaption b{color:var(--ink); font-weight:600}
+
+  /* ---------- callouts ---------- */
+  .note{
+    background:var(--petrol-soft); border-left:3px solid var(--petrol);
+    padding:16px 20px; margin:26px 0; border-radius:0 4px 4px 0;
+  }
+  .note p{margin:0; font-size:16px}
+  .note p+p{margin-top:.7em}
+  .note .lbl{
+    font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--petrol); display:block; margin-bottom:6px;
+  }
+  .warn{background:var(--brick-soft); border-left-color:var(--brick)}
+  .warn .lbl{color:var(--brick)}
+
+  code{font-family:var(--mono); font-size:.87em; background:var(--sunk); padding:1px 5px; border-radius:3px}
+
+  dl.facts{margin:22px 0; display:grid; grid-template-columns:auto 1fr; gap:9px 20px; align-items:baseline}
+  dl.facts dt{font-family:var(--sans); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap}
+  dl.facts dd{margin:0; font-size:15.5px}
+
+  footer{margin-top:64px; padding-top:22px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint)}
+  footer p{margin:0 0 .5em}
+
+  /* ---------- correspondance rapport <-> mesure ---------- */
+  .claims{display:grid; gap:14px; margin:26px 0}
+  .claim{
+    background:var(--panel); border:1px solid var(--rule); border-radius:5px;
+    padding:18px 20px; display:grid; grid-template-columns:1fr; gap:10px;
+  }
+  .claim .src{
+    font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .claim blockquote{
+    margin:0; padding-left:14px; border-left:2px solid var(--rule);
+    font-style:italic; color:var(--ink-soft); font-size:16px;
+  }
+  .claim .verdict{font-size:16px; margin:0}
+  .claim .verdict .chip{margin-right:8px}
+  @media (min-width:760px){
+    .claim{grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:start; gap:10px 26px}
+    .claim .src{grid-column:1/-1}
+  }
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">Stage FM/UNN — mesures AFHQ-32 pour le rapport</p>
+  <h1>ScCP contre UNet</h1>
+  <p class="standfirst">Ce que le ScCP sait faire comme champ de vitesses de Flow Matching, ce qu'il ne sait pas faire, et à quel prix. Chaque section répond à une affirmation du rapport, en la confirmant, en la nuançant ou en la contredisant.</p>
+  <div class="meta">
+    <span>AFHQ chats 32×32 · 5 141 train / 512 validation tenues à l'écart</span>
+    <span>17 runs de débruitage · 7 runs Flow Matching</span>
+    <span>17 août 2026</span>
+  </div>
+</header>
+
+<div class="col">
+<p>Le rapport pose en §4.1 l'identité qui fonde tout ce qui suit :</p>
+</div>
+<p style="font-family:var(--mono); font-size:14.5px; background:var(--sunk); padding:14px 18px; border-radius:4px; max-width:66ch">D*<sub>t</sub>(x<sub>t</sub>) = E[x₁ | x<sub>t</sub>, t] = x<sub>t</sub> + (1−t)·v*(x<sub>t</sub>, t)</p>
+<div class="col">
+<p>Le champ de vitesses optimal <em>est</em> le débruiteur optimal, à chaque niveau de bruit. Mesurer la qualité de débruitage à quelques <code>t</code> fixes n'est donc pas un proxy commode : c'est l'objectif du Flow Matching restreint à un support fini. C'est ce qui autorise à comparer, sur une même métrique, des modèles entraînés au débruitage seul et des modèles entraînés en Flow Matching complet.</p>
+<p>Ce qui disparaît en revanche, c'est l'échantillonnage — pas d'EDO, pas d'accumulation d'erreur. Le banc mesure la <strong>capacité</strong> de l'architecture, pas la qualité générative finale. Deux sections plus bas, on verra que l'écart entre les deux est exactement là où se logeaient les « pâtés ».</p>
+</div>
+
+<div class="verdicts">
+  <div class="vcard ok">
+    <h4>Ce qui marche</h4>
+    <ul>
+      <li>Le ScCP <strong>génère de vrais chats</strong> à 165 000 steps. Les « pâtés » étaient des runs inachevés, pas une limite d'architecture.</li>
+      <li><strong>Aucune mémorisation</strong> : nmse train = nmse val à ±0,7 % près sur quatre checkpoints, jusqu'à 10,4M paramètres.</li>
+      <li>La <strong>localité ne l'empêche pas de reconstruire du détail fin</strong> : à t = 0,8 ses prédictions sont indiscernables de la vérité.</li>
+      <li>Par heure de GPU, les <strong>petites configurations dominent</strong> : 96 % de la qualité du gros modèle pour un septième du temps.</li>
+    </ul>
+  </div>
+  <div class="vcard no">
+    <h4>Ce qui ne marche pas</h4>
+    <ul>
+      <li>Son plateau est <strong>au-dessus</strong> de ce qu'un UNet plus petit atteint en 21 minutes : 0,2056 après 200 000 steps contre 0,1904.</li>
+      <li>Il paie <strong>6 à 10× le temps GPU</strong> pour une qualité égale ou moindre.</li>
+      <li>Le temps n'entre dans le réseau que par <strong>K scalaires</strong> — un par couche, et rien d'autre n'en dépend.</li>
+      <li>Sur le run le plus long, <strong>deux couches se sont éteintes</strong> : leur rayon de prox tombe à 10⁻⁴.</li>
+    </ul>
+  </div>
+  <div class="vcard un">
+    <h4>Ce qui n'a pas été testé</h4>
+    <ul>
+      <li>Le <strong>type de prox</strong> (<code>l1c</code>, <code>silu</code>) et la version <code>LNO</code> — seul axe jamais exploré, et le seul qui ait payé côté UNet.</li>
+      <li>Le <strong>FID</strong>. Le classement par nmse n'est validé qu'ordinalement, sur cinq checkpoints.</li>
+      <li>La <strong>profondeur isolée</strong> : dans la comparaison longue, k, K et ic changent en même temps.</li>
+    </ul>
+  </div>
+</div>
+
+<section>
+<h2>Ce que le rapport affirme, ce que la mesure en dit</h2>
+<p class="sub">§ « Structural differences with a UNet » et § Model Variants — les quatre points confrontés aux données.</p>
+
+<div class="claims">
+
+  <div class="claim">
+    <span class="src">§ Structural differences — No multiscale (affirmation en rouge)</span>
+    <blockquote>« This locality does not appear to limit generation as long as the network has enough layers, but we have not tested this systematically. »</blockquote>
+    <p class="verdict"><span class="chip un">nuancé</span> Testé sur un plan factoriel complet. La localité ne limite pas la <em>reconstruction</em> : à t = 0,8 le ScCP restitue oreilles et fourrure. Mais « assez de couches » ne suffit pas — à budget court, doubler K ne rapporte que 5 % ; à budget long, un modèle plus large et plus profond garde 4,0 % d'avance, IC 95 % [+3,7 ; +4,4]. L'affirmation tient pour la capacité de détail, pas pour la qualité atteignable.</p>
+  </div>
+
+  <div class="claim">
+    <span class="src">§ Structural differences — Nonlinearity</span>
+    <blockquote>« The only nonlinearity in ScCP is a proximal operator — here a clipping with a learned, time-dependent radius. »</blockquote>
+    <p class="verdict"><span class="chip ok">confirmé, et c'est le goulot</span> Vérifié dans les poids : ni W<sub>k</sub>, ni V<sub>k</sub>, ni τ<sub>k</sub>, ni σ<sub>k</sub>, ni α<sub>k</sub> ne dépendent de t. Toute la dépendance temporelle du réseau passe par les K rayons r<sub>k</sub>(t) — <strong>dix nombres</strong> pour K = 10, contre un plongement temporel par bloc et par canal chez un UNet.</p>
+  </div>
+
+  <div class="claim">
+    <span class="src">§ Model Variants — Time conditioning (ligne 1074)</span>
+    <blockquote>« For convolutional or ℓ₁ proximal operator, a small MLP maps t ↦ a channel-wise bias. »</blockquote>
+    <p class="verdict"><span class="chip no">à corriger dans le .tex</span> Le code produit un <strong>scalaire</strong>, pas un biais par canal : <code>prox.time_scaling</code> est un <code>Linear(1,32) → SiLU → Linear(32,1)</code>, sortie de dimension 1. La variante décrite par le rapport existe — <code>L1ProxConv(channels=ic)</code> — mais n'est pas celle qui a été entraînée.</p>
+  </div>
+
+  <div class="claim">
+    <span class="src">§ Model Variants — Truncation depth (ligne 1075)</span>
+    <blockquote>« K ∈ {3, 5, 10, 15} for per-layer models. »</blockquote>
+    <p class="verdict"><span class="chip no">à étendre</span> Les runs AFHQ vont jusqu'à <strong>K = 50</strong>. Au-delà de K = 30 le gain devient indétectable : K = 30 → 50 rapporte 3,5 % à t = 0,8, pour 70 % de calcul en plus.</p>
+  </div>
+
+</div>
+</section>
+
+<section>
+<h2>Le protocole, en une fois</h2>
+<p class="sub">Identique d'un run à l'autre ; tout ce qui suit en dépend.</p>
+<div class="col">
+<p>Chaque modèle reconstruit x₁ à partir de x<sub>t</sub> = (1−t)·x₀ + t·x₁ à quatre niveaux de bruit fixes, en paramétrisation x-prediction — celle du rapport. La mesure porte sur 512 images jamais vues, avec un bruit tiré une fois pour toutes, donc comparable au bit près entre modèles.</p>
+</div>
+<dl class="facts">
+  <dt>Métrique</dt><dd><strong>nmse</strong> = mse ÷ variance des données. 1 = le modèle n'apprend rien de plus que la moyenne du jeu ; 0 = reconstruction parfaite.</dd>
+  <dt>Garde-fou</dt><dd>Le <strong>débruiteur linéaire optimal</strong> — filtre de Wiener construit sur la covariance du train, mesuré sur la même validation : <strong>0,2193</strong>. Un réseau qui ne le bat pas n'a rien appris au-delà des corrélations du second ordre.</dd>
+  <dt>Barres d'erreur</dt><dd>Bootstrap apparié sur les images : ±2,1 % sur une nmse isolée, mais l'IC d'un <em>écart</em> entre deux modèles est cinq fois plus serré, les images étant les mêmes.</dd>
+  <dt>Réserve</dt><dd>Le bootstrap ne couvre que le tirage des images, pas l'aléa d'entraînement — une graine par configuration. Un écart de l'ordre de 2 % n'est pas distinguable du bruit de graine.</dd>
+</dl>
+</section>
+
+<section>
+<h2>À budget égal, le UNet gagne</h2>
+<p class="sub">20 000 steps chacun, couplage indépendant, même loss — la seule comparaison inter-familles valide du lot.</p>
+
+<div class="tw">
+<table>
+  <caption>Ces quatre modèles sont entraînés uniquement au débruitage, sous protocole identique. Le ScCP est le seul dont le coût se compte en heures.</caption>
+  <thead><tr><th>Modèle</th><th>Paramètres</th><th>nmse</th><th>IC 95 %</th><th>it/s</th><th>Temps GPU</th></tr></thead>
+  <tbody>
+    <tr class="unet"><td>UNet torchcfm ch64</td><td>4 437 699</td><td class="num-best">0,1858</td><td>[0,1818 – 0,1898]</td><td>9,3</td><td>36 min</td></tr>
+    <tr class="unet"><td>UNet torchcfm ch32</td><td>1 113 955</td><td class="num-best">0,1904</td><td>[0,1863 – 0,1945]</td><td>15,7</td><td>21 min</td></tr>
+    <tr class="sccp"><td>ScCP k9 / K20 / ic128</td><td>1 248 661</td><td>0,2086</td><td>[0,2042 – 0,2130]</td><td>2,6</td><td><strong>2 h 09</strong></td></tr>
+    <tr class="unet"><td>UNet Kamb</td><td>2 107 366</td><td>0,2093</td><td>[0,2050 – 0,2138]</td><td>26,2</td><td>12,7 min</td></tr>
+    <tr class="ref"><td>Débruiteur linéaire optimal</td><td>—</td><td>0,2193</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr class="ref"><td>Prédicteur constant</td><td>—</td><td>1,0000</td><td>—</td><td>—</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p>Deux écarts appariés, sur les mêmes images rééchantillonnées :</p>
+<p><strong>ScCP contre UNet Kamb : +0,4 %</strong>, IC [−0,0006 ; +0,0021]. Statistiquement indiscernables — pour <strong>dix fois</strong> le temps GPU.</p>
+<p><strong>ScCP contre UNet torchcfm ch32 : +9,6 %</strong>, IC [+8,9 ; +10,3]. Significatif, et ce UNet a <em>moins</em> de paramètres que le ScCP tout en s'entraînant six fois plus vite.</p>
+<p>Les colonnes it/s et temps GPU renseignent les entrées manquantes de la table quantitative du rapport, qui les appelle explicitement.</p>
+</div>
+
+<div class="note">
+<span class="lbl">Ce que ça vaut</span>
+<p>Le ScCP atteint la qualité d'un UNet minimal, pas celle d'un UNet résiduel moderne. Et l'écart n'est pas un artefact de budget : poussé à 200 000 steps, le ScCP plafonne à 0,2056, toujours 8 % au-dessus d'un UNet plus petit entraîné en vingt et une minutes.</p>
+</div>
+</section>
+
+<section>
+<h2>La comparaison à l'œil</h2>
+<p class="sub">Mêmes images, mêmes bruits, mêmes 20 000 steps.</p>
+<figure>
+  <img src="report_figs/fig_denoise_compare.png" alt="Grille comparant les reconstructions du ScCP, du UNet torchcfm et du UNet de Kamb à quatre niveaux de bruit">
+  <figcaption><b>À t = 0,2, tout le monde échoue de la même façon</b> — masses colorées sans identité. C'est le régime où la variance conditionnelle domine. <b>À t = 0,6 et 0,8, l'écart devient visible</b> : le UNet torchcfm rend moustaches et texture d'iris là où le ScCP lisse. Le UNet de Kamb, lui, produit des artefacts en blocs bien visibles à t = 0,2 et 0,4.</figcaption>
+</figure>
+<div class="col">
+<p>Cette planche explique aussi pourquoi les chiffres agrégés discriminent mal. La nmse moyenne est dominée par t = 0,2 — 0,45 contre 0,05 à t = 0,8, un facteur neuf — c'est-à-dire par le régime où toutes les architectures se ressemblent. Les différences visibles vivent dans la partie du budget qui pèse le moins.</p>
+</div>
+</section>
+
+<section>
+<h2>Les leviers de taille : ce qu'on sait, et d'où ça vient</h2>
+<p class="sub">Plan factoriel complet, 12 configurations ScCP, 3 000 steps : k ∈ {9, 15} × K ∈ {5, 10, 20} × ic ∈ {128, 256}.</p>
+
+<div class="note warn">
+<span class="lbl">À lire avant le tableau</span>
+<p>Ce plan factoriel a été mesuré à <strong>3 000 steps</strong>, et à ce budget les douze configurations sont toutes <strong>entre 4 % et 20 % moins bonnes que le débruiteur linéaire optimal</strong>. Aucune n'a donc appris quoi que ce soit qu'un opérateur linéaire ne fasse pas.</p>
+<p>Les exposants ci-dessous décrivent en conséquence <em>la vitesse à laquelle une configuration s'approche d'un plancher qu'aucune n'a atteint</em> — une mesure d'optimisation, pas de qualité atteignable. Ils gardent leur valeur pour choisir une configuration de prototypage à budget serré ; ils n'en ont aucune pour conclure qu'une architecture vaut mieux qu'une autre.</p>
+</div>
+
+<div class="tw">
+<table>
+  <caption>Moindres carrés sur log(nmse), R² = 0,906. Se lit : « doubler ce paramètre multiplie la nmse par 2^exposant ». Régime sous-entraîné — voir l'avertissement ci-dessus.</caption>
+  <thead><tr><th>Levier</th><th>Exposant</th><th>Effet d'un doublement</th><th>Effet sur le coût</th></tr></thead>
+  <tbody>
+    <tr><td>Profondeur K</td><td>−0,076</td><td class="num-best">−5,1 %</td><td>×2 (linéaire)</td></tr>
+    <tr><td>Noyau k</td><td>−0,034</td><td>−2,4 %</td><td>×2,5</td></tr>
+    <tr><td>Espace dual ic</td><td>+0,011</td><td class="num-bad">+0,8 %</td><td>×2</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p>À 3 000 steps, les douze configurations tiennent dans <strong>15,8 % de nmse</strong> alors que leurs paramètres varient d'un facteur 22 et leur temps GPU d'un facteur 19. La taille de l'espace dual y est inerte, voire nuisible.</p>
+<p>Un résultat du même genre existe côté UNet, et celui-là est <strong>mesuré dans un régime valide</strong> : à 20 000 steps, où les modèles battent le filtre linéaire de 13 %, quadrupler la capacité rapporte <strong>+2,5 %</strong> [+2,2 ; +2,8], quand changer de <em>type de bloc</em> — du UNet de Kamb au UNet torchcfm — en rapporte <strong>12,7 %</strong>. Cinq fois plus.</p>
+</div>
+
+<h3>Ce que les archives disent déjà, sans rien relancer</h3>
+<div class="col">
+<p>Les runs Flow Matching archivent leurs poids tous les 10 000 steps. Plusieurs architectures existent donc déjà aux <strong>mêmes budgets</strong> : il suffisait de les évaluer. Cinquante-six checkpoints, aucun entraînement.</p>
+</div>
+
+<div class="tw">
+<table>
+  <caption>Deux budgets appariés, mêmes 512 images de validation, même bruit fixe. Le régime indique si la configuration bat déjà le débruiteur linéaire optimal (0,2193) — sans quoi la comparer aux autres n'a pas de sens.</caption>
+  <thead><tr><th>Configuration</th><th>Paramètres</th><th>nmse à 40k</th><th>nmse à 50k</th><th>Régime à 50k</th></tr></thead>
+  <tbody>
+    <tr class="sccp"><td>k15 / K20 / ic256</td><td>6 919 061</td><td>0,2264</td><td class="num-best">0,2122</td><td>valide</td></tr>
+    <tr class="sccp"><td>k9 / K10 / ic256</td><td>1 247 691</td><td>0,2222</td><td>0,2155</td><td>valide</td></tr>
+    <tr class="sccp"><td>k9 / K10 / ic128</td><td>624 331</td><td>0,2220</td><td>0,2161</td><td>valide</td></tr>
+    <tr class="sccp"><td>k9 / K20 / ic256</td><td>2 495 381</td><td class="num-best">0,2205</td><td>—</td><td>—</td></tr>
+    <tr class="ref"><td>Débruiteur linéaire optimal</td><td>—</td><td>0,2193</td><td>0,2193</td><td>—</td></tr>
+    <tr class="sccp"><td>k25 / K10 / ic256</td><td>9 603 531</td><td>0,2406</td><td class="num-bad">0,2198</td><td>sous-entraîné</td></tr>
+    <tr class="sccp"><td>k15 / K15 / ic512</td><td>10 377 136</td><td>0,2434</td><td class="num-bad">0,2239</td><td>sous-entraîné</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p><strong>Le classement s'inverse entre 40 000 et 50 000 steps.</strong> À 40k, la meilleure configuration est k9/K20/ic256 et le gros modèle k15/K20/ic256 n'arrive que quatrième ; à 50k ce dernier passe premier et le reste jusqu'à 160 000 steps. C'est la démonstration directe qu'un classement établi sous le plancher linéaire ne prédit pas le classement final — et donc que le tableau à 3 000 steps ne pouvait pas trancher.</p>
+<p><strong>En revanche, l'inertie de l'espace dual survit.</strong> À 50 000 steps, dans un régime où les deux battent le filtre linéaire, k9/K10/ic256 (1,25M) fait 0,2155 contre 0,2161 pour k9/K10/ic128 (0,62M) : <strong>0,3 % pour deux fois plus de paramètres</strong>. C'était le résultat le plus surprenant du plan factoriel, et c'est celui qui tient.</p>
+<p><strong>Les deux plus gros modèles ne franchissent jamais le plancher</strong>, même à 50 000 steps — 9,60M et 10,38M de paramètres, tous deux encore au-dessus d'un opérateur linéaire.</p>
+</div>
+
+<figure>
+  <img src="budget_matched.png" alt="Trajectoires nmse en fonction du nombre de steps pour sept configurations, avec la ligne du débruiteur linéaire optimal">
+  <figcaption><b>À gauche</b>, les sept trajectoires en échelle log : toutes plongent vers le plancher linéaire entre 40 000 et 50 000 steps. <b>À droite</b>, le zoom sur la zone où le classement se décide : la séparation entre le gros modèle et le petit apparaît juste après le franchissement et se stabilise autour de 4 %. Avant 40 000 steps, l'ordre des courbes n'a aucune valeur prédictive.</figcaption>
+</figure>
+
+<div class="col">
+</div>
+
+<div class="note">
+<span class="lbl">La règle, et sa limite</span>
+<p>À budget court, la capacité est inerte ; c'est le type de bloc qui décide. <strong>Mais cette platitude est un effet du sous-entraînement.</strong> Poussées à leur budget, deux configurations que le balayage à 3 000 steps déclarait équivalentes se séparent : le gros modèle (6,92M, 165 000 steps) bat le petit (0,62M, 200 000 steps) de <strong>4,0 %</strong>, IC [+3,7 ; +4,4] — significatif, et acquis malgré 35 000 steps de moins.</p>
+<p>La capacité finit donc par payer, mais seulement après ~150 000 steps. Le petit modèle obtient tout de même 96 % de la qualité pour un septième du temps GPU et onze fois moins de paramètres.</p>
+<p>Les archives permettent aussi de dater cette séparation : elle apparaît <strong>juste après le franchissement du plancher linéaire</strong>, vers 50 000 steps, et reste stable entre 4 et 4,4 % jusqu'à 160 000. Ce n'est donc pas un effet qui se creuse indéfiniment avec le budget — il s'installe dès que les modèles deviennent comparables, puis ne bouge plus.</p>
+</div>
+</section>
+
+<section>
+<h2>Pourquoi le temps est le goulot</h2>
+<p class="sub">Conséquence directe du § « Nonlinearity » du rapport, vérifiée dans les poids.</p>
+<div class="col">
+<p>Dans <code>ConvScCP_UNN(use_Unet="l1")</code>, la seule dépendance temporelle passe par le rayon du prox ℓ₁ :</p>
+<p style="font-family:var(--mono); font-size:14px; background:var(--sunk); padding:12px 16px; border-radius:4px">r<sub>k</sub>(t) = softplus(MLP<sub>k</sub>(t)),  prox<sub>k</sub>(u) = clamp(u, −r<sub>k</sub>, +r<sub>k</sub>)</p>
+<p>Avec K = 10, tout le conditionnement temporel du réseau tient dans <strong>dix nombres</strong>. Les rayons appris sont monotones, lisses, décroissants — le prox laisse passer à t petit, seuille fort à t grand — et leur dérivée normalisée ne dépasse pas 5,4.</p>
+<p>Conséquence pratique : <strong>un encodage sinusoïdal du temps n'apporterait rien</strong>. Il sert à représenter des dépendances à haute fréquence en t, or le réseau n'en demande pas. Ce qui manque n'est pas la paramétrisation du temps, c'est la <strong>largeur du canal</strong> par lequel il agit.</p>
+<p>Un détail à surveiller : sur le run à 165 000 steps, <strong>deux couches ont un rayon qui s'effondre</strong> — r(1) = 0,0000 et 0,0002. Leur prox annule tout le signal dual, elles sont éteintes. Si des couches meurent, augmenter K est encore plus vain que ne le suggère l'exposant.</p>
+</div>
+</section>
+
+<section>
+<h2>Le budget décide de tout le reste</h2>
+<p class="sub">Runs Flow Matching complets, <code>results_afhq32</code>.</p>
+
+<div class="tw">
+<table>
+  <caption>Les deux plus gros modèles sont les deux plus mauvais — et tous deux sous le filtre linéaire. Ils ont reçu le même budget de steps que des modèles seize fois plus petits.</caption>
+  <thead><tr><th>Run</th><th>Paramètres</th><th>Steps</th><th>Temps</th><th>nmse</th><th>t₀*</th></tr></thead>
+  <tbody>
+    <tr class="sccp"><td>k15 / K20 / ic256</td><td>6 919 061</td><td>165 000</td><td>74,7 h</td><td class="num-best">0,1976</td><td><strong>0</strong></td></tr>
+    <tr class="sccp"><td>k9 / K10 / ic128</td><td>624 331</td><td>200 000</td><td>10,9 h</td><td>0,2056</td><td>≈ 0,2</td></tr>
+    <tr class="sccp"><td>k9 / K10 / ic128</td><td>624 331</td><td>100 000</td><td>5,4 h</td><td>0,2091</td><td>≈ 0,3</td></tr>
+    <tr class="sccp"><td>k9 / K10 / ic256</td><td>1 247 691</td><td>55 000</td><td>—</td><td>0,2142</td><td>≈ 0,5</td></tr>
+    <tr class="sccp"><td>k9 / K20 / ic256</td><td>2 495 381</td><td>45 000</td><td>—</td><td>0,2157</td><td>≈ 0,5</td></tr>
+    <tr class="ref"><td>Débruiteur linéaire optimal</td><td>—</td><td>—</td><td>—</td><td>0,2193</td><td>—</td></tr>
+    <tr class="sccp"><td>k25 / K10 / ic256</td><td>9 603 531</td><td>50 000</td><td>—</td><td class="num-bad">0,2198</td><td>0,5 – 0,7</td></tr>
+    <tr class="sccp"><td>k15 / K15 / ic512</td><td>10 377 136</td><td>50 000</td><td>32,4 h</td><td class="num-bad">0,2239</td><td>≈ 0,7</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="col">
+<p>De 100 000 à 200 000 steps, la nmse passe de 0,2091 à 0,2056 (−1,7 %) pour 5,5 h de GPU supplémentaires, et les gains sont tombés à <strong>0,10 % par tranche de 10 000 steps</strong>. Le modèle est à plat.</p>
+<p>La colonne <strong>t₀*</strong> vient d'un test de départ retardé : on part d'un <em>vrai</em> x<sub>t₀</sub> et on n'intègre que [t₀, 1]. Le t₀ où les images deviennent nettes borne l'intervalle de temps encore mal appris. Il classe les runs exactement comme la nmse, et exactement comme l'œil.</p>
+</div>
+
+<figure>
+  <img src="report_figs/fig_t0_ladder.png" alt="Comparaison des échelles de départ retardé entre un run à 45 000 steps et un run à 165 000 steps">
+  <figcaption><b>À gauche, 45 000 steps</b> : il faut lui donner la moitié de la trajectoire pour qu'un chat apparaisse. <b>À droite, 165 000 steps</b> : net dès le bruit pur, et dès t₀ = 0,2 il retrouve la bonne cible. Le champ s'apprend à rebours du temps — l'intervalle [0 ; 0,3], celui qui choisit <em>quel</em> chat produire, converge en dernier.</figcaption>
+</figure>
+
+<figure>
+  <img src="report_figs/fig_samples_fm.png" alt="Échantillons générés par les cinq runs Flow Matching, triés par nmse">
+  <figcaption>Le seuil entre « tache brune » et « chat » tombe entre <b>nmse 0,2142 et 0,1976</b>. Cinq checkpoints, un classement identique par nmse, par t₀* et à l'œil : c'est la seule validation dont dispose le banc de débruitage, et elle est ordinale, pas quantitative.</figcaption>
+</figure>
+</section>
+
+<section>
+<h2>Trois pistes qui semblaient bonnes et qui sont fausses</h2>
+<p class="sub">Suivies puis réfutées par la mesure ; les noter évite de les reprendre.</p>
+<div class="col">
+<h3><span class="chip no">réfuté</span> « Le prox ℓ₁ détruit les hautes fréquences »</h3>
+<p>La grille de débruitage montre le contraire : les mêmes poids qui produisent des pâtés en génération reconstruisent, à t = 0,8, des chats nets avec oreilles et fourrure. La capacité à représenter du détail est intacte. Ce qui manquait était la première moitié de la trajectoire.</p>
+
+<h3><span class="chip no">réfuté</span> « Il faut plus de pas d'Euler »</h3>
+<p>Euler à 10, 50, 200 et 1 000 pas et dopri5 à tolérance 10⁻⁵ donnent des images <strong>identiques</strong>. L'intégration est convergée dès dix pas. L'erreur est dans le champ, pas dans sa discrétisation.</p>
+
+<h3><span class="chip no">réfuté</span> « Il faut plus d'images »</h3>
+<p>L'écart entre nmse d'entraînement et nmse de validation est <strong>nul</strong> sur quatre checkpoints — jusqu'à 10,4M paramètres et l'équivalent de 2 500 époques. Aucune mémorisation : ces modèles sous-apprennent. Ajouter des données, c'est en donner plus à quelqu'un qui n'a pas fini d'exploiter ce qu'il a.</p>
+</div>
+
+<div class="note warn">
+<span class="lbl">Piège de méthode</span>
+<p>Trois familles de protocole cohabitent dans les dossiers de résultats : couplage indépendant avec loss x₁ à 3 000 steps, couplage OT avec loss vitesse sur <code>t = [0,8]</code> seul, et les runs à 20 000 steps. Un classement global sur la nmse mélangerait architecture et protocole, et condamnerait des modèles pour une raison qui n'a rien à voir avec eux. <code>analyze_denoise_probe.py</code> détecte les familles et refuse de les comparer entre elles.</p>
+</div>
+</section>
+
+<section>
+<h2>Ce qu'il reste à faire</h2>
+<div class="col">
+<p><strong>Balayer le type de prox.</strong> <code>prox=l1c</code> apprend un rayon <em>par canal dual</em> : 1 280 scalaires de conditionnement au lieu de 10, pour quatre mille paramètres de plus par couche — et c'est exactement ce que décrit déjà la ligne 1074 du rapport. Cela reste un prox ℓ₁ exact, celui de la norme pondérée, donc la propriété « la sortie est un opérateur proximal » survit. Seul axe qui attaque le goulot identifié, et seul dont l'analogue a payé côté UNet.</p>
+<p><strong>Isoler la profondeur.</strong> Dans la comparaison à budget long, k, K et ic changent en même temps : l'écart de 4,0 % n'est attribuable à aucun des trois. Un seul run — k9 / K20 / ic128 à 200 000 steps, environ 20 h — sépare la profondeur, le levier que le balayage court désignait comme le seul favorable.</p>
+<p><strong>Calculer un FID</strong> sur les checkpoints Flow Matching, pour remplir la colonne restée vide de la table quantitative du rapport et vérifier que le classement par nmse n'est pas seulement ordinal.</p>
+</div>
+</section>
+
+<footer>
+<p><strong>Sources.</strong> <code>results_denoise_probe/</code> (17 runs, 3 000 steps) · <code>results_denoise_probe_20k/</code> (4 runs, 20 000 steps) · <code>results_afhq32/</code> (7 runs Flow Matching).</p>
+<p><strong>Scripts.</strong> <code>denoise_probe.py</code>, <code>denoise_curve.py</code>, <code>analyze_denoise_probe.py</code>, <code>denoise_significance.py</code>, <code>generalization_gap.py</code>, <code>denoise_grid_ckpt.py</code>, <code>sampler_diagnosis.py</code>, <code>inspect_prox_radius.py</code>, <code>make_report_figures.py</code>.</p>
+<p>Toutes les nmse de ce document sont mesurées sur le même tirage de bruit fixe, aux quatre niveaux t = 0,2 / 0,4 / 0,6 / 0,8, sur les 512 mêmes images de validation.</p>
+</footer>
+
+</div>
