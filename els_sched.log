@@ -1,6 +1,0 @@
-schedule P(t): [9, 9, 7, 7, 7, 7, 5, 5, 5] (échelles utilisées: [5, 7, 9])
-ckpt=results/temp-5/ConvScCP_k3_K6_ic128_L1_LNO/model.pt  P=sched nsub=6000 nseed=8
-median r2(model, IS-FM)  = 0.471
-median r2(model, ELS-FM) = 0.461
-ELS>IS on 4/8 seeds
-saved -> els_fm_grid_k3_sched.png , els_fm_metrics_k3_sched.txt

@@ -1,5 +1,0 @@
-model_name	n_params	final_loss	train_time_s	status
-DFB_UNN_L1_LFO	2510	19.798392	39.1	OK
-DFB_UNN_L1_LFO_x1hat	2510	18.439121	33.7	OK
-SharedDFB_UNN_L1_LFO_rand	354	0.121778	34.1	OK
-SharedDFB_UNN_L1_LFO_fixed	4194	0.093155	34.0	OK

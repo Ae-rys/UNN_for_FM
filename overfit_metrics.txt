@@ -1,6 +1,0 @@
-checkpoint: results/temp-4/ConvScCP_UNN_L1_LNO/model.pt  (K=20, ic=64)   N_seed=16
-median r2(model, IS-FM)          = 0.698   (haut => memorise)
-median r2(model, nearest train)  = 0.803
-median L2(model sample -> train) = 10.44
-median L2(TEST image  -> train)  = 8.57   (reference d'un vrai voisin non-memorise)
-ratio sample/test nearest-dist   = 1.22   (<<1 => samples collent au train => overfit)

@@ -1,4 +1,0 @@
-ckpt=results/temp-5/ConvScCP_k3_K6_ic128_L1_LNO/model.pt  P=calib nsub=4000 nseed=8
-median r2(model, IS-FM)  = 0.558
-median r2(model, ELS-FM) = 0.521
-ELS>IS on 4/8 seeds

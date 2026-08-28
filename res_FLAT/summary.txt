@@ -1,2 +1,0 @@
-model_name	n_params	final_loss	train_time_s	status
-DFB_UNN_L1_LFO_x1hat	2510	1.017757	252.1	OK
